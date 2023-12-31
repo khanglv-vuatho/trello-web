@@ -1,8 +1,8 @@
 const { nextui } = require("@nextui-org/react")
 import type { Config } from "tailwindcss"
 
-const HEADER_HEIGHT = '70px'
-const BOARDBAR_HEIGHT = '80px'
+const HEADER_HEIGHT = "70px"
+const BOARDBAR_HEIGHT = "80px"
 
 const config: Config = {
   content: [
@@ -20,29 +20,30 @@ const config: Config = {
     },
   },
   darkMode: "class",
-  plugins: [ nextui({
-    themes: {
-      light: {
-        colors: {
-          colorHeader:'#294ac4',
-          colorBoardBar:"#305cda",
-          colorBoardContent:'#305bda',
-          primary:'#fff',
-          primary2:'#292D32'
+  plugins: [
+    nextui({
+      themes: {
+        light: {
+          colors: {
+            colorHeader: "#294ac4",
+            colorBoardBar: "#305cda",
+            colorBoardContent: "#305bda",
+            primary: "#fff",
+            primary2: "#292D32",
+          },
+        },
+        dark: {
+          colors: {
+            colorHeader: "#294ac4",
+            colorBoardBar: "#305cda",
+            colorBoardContent: "#305bda",
+            primary: "#292D32",
+            primary2: "#fff",
+          },
         },
       },
-      dark: {
-        colors: {
-          colorHeader:'#294ac4',
-          colorBoardBar:"#305cda",
-          colorBoardContent:'#305bda',
-          primary:'#292D32',
-          primary2:'#fff',
-        },
-      },
-    },
-  }),],
+    }),
+  ],
 }
-
 
 export default config
