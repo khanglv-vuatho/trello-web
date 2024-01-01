@@ -2,11 +2,12 @@
 
 import React, { useEffect, useRef, useState } from "react"
 
-import { Avatar, Badge, Button, Input } from "@nextui-org/react"
-import { Add, Element, Notification, SearchNormal1, Trello } from "iconsax-react"
+import { Apps as AppsIcon, NotificationsNoneOutlined as NotificationsIcon, HelpOutlineOutlined as HelpIcon } from "@mui/icons-material"
+import { Avatar, Badge, Input } from "@nextui-org/react"
+import { Add, ArrowDown2, SearchNormal1, Trello } from "iconsax-react"
 
-import { HelpIcon, LoadingSearch } from "@/components/Icons"
 import ExpandButton from "@/components/ExpandButton"
+import { LoadingSearch } from "@/components/Icons"
 
 function Header() {
   const [searchValue, setSearchValue] = useState("")
@@ -25,15 +26,15 @@ function Header() {
     {
       id: 1,
       children: (
-        <Badge content="7" shape="circle" color="danger" placement="top-right" size="sm" classNames={{ badge: "!size-5", base: "khang2" }}>
-          <Notification className="rotate-45 size-6 flex-shrink-0 cursor-pointer" />
+        <Badge content="7" shape="circle" color="danger" placement="top-right" size="sm" classNames={{ badge: "!size-5" }}>
+          <NotificationsIcon />
         </Badge>
       ),
       content: <>Badge</>,
     },
     {
       id: 2,
-      children: <HelpIcon className="!size-6 flex-shrink-0" />,
+      children: <HelpIcon />,
       content: <div className="">HelpIcon</div>,
     },
     {
@@ -88,21 +89,19 @@ function Header() {
     <header className="flex items-center justify-between px-4 h-header bg-colorHeader text-primary overflow-x-auto">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="hover:bg-default/40 p-1.5 rounded-[3px] cursor-pointer">
-            <Element size={24} />
-          </span>
-          <div className="flex items-center gap-1 p-1 hover:bg-default/40 rounded-[3px] cursor-pointer">
+          <div className="size-10 hover:bg-default/40 rounded-[3px] cursor-pointer flex items-center justify-center">
+            <AppsIcon />
+          </div>
+          <div className="flex items-center justify-center min-h-10 gap-1 px-2 hover:bg-default/40 rounded-[3px] cursor-pointer">
             <Trello size="24" color="#fff" variant="Bold" />
             <p className="text-xl font-bold">Trello</p>
           </div>
         </div>
         <div className="flex items-center gap-1 mr-2">
           {listExpandButton.map((item) => (
-            <ExpandButton title={item.title} key={item.title} content={item.content} />
+            <ExpandButton title={item.title} key={item.title} content={item.content} endContent={<ArrowDown2 size={16} />} />
           ))}
-          <Button className="flex items-center gap-2 font-medium text-primary rounded-[3px] p-2" variant="light" startContent={<Add />}>
-            Create
-          </Button>
+          <ExpandButton title={"Create"} content={<>Create</>} startContent={<Add size={24} />}></ExpandButton>
         </div>
       </div>
       <div className="flex items-center gap-4">

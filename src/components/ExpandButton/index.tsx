@@ -3,14 +3,18 @@ import React, { useState } from "react"
 import { Button, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react"
 import { ArrowDown2 } from "iconsax-react"
 
-const ExpandButton: React.FC<{ title?: string; isIconOnly?: boolean; props?: any; children?: React.ReactNode; content: React.ReactNode; placement?: "top" | "bottom" | "left" | "right" }> = ({
-  title,
-  isIconOnly,
-  props,
-  children,
-  placement,
-  content,
-}) => {
+const ExpandButton: React.FC<{
+  title?: string
+  isIconOnly?: boolean
+  startContent?: React.ReactNode
+  props?: any
+  children?: React.ReactNode
+  content: React.ReactNode
+  endContent?: React.ReactNode
+  style?: string
+  variant?: "solid" | "faded" | "bordered" | "light" | "flat" | "ghost" | "shadow"
+  placement?: "top" | "bottom" | "left" | "right"
+}> = ({ title, isIconOnly, props, children, placement, content, startContent, endContent, style, variant }) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false)
 
   const handlePopoverToggle = () => {
@@ -21,11 +25,12 @@ const ExpandButton: React.FC<{ title?: string; isIconOnly?: boolean; props?: any
     disableAnimation: true,
     disableRipple: true,
     radius: isIconOnly ? ("full" as const) : ("none" as const),
-    variant: "light" as const,
-    endContent: isIconOnly ? <></> : <ArrowDown2 size={16} />,
+    variant: variant ? variant : ("light" as const),
+    endContent: endContent ? endContent : <></>,
+    startContent: startContent ? startContent : <></>,
     onClick: handlePopoverToggle,
     isIconOnly,
-    className: `flex items-center gap-2 justify-center font-medium text-primary p-2 ${isIconOnly ? "overflow-visible aspect-square" : ""}`,
+    className: `flex items-center gap-2 font-medium text-primary px-4 min-h-10 ${isIconOnly ? "overflow-visible" : "rounded-[3px]"} ${style ? style : ""}`,
   }
 
   const buttonElement = React.cloneElement(<Button {...defaultButtonProps}>{isIconOnly ? children : title}</Button>, { ...props })
