@@ -5,16 +5,18 @@ import React from "react"
 import { AddToDrive as AddToDriveIcon, Dashboard as DashboardIcon, VpnLock as VpnLockIcon, Bolt as BoltIcon, FilterList as FilterListIcon, PersonAdd as PersonAddIcon } from "@mui/icons-material"
 import ExpandButton from "@/components/ExpandButton"
 import { Avatar, AvatarGroup } from "@nextui-org/react"
-function BoardBar() {
+import { Board } from "@/interface"
+import { capitalizeFirstLetter } from "@/utils"
+function BoardBar({ board }: { board: Board }) {
   const listBoardBar: { startContent: any; title: string; content: React.ReactNode }[] = [
     {
       startContent: <DashboardIcon />,
-      title: "LuongViKhang MERN Stack Board",
+      title: board?.title,
       content: <>LuongViKhang MERN Stack Board</>,
     },
     {
       startContent: <VpnLockIcon />,
-      title: "Public/Private Workspace",
+      title: capitalizeFirstLetter(board?.type),
       content: <>Public/Private Workspace</>,
     },
     {
