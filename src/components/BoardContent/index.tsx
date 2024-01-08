@@ -19,9 +19,12 @@ import {
   arrayMove,
   horizontalListSortingStrategy,
   useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useEffect, useMemo, useState } from 'react'
+
+import './BoardContent.css'
 
 function BoardContent({ board }: { board: Board }) {
   const [orderedColumns, setOrderedColumns] = useState<any[]>([])
@@ -32,6 +35,7 @@ function BoardContent({ board }: { board: Board }) {
       distance: 10,
     },
   })
+
   const touchSensor = useSensor(PointerSensor, {
     activationConstraint: {
       delay: 150,
@@ -48,6 +52,7 @@ function BoardContent({ board }: { board: Board }) {
 
   const _handleDragEnd = (e: any) => {
     console.log('_handleDragEnd', e)
+
     const { active, over } = e
 
     // check exits over
@@ -66,9 +71,17 @@ function BoardContent({ board }: { board: Board }) {
     }
   }
 
+  const _handleDragOver = (e: any) => {
+    // console.log('_handleDragOver', e)
+  }
+
   return (
     <div className='bg-colorBoardContent h-boardContent'>
-      <DndContext onDragEnd={_handleDragEnd} sensors={sensors}>
+      <DndContext
+        onDragEnd={_handleDragEnd}
+        sensors={sensors}
+        onDragOver={_handleDragOver}
+      >
         <ListColumn columns={orderedColumns} />
       </DndContext>
     </div>
@@ -89,6 +102,8 @@ const ListColumn = ({ columns }: { columns: Column[] }) => {
   )
 }
 const Column = ({ column }: { column: Column }) => {
+  const [orderedCards, setOrderedCards] = useState<any[]>([])
+
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: column._id,
     data: { ...column },
@@ -98,7 +113,10 @@ const Column = ({ column }: { column: Column }) => {
     transform: CSS.Translate.toString(transform),
     transition,
   }
-  const orderedCards = mapOrder(column?.cards, column?.cardOrderIds, '_id')
+
+  useEffect(() => {
+    setOrderedCards(mapOrder(column?.cards, column?.cardOrderIds, '_id'))
+  }, [column])
 
   return (
     <div
@@ -106,16 +124,16 @@ const Column = ({ column }: { column: Column }) => {
       style={dndKitColumnStyle}
       {...attributes}
       {...listeners}
-      className='rounded-lg bg-[#f1f2f4] w-full max-w-[300px] p-2 h-[fit-content]'
+      className={`rounded-lg bg-[#f1f2f4] w-full max-w-[300px] h-[fit-content]`}
     >
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between p-2'>
         <h3 className='pl-3 font-semibold'>{column?.title}</h3>
         <ExpandButton isIconOnly content={<>Expand ...</>}>
           <MoreHorizIcon className='text-black' />
         </ExpandButton>
       </div>
       <ListCard cards={orderedCards} />
-      <div className='flex items-center'>
+      <div className='flex items-center p-2'>
         <Button
           startContent={<AddIcon className='text-[#091E42]' />}
           className='rounded-lg w-full justify-start p-2 bg-transparent hover:bg-[#091E4224]'
@@ -131,67 +149,83 @@ const Column = ({ column }: { column: Column }) => {
 }
 
 const ListCard = ({ cards }: { cards: Card[] }) => {
+  const dndKitCards = useMemo(() => cards.map((item) => item._id), [cards])
+
   return (
-    <div className='flex flex-col gap-2 py-2'>
-      {cards.map((card) => (
-        <CardContent key={card._id} card={card} />
-      ))}
-    </div>
+    <SortableContext strategy={verticalListSortingStrategy} items={dndKitCards}>
+      <div className='card'>
+        <div className='flex flex-col gap-2 px-2'>
+          {cards.map((card) => (
+            <CardContent key={card._id} card={card} />
+          ))}
+        </div>
+      </div>
+    </SortableContext>
   )
 }
 
 const CardContent = ({ card }: { card: Card }) => {
-  const shouldShowCardAction = () => {
-    return (
-      !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
-    )
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: card._id,
+    data: { ...card },
+  })
+
+  const dndKitCardStyle = {
+    transform: CSS.Translate.toString(transform),
+    transition,
   }
+
+  const shouldShowCardAction = () =>
+    !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
+
   return (
-    <CardNextUI className='rounded-lg'>
-      <CardBody className='p-0'>
-        {card?.cover && (
-          <ImageFallback
-            alt={card?.cover}
-            className='object-contain max-h-[200px] w-full'
-            src={card?.cover}
-            width={270}
-            height={400}
-          />
-        )}
-        <p className='p-2'>{card?.title}</p>
-        {shouldShowCardAction() && (
-          <div className='flex items-center gap-2 p-2'>
-            {!!card?.memberIds?.length && (
-              <Button
-                variant='light'
-                startContent={<GroupIcon className='size-5' />}
-                className='flex gap-2 items-center text-colorHeader rounded-sm'
-              >
-                {card?.memberIds?.length}
-              </Button>
-            )}
-            {!!card?.comments?.length && (
-              <Button
-                variant='light'
-                startContent={<CommentIcon className='size-5' />}
-                className='flex gap-2 items-center text-colorHeader rounded-sm'
-              >
-                {card?.comments?.length}
-              </Button>
-            )}
-            {!!card?.attachments?.length && (
-              <Button
-                variant='light'
-                startContent={<AttachmentIcon className='size-5' />}
-                className='flex gap-2 items-center text-colorHeader rounded-sm'
-              >
-                {card?.attachments?.length}
-              </Button>
-            )}
-          </div>
-        )}
-      </CardBody>
-    </CardNextUI>
+    <div ref={setNodeRef} style={dndKitCardStyle} {...attributes} {...listeners}>
+      <CardNextUI className='rounded-lg'>
+        <CardBody className='p-0'>
+          {card?.cover && (
+            <ImageFallback
+              alt={card?.cover}
+              className='object-contain max-h-[200px] w-full'
+              src={card?.cover}
+              width={270}
+              height={400}
+            />
+          )}
+          <p className='p-2'>{card?.title}</p>
+          {shouldShowCardAction() && (
+            <div className='flex items-center gap-2 p-2'>
+              {!!card?.memberIds?.length && (
+                <Button
+                  variant='light'
+                  startContent={<GroupIcon className='size-5' />}
+                  className='flex gap-2 items-center text-colorHeader rounded-sm'
+                >
+                  {card?.memberIds?.length}
+                </Button>
+              )}
+              {!!card?.comments?.length && (
+                <Button
+                  variant='light'
+                  startContent={<CommentIcon className='size-5' />}
+                  className='flex gap-2 items-center text-colorHeader rounded-sm'
+                >
+                  {card?.comments?.length}
+                </Button>
+              )}
+              {!!card?.attachments?.length && (
+                <Button
+                  variant='light'
+                  startContent={<AttachmentIcon className='size-5' />}
+                  className='flex gap-2 items-center text-colorHeader rounded-sm'
+                >
+                  {card?.attachments?.length}
+                </Button>
+              )}
+            </div>
+          )}
+        </CardBody>
+      </CardNextUI>
+    </div>
   )
 }
 
