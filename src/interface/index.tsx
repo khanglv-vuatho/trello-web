@@ -1,4 +1,4 @@
-export interface Card {
+export interface ICard {
   _id: string
   boardId: string
   columnId: string
@@ -10,21 +10,21 @@ export interface Card {
   attachments: string[]
 }
 
-export interface Column {
+export interface IColumn {
   _id: string
   boardId: string
   title: string
   cardOrderIds: string[]
-  cards: Card[]
+  cards: ICard[]
 }
 
-export interface Board {
+export interface IBoard {
   _id: string
   title: string
   description: string
-  type: "public" | "private"
+  type: 'public' | 'private'
   ownerIds: string[]
   memberIds: string[]
   columnOrderIds: string[]
-  columns: Column[]
+  columns: IColumn[]
 }
