@@ -1,6 +1,6 @@
-import { Board } from '@/interface'
+import { IBoard } from '@/interface'
 
-export const mockData: { board: Board } = {
+export const mockData: { board: IBoard } = {
   board: {
     _id: 'board-id-01',
     title: 'Khang MERN Stack Board',
@@ -14,15 +14,7 @@ export const mockData: { board: Board } = {
         _id: 'column-id-01',
         boardId: 'board-id-01',
         title: 'To Do Column 01',
-        cardOrderIds: [
-          'card-id-01',
-          'card-id-02',
-          'card-id-03',
-          'card-id-04',
-          'card-id-05',
-          'card-id-06',
-          'card-id-07',
-        ],
+        cardOrderIds: ['card-id-01', 'card-id-02', 'card-id-03', 'card-id-04', 'card-id-05', 'card-id-06', 'card-id-07'],
         cards: [
           {
             _id: 'card-id-01',
@@ -30,15 +22,10 @@ export const mockData: { board: Board } = {
             columnId: 'column-id-01',
             title: 'Title of card 01',
             description: 'Markdown Syntax (sẽ ở khóa nâng cao nhé)',
-            cover:
-              'https://trungquandev.com/wp-content/uploads/2022/07/fair-mern-stack-advanced-banner-trungquandev.jpg',
+            cover: 'https://trungquandev.com/wp-content/uploads/2022/07/fair-mern-stack-advanced-banner-trungquandev.jpg',
             memberIds: ['test-user-id-01'],
             comments: ['test comment 01', 'test comment 02'],
-            attachments: [
-              'test attachment 01',
-              'test attachment 02',
-              'test attachment 03',
-            ],
+            attachments: ['test attachment 01', 'test attachment 02', 'test attachment 03'],
           },
           {
             _id: 'card-id-02',
@@ -89,50 +76,6 @@ export const mockData: { board: Board } = {
             boardId: 'board-id-01',
             columnId: 'column-id-01',
             title: 'Title of card 06',
-            description: null,
-            cover: null,
-            memberIds: [],
-            comments: [],
-            attachments: [],
-          },
-          {
-            _id: 'card-id-07',
-            boardId: 'board-id-01',
-            columnId: 'column-id-01',
-            title: 'Title of card 07',
-            description: null,
-            cover: null,
-            memberIds: [],
-            comments: [],
-            attachments: [],
-          },
-          {
-            _id: 'card-id-07',
-            boardId: 'board-id-01',
-            columnId: 'column-id-01',
-            title: 'Title of card 07',
-            description: null,
-            cover: null,
-            memberIds: [],
-            comments: [],
-            attachments: [],
-          },
-          {
-            _id: 'card-id-07',
-            boardId: 'board-id-01',
-            columnId: 'column-id-01',
-            title: 'Title of card 07',
-            description: null,
-            cover: null,
-            memberIds: [],
-            comments: [],
-            attachments: [],
-          },
-          {
-            _id: 'card-id-07',
-            boardId: 'board-id-01',
-            columnId: 'column-id-01',
-            title: 'Title of card 07',
             description: null,
             cover: null,
             memberIds: [],
