@@ -1,7 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { DndContext, PointerSensor, useSensor, useSensors, DragOverlay, DropAnimation, defaultDropAnimationSideEffects, closestCorners } from '@dnd-kit/core'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  DropAnimation,
+  defaultDropAnimationSideEffects,
+  closestCorners,
+  pointerWithin,
+  rectIntersection,
+  getFirstCollision,
+} from '@dnd-kit/core'
 import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Add as AddIcon, DragHandle as DragHandleIcon, MoreHoriz as MoreHorizIcon, Group as GroupIcon, Comment as CommentIcon, Attachment as AttachmentIcon } from '@mui/icons-material'
@@ -54,12 +66,102 @@ function BoardContent({ board }: { board: IBoard }) {
     }),
   }
 
+  const lastOverId = useRef<any>(null)
+
+  const collisionDetectionStrategy = useCallback(
+    (args: any) => {
+      if (activeItemType === 'ACTIVE_ITEM_COLUMN') {
+        return closestCorners({ ...args })
+      }
+
+      const pointerIntersections = pointerWithin(args)
+
+      console.log('pointerIntersections', pointerIntersections)
+
+      const intersections = !!pointerIntersections?.length ? pointerIntersections : rectIntersection(args)
+
+      let overId = getFirstCollision(intersections, 'id')
+
+      console.log('overId', overId)
+      console.log(orderedColumns)
+
+      if (overId) {
+        const checkColumn = orderedColumns.find((column) => column._id == overId)
+        console.log('checkColumn', checkColumn)
+
+        if (checkColumn) {
+          overId = closestCorners({
+            ...args,
+            droppableContainers: args?.droppableContainers.filter((container: any) => {
+              return container.id !== overId && checkColumn?.cardOrderIds?.includes(container.id)
+            }),
+          })?.[0]?.id
+        }
+
+        lastOverId.current = overId
+        return [{ id: overId }]
+      }
+
+      return lastOverId.current ? [{ id: lastOverId.current }] : []
+    },
+    [activeItemType, orderedColumns],
+  )
+
   useEffect(() => {
     setOrderedColumns(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
   }, [board])
 
   const _handleFindColumnByCardId = (id: string | number) => {
     return orderedColumns?.find((column) => column?.cards?.map((card: ICard) => card._id)?.includes(id))
+  }
+
+  const moveCardBetweenDifferenctColumns = (overCardId: any, overColumn: any, active: any, over: any, activeColumn: any, activeDraggingCardId: any, activeDraggingCardData: any) => {
+    setOrderedColumns((prevColumns) => {
+      let newCardIndex: number
+
+      //find index active over card
+      const overCardIndex = overColumn?.cards?.findIndex((card: ICard) => card._id === overCardId)
+
+      const isBelowOverItem = active.rect.current.translated && active.rect.current.translated.top > over.rect.top + over.rect.height
+      const modifier = isBelowOverItem ? 1 : 0
+      newCardIndex = overCardIndex >= 0 ? overCardIndex + modifier : overColumn?.cards?.length + 1
+
+      //clone orderedcolumn
+      const nextColumns = JSON.parse(JSON.stringify(prevColumns))
+
+      const nextActiveColumn = nextColumns.find((column: IColumn) => column?._id === activeColumn._id)
+      const nextOverColumn = nextColumns.find((column: IColumn) => column?._id === overColumn._id)
+
+      //nextActiveColumn is old Column
+      if (nextActiveColumn) {
+        //delete card active
+        nextActiveColumn.cards = nextActiveColumn.cards.filter((card: ICard) => card._id !== activeDraggingCardId)
+
+        //arrange cardOrderIds of Column
+        nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map((card: ICard) => card._id)
+      }
+
+      //nextOverColumn is new Column
+      if (nextOverColumn) {
+        //check exits overcolumn, and delete
+        nextOverColumn.cards = nextOverColumn.cards.filter((card: ICard) => card?._id !== activeDraggingCardId)
+        //add cardover to overColumn follow new index (newCardIndex)
+
+        const rebuild_activeDraggingCardData = {
+          ...activeDraggingCardData,
+          columnId: nextOverColumn?._id,
+        }
+
+        nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
+
+        //update cardOrderIds
+        nextOverColumn.cardOrderIds = nextOverColumn.cards.map((card: ICard) => card._id)
+      }
+
+      // console.log('nextColumns', nextColumns)
+
+      return [...nextColumns]
+    })
   }
 
   const _handleDragStart = (e: any) => {
@@ -96,46 +198,7 @@ function BoardContent({ board }: { board: IBoard }) {
     if (!activeColumn || !overColumn) return
 
     if (activeColumn._id !== overColumn._id) {
-      setOrderedColumns((prevColumns) => {
-        let newCardIndex: number
-
-        //find index active over card
-        const overCardIndex = overColumn?.cards?.findIndex((card: ICard) => card._id === overCardId)
-
-        const isBelowOverItem = active.rect.current.translated && active.rect.current.translated.top > over.rect.top + over.rect.height
-        const modifier = isBelowOverItem ? 1 : 0
-        newCardIndex = overCardIndex >= 0 ? overCardIndex + modifier : overColumn?.cards?.length + 1
-
-        //clone orderedcolumn
-        const nextColumns = JSON.parse(JSON.stringify(prevColumns))
-
-        const nextActiveColumn = nextColumns.find((column: IColumn) => column?._id === activeColumn._id)
-        const nextOverColumn = nextColumns.find((column: IColumn) => column?._id === overColumn._id)
-
-        //nextActiveColumn is old Column
-        if (nextActiveColumn) {
-          //delete card active
-          nextActiveColumn.cards = nextActiveColumn.cards.filter((card: ICard) => card._id !== activeDraggingCardId)
-
-          //arrange cardOrderIds of Column
-          nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map((card: ICard) => card._id)
-        }
-
-        //nextOverColumn is new Column
-        if (nextOverColumn) {
-          //check exits overcolumn, and delete
-          nextOverColumn.cards = nextOverColumn.cards.filter((card: ICard) => card?._id !== activeDraggingCardId)
-          //add cardover to overColumn follow new index (newCardIndex)
-          nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, activeDraggingCardData)
-
-          //update cardOrderIds
-          nextOverColumn.cardOrderIds = nextOverColumn.cards.map((card: ICard) => card._id)
-        }
-
-        // console.log('nextColumns', nextColumns)
-
-        return [...nextColumns]
-      })
+      moveCardBetweenDifferenctColumns(overCardId, overColumn, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData)
     }
   }
 
@@ -162,8 +225,7 @@ function BoardContent({ board }: { board: IBoard }) {
 
       //drag and drop between 2 difference column
       if (oldCloumnWhenDraggingCard._id !== overColumn._id) {
-        console.log('oldCloumnWhenDraggingCard', oldCloumnWhenDraggingCard)
-        console.log('overColumn', overColumn)
+        moveCardBetweenDifferenctColumns(overCardId, overColumn, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData)
       } else {
         const oldCardIndex = oldCloumnWhenDraggingCard?.cards?.findIndex((card: ICard) => card._id === activeDragItemId)
         const newCardIndex = overColumn?.cards?.findIndex((card: ICard) => card._id === overCardId)
@@ -209,7 +271,7 @@ function BoardContent({ board }: { board: IBoard }) {
 
   return (
     <div className='bg-colorBoardContent h-boardContent overflow-x-auto'>
-      <DndContext collisionDetection={closestCorners} onDragStart={_handleDragStart} onDragEnd={_handleDragEnd} sensors={sensors} onDragOver={_handleDragOver}>
+      <DndContext collisionDetection={collisionDetectionStrategy} onDragStart={_handleDragStart} onDragEnd={_handleDragEnd} sensors={sensors} onDragOver={_handleDragOver}>
         <ListColumn columns={orderedColumns} />
         <DragOverlay dropAnimation={dropAnimation}>
           {activeItemDragStart?.id && activeItemType === 'ACTIVE_ITEM_COLUMN' ? <Column column={activeItemDragStart?.data?.current} /> : <CardContent card={activeItemDragStart?.data?.current} />}
@@ -311,33 +373,31 @@ const CardContent = ({ card }: { card: ICard }) => {
   const shouldShowCardAction = () => !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
 
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners}>
-      <CardNextUI className='rounded-lg' style={dndKitCardStyle}>
-        <CardBody className='p-0'>
-          {card?.cover && <ImageFallback alt={card?.cover} className='object-contain max-h-[200px] w-full' src={card?.cover} width={270} height={400} />}
-          <p className='p-2 select-none'>{card?.title}</p>
-          {shouldShowCardAction() && (
-            <div className='flex items-center gap-2 p-2'>
-              {!!card?.memberIds?.length && (
-                <Button variant='light' startContent={<GroupIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
-                  {card?.memberIds?.length}
-                </Button>
-              )}
-              {!!card?.comments?.length && (
-                <Button variant='light' startContent={<CommentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
-                  {card?.comments?.length}
-                </Button>
-              )}
-              {!!card?.attachments?.length && (
-                <Button variant='light' startContent={<AttachmentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
-                  {card?.attachments?.length}
-                </Button>
-              )}
-            </div>
-          )}
-        </CardBody>
-      </CardNextUI>
-    </div>
+    <CardNextUI ref={setNodeRef} {...attributes} {...listeners} className='rounded-lg' style={dndKitCardStyle}>
+      <CardBody className='p-0'>
+        {card?.cover && <ImageFallback alt={card?.cover} className='object-contain max-h-[200px] w-full' src={card?.cover} width={270} height={400} />}
+        <p className='p-2 select-none'>{card?.title}</p>
+        {shouldShowCardAction() && (
+          <div className='flex items-center gap-2 p-2'>
+            {!!card?.memberIds?.length && (
+              <Button variant='light' startContent={<GroupIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
+                {card?.memberIds?.length}
+              </Button>
+            )}
+            {!!card?.comments?.length && (
+              <Button variant='light' startContent={<CommentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
+                {card?.comments?.length}
+              </Button>
+            )}
+            {!!card?.attachments?.length && (
+              <Button variant='light' startContent={<AttachmentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
+                {card?.attachments?.length}
+              </Button>
+            )}
+          </div>
+        )}
+      </CardBody>
+    </CardNextUI>
   )
 }
 
