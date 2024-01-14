@@ -21,7 +21,7 @@ import { Button, Card as CardNextUI, CardBody } from '@nextui-org/react'
 
 import ExpandButton from '../ExpandButton'
 import ImageFallback from '../ImageFallback'
-import { mapOrder } from '@/utils'
+import { generatePlaceholderCard, mapOrder } from '@/utils'
 
 import './BoardContent.css'
 import { IBoard, ICard, IColumn } from '@/interface'
@@ -37,6 +37,7 @@ function BoardContent({ board }: { board: IBoard }) {
   const [activeDragItemId, setActiveDragItemId] = useState<any>(null)
   const [activeItemDragStart, setActiveItemDragStart] = useState<any>({})
   const [activeItemType, setActiveItemType] = useState<any>(null)
+  const [activeDragItemData, setActiveDragItemData] = useState<any>(null)
   const [oldCloumnWhenDraggingCard, setOldCloumnWhenDraggingCard] = useState<any>(null)
 
   const mouseSensor = useSensor(PointerSensor, {
@@ -76,18 +77,12 @@ function BoardContent({ board }: { board: IBoard }) {
 
       const pointerIntersections = pointerWithin(args)
 
-      console.log('pointerIntersections', pointerIntersections)
+      if (!pointerIntersections?.length) return
 
-      const intersections = !!pointerIntersections?.length ? pointerIntersections : rectIntersection(args)
-
-      let overId = getFirstCollision(intersections, 'id')
-
-      console.log('overId', overId)
-      console.log(orderedColumns)
+      let overId = getFirstCollision(pointerIntersections, 'id')
 
       if (overId) {
         const checkColumn = orderedColumns.find((column) => column._id == overId)
-        console.log('checkColumn', checkColumn)
 
         if (checkColumn) {
           overId = closestCorners({
@@ -117,6 +112,8 @@ function BoardContent({ board }: { board: IBoard }) {
 
   const moveCardBetweenDifferenctColumns = (overCardId: any, overColumn: any, active: any, over: any, activeColumn: any, activeDraggingCardId: any, activeDraggingCardData: any) => {
     setOrderedColumns((prevColumns) => {
+      console.log('prevColumns', prevColumns)
+
       let newCardIndex: number
 
       //find index active over card
@@ -128,14 +125,25 @@ function BoardContent({ board }: { board: IBoard }) {
 
       //clone orderedcolumn
       const nextColumns = JSON.parse(JSON.stringify(prevColumns))
+      console.log('nextColumns', nextColumns)
 
       const nextActiveColumn = nextColumns.find((column: IColumn) => column?._id === activeColumn._id)
       const nextOverColumn = nextColumns.find((column: IColumn) => column?._id === overColumn._id)
+
+      console.log('nextActiveColumn', nextActiveColumn)
+      console.log('nextOverColumn', nextOverColumn)
 
       //nextActiveColumn is old Column
       if (nextActiveColumn) {
         //delete card active
         nextActiveColumn.cards = nextActiveColumn.cards.filter((card: ICard) => card._id !== activeDraggingCardId)
+
+        // add FE_PlaceholderCard if column is empty
+        if (!nextActiveColumn?.cards?.length) {
+          console.log('card cuoi cung bi keo di')
+
+          nextActiveColumn.cards = [generatePlaceholderCard(nextActiveColumn)]
+        }
 
         //arrange cardOrderIds of Column
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map((card: ICard) => card._id)
@@ -151,27 +159,29 @@ function BoardContent({ board }: { board: IBoard }) {
           ...activeDraggingCardData,
           columnId: nextOverColumn?._id,
         }
+        console.log(' nextColumns.cards', nextColumns.cards)
 
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
+
+        // delete placeholder card if exits
+        nextColumns.cards = nextOverColumn.cards.filter((card: any) => card?.FE_PlaceholderCard)
 
         //update cardOrderIds
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map((card: ICard) => card._id)
       }
 
-      // console.log('nextColumns', nextColumns)
+      console.log('nextColumns', nextColumns)
 
       return [...nextColumns]
     })
   }
 
   const _handleDragStart = (e: any) => {
-    console.log('_handleDragStart', e?.active)
     const { active } = e
     setActiveDragItemId(e?.active?.id)
     setActiveItemDragStart(active)
     setActiveItemType(active?.data?.current?._id?.includes('column') ? ITEM_TYPE.COLUMN : ITEM_TYPE.CARD)
-
-    // if drag card
+    setActiveDragItemData(active?.data?.current)
     if (active?.data?.current?._id?.includes('card')) {
       setOldCloumnWhenDraggingCard(_handleFindColumnByCardId(e?.active?.id))
     }
@@ -267,14 +277,15 @@ function BoardContent({ board }: { board: IBoard }) {
     setActiveItemType(null)
     setActiveDragItemId(null)
     setOldCloumnWhenDraggingCard(null)
+    setActiveDragItemData(null)
   }
 
   return (
     <div className='bg-colorBoardContent h-boardContent overflow-x-auto'>
-      <DndContext collisionDetection={collisionDetectionStrategy} onDragStart={_handleDragStart} onDragEnd={_handleDragEnd} sensors={sensors} onDragOver={_handleDragOver}>
+      <DndContext collisionDetection={collisionDetectionStrategy as any} onDragStart={_handleDragStart} onDragEnd={_handleDragEnd} sensors={sensors} onDragOver={_handleDragOver}>
         <ListColumn columns={orderedColumns} />
         <DragOverlay dropAnimation={dropAnimation}>
-          {activeItemDragStart?.id && activeItemType === 'ACTIVE_ITEM_COLUMN' ? <Column column={activeItemDragStart?.data?.current} /> : <CardContent card={activeItemDragStart?.data?.current} />}
+          {activeItemDragStart?.id && activeItemType === 'ACTIVE_ITEM_COLUMN' ? <Column column={activeDragItemData} /> : <CardContent card={activeDragItemData} />}
         </DragOverlay>
       </DndContext>
     </div>
@@ -373,31 +384,33 @@ const CardContent = ({ card }: { card: ICard }) => {
   const shouldShowCardAction = () => !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
 
   return (
-    <CardNextUI ref={setNodeRef} {...attributes} {...listeners} className='rounded-lg' style={dndKitCardStyle}>
-      <CardBody className='p-0'>
-        {card?.cover && <ImageFallback alt={card?.cover} className='object-contain max-h-[200px] w-full' src={card?.cover} width={270} height={400} />}
-        <p className='p-2 select-none'>{card?.title}</p>
-        {shouldShowCardAction() && (
-          <div className='flex items-center gap-2 p-2'>
-            {!!card?.memberIds?.length && (
-              <Button variant='light' startContent={<GroupIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
-                {card?.memberIds?.length}
-              </Button>
-            )}
-            {!!card?.comments?.length && (
-              <Button variant='light' startContent={<CommentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
-                {card?.comments?.length}
-              </Button>
-            )}
-            {!!card?.attachments?.length && (
-              <Button variant='light' startContent={<AttachmentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
-                {card?.attachments?.length}
-              </Button>
-            )}
-          </div>
-        )}
-      </CardBody>
-    </CardNextUI>
+    <div ref={setNodeRef} {...listeners} {...attributes}>
+      <CardNextUI className={`cursor-pointer rounded-lg `} style={dndKitCardStyle}>
+        <CardBody className={`p-0 ${card?.FE_PlaceholderCard ? 'none' : 'block'}`}>
+          {card?.cover && <ImageFallback alt={card?.cover} className='object-contain max-h-[200px] w-full' src={card?.cover} width={270} height={400} />}
+          <p className='p-2 select-none'>{card?.title}</p>
+          {shouldShowCardAction() && (
+            <div className='flex items-center gap-2 p-2'>
+              {!!card?.memberIds?.length && (
+                <Button variant='light' startContent={<GroupIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
+                  {card?.memberIds?.length}
+                </Button>
+              )}
+              {!!card?.comments?.length && (
+                <Button variant='light' startContent={<CommentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
+                  {card?.comments?.length}
+                </Button>
+              )}
+              {!!card?.attachments?.length && (
+                <Button variant='light' startContent={<AttachmentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
+                  {card?.attachments?.length}
+                </Button>
+              )}
+            </div>
+          )}
+        </CardBody>
+      </CardNextUI>
+    </div>
   )
 }
 

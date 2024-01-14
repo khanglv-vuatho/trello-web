@@ -1,7 +1,8 @@
 export const capitalizeFirstLetter = (val: string) => {
-  if (!val) return ""
+  if (!val) return ''
   return `${val.charAt(0).toUpperCase()}${val.slice(1)}`
 }
+
 export const mapOrder = (originalArray: any[], orderArray: string[], key: string) => {
   if (!originalArray || !orderArray || !key) return []
 
@@ -11,4 +12,13 @@ export const mapOrder = (originalArray: any[], orderArray: string[], key: string
   })
 
   return orderedArray
+}
+
+export const generatePlaceholderCard = (column: any) => {
+  return {
+    _id: `${column?._id}-placeholder-card`,
+    boardId: column?.boardId,
+    columnId: column?._id,
+    FE_Placeholder: true,
+  }
 }

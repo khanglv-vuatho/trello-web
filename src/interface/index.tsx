@@ -8,6 +8,7 @@ export interface ICard {
   memberIds: string[]
   comments: string[]
   attachments: string[]
+  FE_PlaceholderCard?: boolean
 }
 
 export interface IColumn {
