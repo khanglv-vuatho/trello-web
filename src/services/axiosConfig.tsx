@@ -1,7 +1,7 @@
-import axios, { AxiosResponse } from "axios"
+import axios, { AxiosResponse } from 'axios'
 
 const apiConfig = {
-  baseUrl: `${process.env.NEXT_PUBLIC_API_URL}`,
+  baseUrl: process.env.NEXT_PUBLIC_API_URL,
 }
 
 const instance = axios.create({
@@ -9,14 +9,13 @@ const instance = axios.create({
   timeout: 30000, // 30 seconds
 })
 
-const urlExceptAuthorization = ["Authenticate"]
+const urlExceptAuthorization = ['Authenticate']
 
 const authorization = async () => {
-  const token = localStorage.getItem("access_token")
-  console.log(token)
+  const token = localStorage.getItem('access_token')
 
   if (token) {
-    return { Authorization: "Bearer " + token }
+    return { Authorization: 'Bearer ' + token }
   } else {
     return {}
   }
@@ -24,7 +23,7 @@ const authorization = async () => {
 
 const getUrl = (config: any) => {
   if (config?.baseURL) {
-    return config?.url.replace(config?.baseURL, "")
+    return config?.url.replace(config?.baseURL, '')
   }
   return config?.url
 }
@@ -42,38 +41,38 @@ instance.interceptors.request.use(
         ...authHeader,
       } as any
     }
-    if (process.env.NODE_ENV !== "production") {
-      console.log(`%c Request: ${config?.method?.toUpperCase()} - ${getUrl(config)}:`, "color: #0086b3; font-weight: bold", config)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`%c Request: ${config?.method?.toUpperCase()} - ${getUrl(config)}:`, 'color: #0086b3; font-weight: bold', config)
     }
     return config
   },
-  (error: any) => Promise.reject(error)
+  (error: any) => Promise.reject(error),
 )
 
 // Intercept all responses
 instance.interceptors.response.use(
   (response: AxiosResponse) => {
-    if (process.env.NODE_ENV !== "production") {
-      console.log(`%c Response: ${response?.status} - ${getUrl(response?.config)}:`, "color: #008000; font-weight: bold", response)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`%c Response: ${response?.status} - ${getUrl(response?.config)}:`, 'color: #008000; font-weight: bold', response)
     }
 
     return response.data
   },
   (error: any) => {
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== 'production') {
       if (error?.response) {
         console.log(error)
 
-        console.log("====== Server Error =====")
+        console.log('====== Server Error =====')
       } else if (error?.request) {
-        console.log("====== Timeout =====")
+        console.log('====== Timeout =====')
       } else {
-        console.log("====== Internal Server Error! =====")
+        console.log('====== Internal Server Error! =====')
       }
     }
 
     return Promise.reject(error)
-  }
+  },
 )
 
 export default instance

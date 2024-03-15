@@ -1,14 +1,14 @@
-"use client"
+'use client'
 
-import Image, { ImageProps } from "next/image"
-import { useState, forwardRef, Ref } from "react"
+import Image, { ImageProps } from 'next/image'
+import { useState, forwardRef, Ref } from 'react'
 
-interface ImageFallbackProps extends ImageProps {
+type TImageFallbackProps = {
   fallback?: string
-}
+} & ImageProps
 
-const ImageFallback = forwardRef(({ src, alt, className, fallback: customFallback = "/default.webp", ...props }: ImageFallbackProps, ref: Ref<HTMLImageElement>) => {
-  const [fallback, setFallback] = useState<string>("")
+const ImageFallback = forwardRef(({ src, alt, className, fallback: customFallback = '/default.webp', ...props }: TImageFallbackProps, ref: Ref<HTMLImageElement>) => {
+  const [fallback, setFallback] = useState<string>('')
 
   const handleError = () => {
     setFallback(customFallback)
@@ -17,6 +17,6 @@ const ImageFallback = forwardRef(({ src, alt, className, fallback: customFallbac
   return <Image className={className} ref={ref} src={fallback || src} alt={alt} {...props} onError={handleError} />
 })
 
-ImageFallback.displayName = "Image"
+ImageFallback.displayName = 'Image'
 
 export default ImageFallback

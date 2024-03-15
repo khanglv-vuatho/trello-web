@@ -1,30 +1,18 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  DndContext,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragOverlay,
-  DropAnimation,
-  defaultDropAnimationSideEffects,
-  closestCorners,
-  pointerWithin,
-  rectIntersection,
-  getFirstCollision,
-} from '@dnd-kit/core'
+import { DndContext, DragOverlay, DropAnimation, PointerSensor, closestCorners, defaultDropAnimationSideEffects, getFirstCollision, pointerWithin, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Add as AddIcon, DragHandle as DragHandleIcon, MoreHoriz as MoreHorizIcon, Group as GroupIcon, Comment as CommentIcon, Attachment as AttachmentIcon } from '@mui/icons-material'
-import { Button, Card as CardNextUI, CardBody } from '@nextui-org/react'
+import { Add as AddIcon, Attachment as AttachmentIcon, Comment as CommentIcon, DragHandle as DragHandleIcon, Group as GroupIcon, MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
+import { Button, CardBody, Card as CardNextUI } from '@nextui-org/react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { generatePlaceholderCard, mapOrder } from '@/utils'
 import ExpandButton from '../ExpandButton'
 import ImageFallback from '../ImageFallback'
-import { generatePlaceholderCard, mapOrder } from '@/utils'
 
-import './BoardContent.css'
 import { IBoard, ICard, IColumn } from '@/interface'
+import './BoardContent.css'
 
 const ITEM_TYPE = {
   CARD: 'ACTIVE_ITEM_CARD',
@@ -358,11 +346,7 @@ const ListCard = ({ cards }: { cards: ICard[] }) => {
   return (
     <SortableContext strategy={verticalListSortingStrategy} items={dndKitCards}>
       <div className='card'>
-        <div className='flex flex-col gap-2 px-2'>
-          {cards.map((card, index) => (
-            <CardContent key={index} card={card} />
-          ))}
-        </div>
+        <div className='flex flex-col gap-2 px-2'>{cards?.length ? cards.map((card, index) => <CardContent key={index} card={card} />) : <> </>}</div>
       </div>
     </SortableContext>
   )
@@ -386,7 +370,7 @@ const CardContent = ({ card }: { card: ICard }) => {
   return (
     <div ref={setNodeRef} {...listeners} {...attributes}>
       <CardNextUI className={`cursor-pointer rounded-lg `} style={dndKitCardStyle}>
-        <CardBody className={`p-0 ${card?.FE_PlaceholderCard ? 'none' : 'block'}`}>
+        <CardBody className={`p-0 ${card?.FE_PlaceholderCard ? 'hidden' : 'block'}`}>
           {card?.cover && <ImageFallback alt={card?.cover} className='object-contain max-h-[200px] w-full' src={card?.cover} width={270} height={400} />}
           <p className='p-2 select-none'>{card?.title}</p>
           {shouldShowCardAction() && (
