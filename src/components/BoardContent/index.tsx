@@ -3,21 +3,19 @@
 import { DndContext, DragOverlay, DropAnimation, PointerSensor, closestCorners, defaultDropAnimationSideEffects, getFirstCollision, pointerWithin, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Add as AddIcon, Attachment as AttachmentIcon, Comment as CommentIcon, DragHandle as DragHandleIcon, Group as GroupIcon, MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
-import { Button, CardBody, Card as CardNextUI } from '@nextui-org/react'
+import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { generatePlaceholderCard, mapOrder } from '@/utils'
 import ExpandButton from '../ExpandButton'
-import ImageFallback from '../ImageFallback'
 
-import { IBoard, ICard, IColumn } from '@/interface'
+import CardContent from '@/components/CardContent'
+import CreateCard from '@/components/CreateCard'
+import CreateColumn from '@/components/CreateColumn'
+import { IBoard, ICard, IColumn } from '@/types'
+
+import { ITEM_TYPE } from '@/app/constants'
 import './BoardContent.css'
-
-const ITEM_TYPE = {
-  CARD: 'ACTIVE_ITEM_CARD',
-  COLUMN: 'ACTIVE_ITEM_COLUMN',
-}
 
 function BoardContent({ board }: { board: IBoard }) {
   const [orderedColumns, setOrderedColumns] = useState<any[]>([])
@@ -281,7 +279,7 @@ function BoardContent({ board }: { board: IBoard }) {
 }
 
 const ListColumn = ({ columns }: { columns: IColumn[] }) => {
-  // console.log('ListColumn', columns.length)
+  const [titleColumn, setTitleColumn] = useState<string>('')
 
   const columnsDndKit = columns.map((item) => item._id)
   return (
@@ -290,14 +288,14 @@ const ListColumn = ({ columns }: { columns: IColumn[] }) => {
         {columns.map((column) => (
           <Column key={column._id} column={column} />
         ))}
+        <CreateColumn value={titleColumn} setValue={setTitleColumn} />
       </div>
     </SortableContext>
   )
 }
 const Column = ({ column }: { column: IColumn }) => {
-  // console.log('column', column)
-
   const [orderedCards, setOrderedCards] = useState<any[]>([])
+  const [cardTitle, setCardTitle] = useState<string>('')
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
@@ -325,14 +323,7 @@ const Column = ({ column }: { column: IColumn }) => {
           </ExpandButton>
         </div>
         <ListCard cards={orderedCards} />
-        <div className='flex items-center p-2'>
-          <Button startContent={<AddIcon className='text-[#091E42]' />} className='rounded-lg w-full justify-start p-2 bg-transparent hover:bg-[#091E4224]'>
-            Add a card
-          </Button>
-          <ExpandButton isIconOnly content={<>DragHandleIcon ...</>}>
-            <DragHandleIcon className='text-black' />
-          </ExpandButton>
-        </div>
+        <CreateCard value={cardTitle} setValue={setCardTitle} />
       </div>
     </div>
   )
@@ -349,52 +340,6 @@ const ListCard = ({ cards }: { cards: ICard[] }) => {
         <div className='flex flex-col gap-2 px-2'>{cards?.length ? cards.map((card, index) => <CardContent key={index} card={card} />) : <> </>}</div>
       </div>
     </SortableContext>
-  )
-}
-
-const CardContent = ({ card }: { card: ICard }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: card._id,
-    data: { ...card },
-  })
-
-  const dndKitCardStyle = {
-    transform: CSS.Translate.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    border: isDragging ? '1px solid #54a0ff' : '',
-  }
-
-  const shouldShowCardAction = () => !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
-
-  return (
-    <div ref={setNodeRef} {...listeners} {...attributes}>
-      <CardNextUI className={`cursor-pointer rounded-lg `} style={dndKitCardStyle}>
-        <CardBody className={`p-0 ${card?.FE_PlaceholderCard ? 'hidden' : 'block'}`}>
-          {card?.cover && <ImageFallback alt={card?.cover} className='object-contain max-h-[200px] w-full' src={card?.cover} width={270} height={400} />}
-          <p className='p-2 select-none'>{card?.title}</p>
-          {shouldShowCardAction() && (
-            <div className='flex items-center gap-2 p-2'>
-              {!!card?.memberIds?.length && (
-                <Button variant='light' startContent={<GroupIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
-                  {card?.memberIds?.length}
-                </Button>
-              )}
-              {!!card?.comments?.length && (
-                <Button variant='light' startContent={<CommentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
-                  {card?.comments?.length}
-                </Button>
-              )}
-              {!!card?.attachments?.length && (
-                <Button variant='light' startContent={<AttachmentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
-                  {card?.attachments?.length}
-                </Button>
-              )}
-            </div>
-          )}
-        </CardBody>
-      </CardNextUI>
-    </div>
   )
 }
 

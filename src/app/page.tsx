@@ -5,7 +5,7 @@ import BoardContent from '@/components/BoardContent'
 import Header from '@/(layout)/Header'
 import { mockData } from './constants'
 import { useEffect, useState } from 'react'
-import { IBoard } from '@/interface'
+import { IBoard } from '@/types'
 import instance from '@/services/axiosConfig'
 
 export default function Home() {
@@ -14,12 +14,11 @@ export default function Home() {
 
   const handleFetchingBoard = async () => {
     try {
-      const { data }: any = instance.get(`/v1/boards/65f327f4ae31059fa712f364`)
-      console.log({ data })
+      const data: any = await instance.get(`/v1/boards/660ad3627613c6b26e1e762d`)
+
       setBoard(data)
     } catch (error) {
       console.log(error)
-    } finally {
       setOnFetching(false)
     }
   }
@@ -35,8 +34,8 @@ export default function Home() {
   return (
     <>
       <Header />
-      <BoardBar board={board} />
-      <BoardContent board={board} />
+      <BoardBar board={mockData.board} />
+      <BoardContent board={mockData.board} />
     </>
   )
 }

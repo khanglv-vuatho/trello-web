@@ -1,12 +1,12 @@
 'use client'
 
-import React from 'react'
 import { Avatar, AvatarGroup } from '@nextui-org/react'
 import { AddToDrive as AddToDriveIcon, Dashboard as DashboardIcon, VpnLock as VpnLockIcon, Bolt as BoltIcon, FilterList as FilterListIcon, PersonAdd as PersonAddIcon } from '@mui/icons-material'
 
 import ExpandButton from '@/components/ExpandButton'
-import { IBoard } from '@/interface'
+import { IBoard } from '@/types'
 import { capitalizeFirstLetter } from '@/utils'
+
 function BoardBar({ board }: { board: IBoard }) {
   const listBoardBar: { startContent: any; title: string; content: React.ReactNode }[] = [
     {
@@ -39,8 +39,8 @@ function BoardBar({ board }: { board: IBoard }) {
   return (
     <div className='bg-colorBoardBar h-boardBar flex items-center justify-between px-4 overflow-x-auto gap-5'>
       <div className='flex items-center gap-2'>
-        {listBoardBar.map((item) => (
-          <ExpandButton key={item.title} title={item.title} content={item.content} startContent={item.startContent} style='font-normal'></ExpandButton>
+        {listBoardBar.map((item, index) => (
+          <ExpandButton key={index} title={item.title} content={item.content} startContent={item.startContent} style='font-normal'></ExpandButton>
         ))}
       </div>
       <div className='flex items-center gap-4'>

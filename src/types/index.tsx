@@ -1,4 +1,4 @@
-export interface ICard {
+export type ICard = {
   _id: string
   boardId: string
   columnId: string
@@ -11,7 +11,7 @@ export interface ICard {
   FE_PlaceholderCard?: boolean
 }
 
-export interface IColumn {
+export type IColumn = {
   _id: string
   boardId: string
   title: string
@@ -19,7 +19,7 @@ export interface IColumn {
   cards: ICard[]
 }
 
-export interface IBoard {
+export type IBoard = {
   _id: string
   title: string
   description: string
