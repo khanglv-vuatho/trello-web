@@ -28,4 +28,8 @@ export type IBoard = {
   memberIds: string[]
   columnOrderIds: string[]
   columns: IColumn[]
+  updateAt: Date | null
+  _destroy: boolean
+  slug: string
+  createAt: Date
 }

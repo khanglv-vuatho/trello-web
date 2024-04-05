@@ -4,7 +4,7 @@ import { DndContext, DragOverlay, DropAnimation, PointerSensor, closestCorners, 
 import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
 
 import { generatePlaceholderCard, mapOrder } from '@/utils'
 import ExpandButton from '../ExpandButton'
@@ -16,8 +16,10 @@ import { IBoard, ICard, IColumn } from '@/types'
 
 import { ITEM_TYPE } from '@/app/constants'
 import './BoardContent.css'
+import { isEmpty } from 'lodash'
 
-function BoardContent({ board }: { board: IBoard }) {
+type TBoardContent = { board: IBoard }
+function BoardContent({ board }: TBoardContent) {
   const [orderedColumns, setOrderedColumns] = useState<any[]>([])
 
   const [activeDragItemId, setActiveDragItemId] = useState<any>(null)
@@ -98,8 +100,6 @@ function BoardContent({ board }: { board: IBoard }) {
 
   const moveCardBetweenDifferenctColumns = (overCardId: any, overColumn: any, active: any, over: any, activeColumn: any, activeDraggingCardId: any, activeDraggingCardData: any) => {
     setOrderedColumns((prevColumns) => {
-      console.log('prevColumns', prevColumns)
-
       let newCardIndex: number
 
       //find index active over card
@@ -111,13 +111,9 @@ function BoardContent({ board }: { board: IBoard }) {
 
       //clone orderedcolumn
       const nextColumns = JSON.parse(JSON.stringify(prevColumns))
-      console.log('nextColumns', nextColumns)
 
       const nextActiveColumn = nextColumns.find((column: IColumn) => column?._id === activeColumn._id)
       const nextOverColumn = nextColumns.find((column: IColumn) => column?._id === overColumn._id)
-
-      console.log('nextActiveColumn', nextActiveColumn)
-      console.log('nextOverColumn', nextOverColumn)
 
       //nextActiveColumn is old Column
       if (nextActiveColumn) {
@@ -126,8 +122,6 @@ function BoardContent({ board }: { board: IBoard }) {
 
         // add FE_PlaceholderCard if column is empty
         if (!nextActiveColumn?.cards?.length) {
-          console.log('card cuoi cung bi keo di')
-
           nextActiveColumn.cards = [generatePlaceholderCard(nextActiveColumn)]
         }
 
@@ -145,7 +139,6 @@ function BoardContent({ board }: { board: IBoard }) {
           ...activeDraggingCardData,
           columnId: nextOverColumn?._id,
         }
-        console.log(' nextColumns.cards', nextColumns.cards)
 
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
 
@@ -156,8 +149,6 @@ function BoardContent({ board }: { board: IBoard }) {
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map((card: ICard) => card._id)
       }
 
-      console.log('nextColumns', nextColumns)
-
       return [...nextColumns]
     })
   }
@@ -166,7 +157,7 @@ function BoardContent({ board }: { board: IBoard }) {
     const { active } = e
     setActiveDragItemId(e?.active?.id)
     setActiveItemDragStart(active)
-    setActiveItemType(active?.data?.current?._id?.includes('column') ? ITEM_TYPE.COLUMN : ITEM_TYPE.CARD)
+    setActiveItemType(!!active?.data?.current?.cards ? ITEM_TYPE.COLUMN : ITEM_TYPE.CARD)
     setActiveDragItemData(active?.data?.current)
     if (active?.data?.current?._id?.includes('card')) {
       setOldCloumnWhenDraggingCard(_handleFindColumnByCardId(e?.active?.id))
@@ -174,8 +165,6 @@ function BoardContent({ board }: { board: IBoard }) {
   }
 
   const _handleDragOver = (e: any) => {
-    // console.log('_handleDragOver', e)
-
     if (activeItemType === 'ACTIVE_ITEM_COLUMN') return
 
     const { active, over } = e
@@ -199,8 +188,6 @@ function BoardContent({ board }: { board: IBoard }) {
   }
 
   const _handleDragEnd = (e: any) => {
-    // console.log('_handleDragEnd', e)
-
     const { active, over } = e
 
     // check exits over
@@ -220,7 +207,7 @@ function BoardContent({ board }: { board: IBoard }) {
       if (!activeColumn || !overColumn) return
 
       //drag and drop between 2 difference column
-      if (oldCloumnWhenDraggingCard._id !== overColumn._id) {
+      if (oldCloumnWhenDraggingCard?._id !== overColumn?._id) {
         moveCardBetweenDifferenctColumns(overCardId, overColumn, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData)
       } else {
         const oldCardIndex = oldCloumnWhenDraggingCard?.cards?.findIndex((card: ICard) => card._id === activeDragItemId)
@@ -242,8 +229,6 @@ function BoardContent({ board }: { board: IBoard }) {
 
     //drag and drop column action
     if (activeItemType === 'ACTIVE_ITEM_COLUMN') {
-      console.log('123222')
-
       if (active.id !== over.id) {
         const oldColumnIndex = orderedColumns.findIndex((item) => item._id === active.id)
         const newColumnIndex = orderedColumns.findIndex((item) => item._id === over.id)
@@ -315,29 +300,27 @@ const Column = ({ column }: { column: IColumn }) => {
 
   return (
     <div style={dndKitColumnStyle} className='max-w-[300px] min-w-[300px]'>
-      <div className={`rounded-lg bg-[#f1f2f4] w-full h-[fit-content]`}>
-        <div ref={setNodeRef} {...attributes} {...listeners} className='flex items-center justify-between p-2'>
+      <div ref={setNodeRef} {...attributes} {...listeners} className={`rounded-lg bg-[#f1f2f4] w-full h-[fit-content]`}>
+        <div className='flex items-center justify-between p-2'>
           <h3 className='pl-3 font-semibold'>{column?.title}</h3>
           <ExpandButton isIconOnly content={<>Expand ...</>}>
             <MoreHorizIcon className='text-black' />
           </ExpandButton>
         </div>
         <ListCard cards={orderedCards} />
-        <CreateCard value={cardTitle} setValue={setCardTitle} />
+        <CreateCard value={cardTitle} setValue={setCardTitle} column={column} />
       </div>
     </div>
   )
 }
 
 const ListCard = ({ cards }: { cards: ICard[] }) => {
-  // console.log('cards', cards)
-
   const dndKitCards = cards.map((item) => item._id)
 
   return (
     <SortableContext strategy={verticalListSortingStrategy} items={dndKitCards}>
       <div className='card'>
-        <div className='flex flex-col gap-2 px-2'>{cards?.length ? cards.map((card, index) => <CardContent key={index} card={card} />) : <> </>}</div>
+        <div className='flex flex-col gap-2 px-2'>{cards?.length ? cards.map((card, index) => <CardContent key={index} card={card} />) : <></>}</div>
       </div>
     </SortableContext>
   )

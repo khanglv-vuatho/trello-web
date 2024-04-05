@@ -6,10 +6,15 @@ import ExpandButton from '../ExpandButton'
 import { ChangeEvent, useState } from 'react'
 import { AddButton, CloseButton } from '../Button'
 import Toast from '../Toast'
+import { useStoreBoard } from '@/store'
+import { IBoard, IColumn } from '@/types'
 
-type TCreateCard = { value: string; setValue: (value: string) => void }
-const CreateCard = ({ value, setValue }: TCreateCard) => {
+type TCreateCard = { column: IColumn; value: string; setValue: (value: string) => void }
+const CreateCard = ({ column, value, setValue }: TCreateCard) => {
   const [isCreateNewCard, setIsCreateNewCard] = useState<boolean>(false)
+
+  const { createNewCard } = useStoreBoard()
+  const board: any = useStoreBoard((state) => state.board)
 
   const handleToggleCreateNewCard = () => setIsCreateNewCard(!isCreateNewCard)
 
@@ -17,10 +22,11 @@ const CreateCard = ({ value, setValue }: TCreateCard) => {
     setValue(e.target.value)
   }
 
-  const handleAddColumn: () => void = () => {
+  const handleAddColumn: () => void = async () => {
     if (value === '') {
       Toast({ message: 'Enter card title', type: 'error' })
     } else {
+      await createNewCard(column, board, value)
       setValue('')
       setIsCreateNewCard(false)
       Toast({ message: 'Add Card Successful', type: 'success' })
@@ -39,7 +45,7 @@ const CreateCard = ({ value, setValue }: TCreateCard) => {
                 input: 'placeholder:text-[#00a8ff] text-[#00a8ff]',
               }}
               variant='bordered'
-              placeholder='Enter column title'
+              placeholder='Enter card title'
               value={value}
               onChange={handleInputChange}
             />

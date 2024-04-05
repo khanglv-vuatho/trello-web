@@ -1,32 +1,55 @@
 'use client'
 
 import { Button, Input } from '@nextui-org/react'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 
 import AddIcon from '@mui/icons-material/Add'
 import { AddButton, CloseButton } from '../Button'
 import Toast from '@/components/Toast'
+import { useStoreBoard } from '@/store'
+import instance from '@/services/axiosConfig'
+import { IBoard } from '@/types'
 
 type TCreateColumn = { value: string; setValue: (value: string) => void }
 
 const CreateColumn = ({ value, setValue }: TCreateColumn) => {
   const [isCreateNewColumn, setIsCreateNewColumn] = useState<boolean>(false)
+  const [onSending, setOnSending] = useState<boolean>(false)
+
+  const { createNewColumn } = useStoreBoard()
+  const board = useStoreBoard((state) => state.board)
+
   const handleToggleCreateNewColumn = () => setIsCreateNewColumn(!isCreateNewColumn)
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value)
   }
 
-  const handleAddColumn: () => void = () => {
-    console.log(123)
+  const handleAddColumn: () => void = async () => {
     if (value === '') {
       Toast({ message: 'Enter column title', type: 'error' })
+      return
     } else {
-      setValue('')
-      setIsCreateNewColumn(false)
-      Toast({ message: 'Add Column Successful', type: 'success' })
+      setOnSending(true)
     }
   }
+  const handleSendingColumn = async () => {
+    try {
+      await createNewColumn(board as IBoard, value)
+
+      Toast({ message: 'Add Column Successful', type: 'success' })
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setValue('')
+      setIsCreateNewColumn(false)
+      setOnSending(false)
+    }
+  }
+
+  useEffect(() => {
+    onSending && handleSendingColumn()
+  }, [onSending])
 
   return (
     <div>
