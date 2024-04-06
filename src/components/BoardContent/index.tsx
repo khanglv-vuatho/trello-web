@@ -31,6 +31,7 @@ import { ITEM_TYPE } from '@/app/constants'
 import './BoardContent.css'
 import { isEmpty } from 'lodash'
 import { useStoreBoard } from '@/store'
+import instance from '@/services/axiosConfig'
 
 type TBoardContent = { board: IBoard }
 function BoardContent({ board }: TBoardContent) {
@@ -177,13 +178,20 @@ function BoardContent({ board }: TBoardContent) {
     })
   }
 
-  const moveColumn = (dndOrderedColumns: IColumn[], board: IBoard) => {
+  const moveColumn = async (dndOrderedColumns: IColumn[], board: IBoard) => {
     const cloneBoard = { ...board }
     const dndOrderedColumnsIds = dndOrderedColumns.map((item) => item._id)
     cloneBoard.columnOrderIds = dndOrderedColumnsIds
     cloneBoard.columns = dndOrderedColumns
-
     storeBoard(cloneBoard)
+
+    try {
+      await instance.put(`/v1/boards/${board._id}`, {
+        columns: dndOrderedColumns,
+      })
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const _handleDragStart = (e: any) => {
