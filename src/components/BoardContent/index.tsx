@@ -1,6 +1,19 @@
 'use client'
 
-import { DndContext, DragOverlay, DropAnimation, PointerSensor, closestCorners, defaultDropAnimationSideEffects, getFirstCollision, pointerWithin, useSensor, useSensors } from '@dnd-kit/core'
+import {
+  DndContext,
+  DragOverlay,
+  DropAnimation,
+  PointerSensor,
+  closestCenter,
+  closestCorners,
+  defaultDropAnimationSideEffects,
+  getFirstCollision,
+  pointerWithin,
+  rectIntersection,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
 import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
@@ -17,6 +30,7 @@ import { IBoard, ICard, IColumn } from '@/types'
 import { ITEM_TYPE } from '@/app/constants'
 import './BoardContent.css'
 import { isEmpty } from 'lodash'
+import { useStoreBoard } from '@/store'
 
 type TBoardContent = { board: IBoard }
 function BoardContent({ board }: TBoardContent) {
@@ -27,6 +41,8 @@ function BoardContent({ board }: TBoardContent) {
   const [activeItemType, setActiveItemType] = useState<any>(null)
   const [activeDragItemData, setActiveDragItemData] = useState<any>(null)
   const [oldCloumnWhenDraggingCard, setOldCloumnWhenDraggingCard] = useState<any>(null)
+
+  const { storeBoard } = useStoreBoard()
 
   const mouseSensor = useSensor(PointerSensor, {
     // Require the mouse to move by 10 pixels before activating
@@ -60,7 +76,15 @@ function BoardContent({ board }: TBoardContent) {
   const collisionDetectionStrategy = useCallback(
     (args: any) => {
       if (activeItemType === 'ACTIVE_ITEM_COLUMN') {
-        return closestCorners({ ...args })
+        const pointerCollisions = pointerWithin(args)
+
+        // Collision detection algorithms return an array of collisions
+        if (pointerCollisions.length > 0) {
+          return pointerCollisions
+        }
+
+        // If there are no collisions with the pointer, return rectangle intersections
+        return rectIntersection(args)
       }
 
       const pointerIntersections = pointerWithin(args)
@@ -153,6 +177,15 @@ function BoardContent({ board }: TBoardContent) {
     })
   }
 
+  const moveColumn = (dndOrderedColumns: IColumn[], board: IBoard) => {
+    const cloneBoard = { ...board }
+    const dndOrderedColumnsIds = dndOrderedColumns.map((item) => item._id)
+    cloneBoard.columnOrderIds = dndOrderedColumnsIds
+    cloneBoard.columns = dndOrderedColumns
+
+    storeBoard(cloneBoard)
+  }
+
   const _handleDragStart = (e: any) => {
     const { active } = e
     setActiveDragItemId(e?.active?.id)
@@ -236,8 +269,7 @@ function BoardContent({ board }: TBoardContent) {
         const dndOrderedColumns = arrayMove(orderedColumns, oldColumnIndex, newColumnIndex)
 
         //array index after dragend
-        // const dndOrderedColumnsIds = dndOrderedColumns.map((item) => item._id)
-
+        moveColumn(dndOrderedColumns, board)
         //update state
         setOrderedColumns(dndOrderedColumns)
       }
@@ -299,8 +331,8 @@ const Column = ({ column }: { column: IColumn }) => {
   }, [column])
 
   return (
-    <div style={dndKitColumnStyle} className='max-w-[300px] min-w-[300px]'>
-      <div ref={setNodeRef} {...attributes} {...listeners} className={`rounded-lg bg-[#f1f2f4] w-full h-[fit-content]`}>
+    <div ref={setNodeRef} {...attributes} {...listeners} style={dndKitColumnStyle} className='max-w-[300px] min-w-[300px] '>
+      <div className={`rounded-lg bg-[#f1f2f4] w-full h-[fit-content]`}>
         <div className='flex items-center justify-between p-2'>
           <h3 className='pl-3 font-semibold'>{column?.title}</h3>
           <ExpandButton isIconOnly content={<>Expand ...</>}>

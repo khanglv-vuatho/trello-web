@@ -6,12 +6,17 @@ import { generatePlaceholderCard } from '@/utils'
 
 type TBoardState = {
   board?: IBoard
+  storeBoard: (board: IBoard) => Promise<void>
   fetchBoard: (boardId: string) => Promise<IBoard>
   createNewColumn: (board: IBoard, title: string) => Promise<void>
   createNewCard: (column: IColumn, board: IBoard, title: string) => Promise<void>
+  moveColumn: (column: IColumn, board: IBoard, title: string) => Promise<void>
 }
 
 export const useStoreBoard = create<TBoardState>((set, get) => ({
+  storeBoard: async (board) => {
+    set({ board })
+  },
   fetchBoard: async (boardId) => {
     try {
       const data: any = await instance.get(`/v1/boards/${boardId}`)
@@ -53,6 +58,23 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     }
   },
   createNewCard: async (column, board, title) => {
+    const payload = {
+      title,
+      boardId: board?._id,
+      columnId: column?._id,
+    }
+    const card: any = await instance.post('/v1/cards', payload)
+
+    const clonedColumn = { ...column }
+    clonedColumn.cards.push(card)
+    clonedColumn.cardOrderIds.push(card?._id)
+
+    const newBoard = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
+
+    console.log(newBoard)
+    set({ board: newBoard })
+  },
+  moveColumn: async (column, board, title) => {
     const payload = {
       title,
       boardId: board?._id,
