@@ -4,9 +4,7 @@ import Header from '@/(layout)/Header'
 import BoardBar from '@/components/BoardBar'
 import BoardContent from '@/components/BoardContent'
 import { useStoreBoard } from '@/store'
-import { IBoard } from '@/types'
 import { useEffect, useState } from 'react'
-import { mockData } from './constants'
 
 export default function Home() {
   const [onFetching, setOnFetching] = useState<boolean>(false)

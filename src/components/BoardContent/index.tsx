@@ -27,11 +27,11 @@ import CreateCard from '@/components/CreateCard'
 import CreateColumn from '@/components/CreateColumn'
 import { IBoard, ICard, IColumn } from '@/types'
 
-import { ITEM_TYPE } from '@/app/constants'
 import './BoardContent.css'
 import { isEmpty } from 'lodash'
 import { useStoreBoard } from '@/store'
 import instance from '@/services/axiosConfig'
+import { ITEM_TYPE } from '@/constants'
 
 type TBoardContent = { board: IBoard }
 function BoardContent({ board }: TBoardContent) {
@@ -194,13 +194,35 @@ function BoardContent({ board }: TBoardContent) {
     }
   }
 
+  const moveCardInTheSameColumn = async (dndOrderedCards: ICard[], dndOrderedCardsIds: string[], columnId: string) => {
+    const cloneBoard = { ...board }
+
+    const columnToUpdate = cloneBoard.columns.find((column: IColumn) => column?._id === columnId)
+
+    if (columnToUpdate) {
+      columnToUpdate.cards = dndOrderedCards
+      columnToUpdate.cardOrderIds = dndOrderedCardsIds
+    }
+
+    storeBoard(cloneBoard)
+
+    try {
+      await instance.put(`/v1/columns/${columnId}`, {
+        cardOrderIds: dndOrderedCardsIds,
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   const _handleDragStart = (e: any) => {
     const { active } = e
     setActiveDragItemId(e?.active?.id)
     setActiveItemDragStart(active)
     setActiveItemType(!!active?.data?.current?.cards ? ITEM_TYPE.COLUMN : ITEM_TYPE.CARD)
     setActiveDragItemData(active?.data?.current)
-    if (active?.data?.current?._id?.includes('card')) {
+
+    if (!active?.data?.current?.cardOrderIds) {
       setOldCloumnWhenDraggingCard(_handleFindColumnByCardId(e?.active?.id))
     }
   }
@@ -254,14 +276,17 @@ function BoardContent({ board }: TBoardContent) {
         const oldCardIndex = oldCloumnWhenDraggingCard?.cards?.findIndex((card: ICard) => card._id === activeDragItemId)
         const newCardIndex = overColumn?.cards?.findIndex((card: ICard) => card._id === overCardId)
 
-        const dndOrderedCards = arrayMove(oldCloumnWhenDraggingCard?.cards, oldCardIndex, newCardIndex)
+        const dndOrderedCards: any = arrayMove(oldCloumnWhenDraggingCard?.cards, oldCardIndex, newCardIndex)
+        const dndOrderedCardsIds = dndOrderedCards.map((item: any) => item._id)
+
+        moveCardInTheSameColumn(dndOrderedCards, dndOrderedCardsIds, oldCloumnWhenDraggingCard)
 
         setOrderedColumns((prev) => {
           const nextColumns = JSON.parse(JSON.stringify(prev))
 
           const targetColumn = nextColumns.find((column: IColumn) => column._id === overColumn._id)
           targetColumn.cards = dndOrderedCards
-          targetColumn.cardOrderIds = dndOrderedCards.map((card: any) => card._id)
+          targetColumn.cardOrderIds = dndOrderedCardsIds
 
           return nextColumns
         })
@@ -342,7 +367,7 @@ const Column = ({ column }: { column: IColumn }) => {
     <div ref={setNodeRef} {...attributes} {...listeners} style={dndKitColumnStyle} className='max-w-[300px] min-w-[300px] '>
       <div className={`rounded-lg bg-[#f1f2f4] w-full h-[fit-content]`}>
         <div className='flex items-center justify-between p-2'>
-          <h3 className='pl-3 font-semibold'>{column?.title}</h3>
+          <h3 className='pl-3 font-semibold select-none'>{column?.title}</h3>
           <ExpandButton isIconOnly content={<>Expand ...</>}>
             <MoreHorizIcon className='text-black' />
           </ExpandButton>
