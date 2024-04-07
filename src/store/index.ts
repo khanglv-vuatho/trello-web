@@ -2,7 +2,7 @@ import instance from '@/services/axiosConfig'
 import { IBoard, IColumn } from '@/types'
 import { create } from 'zustand'
 import { isEmpty } from 'lodash'
-import { generatePlaceholderCard } from '@/utils'
+import { generatePlaceholderCard, mapOrder } from '@/utils'
 
 type TBoardState = {
   board?: IBoard
@@ -22,14 +22,16 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
       const data: any = await instance.get(`/v1/boards/${boardId}`)
       const cloneData = { ...data }
 
+      cloneData.columns = mapOrder(cloneData?.columns, cloneData?.columnOrderIds, '_id')
+
       cloneData?.columns?.forEach((column: any) => {
         if (isEmpty(column.cards)) {
           column.cards = [generatePlaceholderCard(column)]
           column.cardOrderIds = [generatePlaceholderCard(column)._id]
+        } else {
+          column.cards = mapOrder(column?.cards, column?.cardOrderIds, '_id')
         }
       })
-
-      console.log({ cloneData })
 
       set({ board: { ...cloneData } })
       return cloneData

@@ -116,7 +116,7 @@ function BoardContent({ board }: TBoardContent) {
   )
 
   useEffect(() => {
-    setOrderedColumns(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
+    setOrderedColumns(board?.columns)
   }, [board])
 
   const _handleFindColumnByCardId = (id: string | number) => {
@@ -276,10 +276,11 @@ function BoardContent({ board }: TBoardContent) {
         const oldCardIndex = oldCloumnWhenDraggingCard?.cards?.findIndex((card: ICard) => card._id === activeDragItemId)
         const newCardIndex = overColumn?.cards?.findIndex((card: ICard) => card._id === overCardId)
 
+        console.log({ oldCardIndex, newCardIndex })
         const dndOrderedCards: any = arrayMove(oldCloumnWhenDraggingCard?.cards, oldCardIndex, newCardIndex)
         const dndOrderedCardsIds = dndOrderedCards.map((item: any) => item._id)
 
-        moveCardInTheSameColumn(dndOrderedCards, dndOrderedCardsIds, oldCloumnWhenDraggingCard)
+        moveCardInTheSameColumn(dndOrderedCards, dndOrderedCardsIds, oldCloumnWhenDraggingCard?._id)
 
         setOrderedColumns((prev) => {
           const nextColumns = JSON.parse(JSON.stringify(prev))
@@ -360,7 +361,7 @@ const Column = ({ column }: { column: IColumn }) => {
   }
 
   useEffect(() => {
-    setOrderedCards(mapOrder(column?.cards, column?.cardOrderIds, '_id'))
+    setOrderedCards(column?.cards)
   }, [column])
 
   return (
