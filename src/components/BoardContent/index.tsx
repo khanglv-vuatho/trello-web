@@ -42,6 +42,8 @@ function BoardContent({ board }: TBoardContent) {
   const [activeDragItemData, setActiveDragItemData] = useState<any>(null)
   const [oldCloumnWhenDraggingCard, setOldCloumnWhenDraggingCard] = useState<any>(null)
 
+  const [onSendingMoveCard, setOnSendingMoveCard] = useState<boolean>(false)
+
   const { storeBoard } = useStoreBoard()
 
   const mouseSensor = useSensor(PointerSensor, {
@@ -114,10 +116,6 @@ function BoardContent({ board }: TBoardContent) {
     [activeItemType, orderedColumns],
   )
 
-  useEffect(() => {
-    setOrderedColumns(board?.columns)
-  }, [board])
-
   const _handleFindColumnByCardId = (id: string | number) => {
     return orderedColumns?.find((column) => column?.cards?.map((card: ICard) => card._id)?.includes(id))
   }
@@ -176,11 +174,8 @@ function BoardContent({ board }: TBoardContent) {
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
 
         // delete placeholder card if exits
-        nextColumns.cards = nextOverColumn.cards.filter((card: any) => {
-          return !card?.FE_PlaceholderCard
-        })
+        nextColumns.cards = nextOverColumn.cards.filter((card: ICard) => !card?.FE_PlaceholderCard)
         //update cardOrderIds
-
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map((card: ICard) => card._id)
       }
 
@@ -197,15 +192,17 @@ function BoardContent({ board }: TBoardContent) {
     const dndOrderedColumnsIds = dndOrderedColumns.map((item) => item._id)
     cloneBoard.columnOrderIds = dndOrderedColumnsIds
     cloneBoard.columns = dndOrderedColumns
-    storeBoard(cloneBoard)
 
     try {
       await instance.put(`/v1/boards/${board._id}`, {
         columns: dndOrderedColumns,
+        columnOrderIds: dndOrderedColumnsIds,
       })
     } catch (error) {
       console.log(error)
     }
+
+    storeBoard(cloneBoard)
   }
 
   const moveCardInTheSameColumn = async (dndOrderedCards: ICard[], dndOrderedCardsIds: string[], columnId: string) => {
@@ -234,22 +231,25 @@ function BoardContent({ board }: TBoardContent) {
     cloneBoard.columns = dndOrderedColumns
     cloneBoard.columnOrderIds = dndOrderedColumnsIds
 
+    let prevCardOrderIds: any = dndOrderedColumns.find((c) => c._id === prevColumnId)?.cardOrderIds || []
+
+    if (prevCardOrderIds[0]?.includes('placeholder-card')) prevCardOrderIds = []
+
     const payload = {
       currentCardId,
       prevColumnId,
-      prevCardOrderIds: dndOrderedColumns.find((c) => c._id === prevColumnId)?.cardOrderIds,
+      prevCardOrderIds,
       nextColumnId,
-      nextCardOrderIds: dndOrderedColumns.find((c) => c._id === nextColumnId)?.cardOrderIds,
+      nextCardOrderIds: dndOrderedColumns.find((c) => c._id === nextColumnId)?.cardOrderIds.filter((cardId) => !cardId.includes('placeholder-card')),
     }
-    console.log({ board })
-    //boardID: "660ad0e171158d225fd8def9"
-    //columnId:"66101e554ae3d8e9e2bc8be7"
-    //currentCardId:"66101f334ae3d8e9e2bc8bef"
-    //activeDraggingCardId, oldCloumnWhenDraggingCard._id, nextOverColumn._id, nextColumns
-    console.log(payload)
-    // try {
-    //   await instance.put('/v1/boards/supports/moving_card', payload)
-    // } catch (error) {}
+
+    try {
+      await instance.put('/v1/boards/supports/moving_card', payload)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setOnSendingMoveCard(false)
+    }
   }
 
   const _handleDragStart = (e: any) => {
@@ -354,6 +354,9 @@ function BoardContent({ board }: TBoardContent) {
     setActiveDragItemData(null)
   }
 
+  useEffect(() => {
+    setOrderedColumns(board?.columns)
+  }, [board])
   return (
     <div className='bg-colorBoardContent h-boardContent overflow-x-auto'>
       <DndContext collisionDetection={collisionDetectionStrategy as any} onDragStart={_handleDragStart} onDragEnd={_handleDragEnd} sensors={sensors} onDragOver={_handleDragOver}>

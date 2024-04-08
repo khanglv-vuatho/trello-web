@@ -14,9 +14,10 @@ export default function Home() {
   const handleFetchingBoard = async () => {
     try {
       await fetchBoard('660ad0e171158d225fd8def9')
-      setOnFetching(false)
     } catch (error) {
       console.log(error)
+    } finally {
+      setOnFetching(false)
     }
   }
 
@@ -26,7 +27,7 @@ export default function Home() {
 
   useEffect(() => {
     setOnFetching(true)
-  }, [board])
+  }, [])
 
   if (!board)
     return (
