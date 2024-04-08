@@ -5,7 +5,6 @@ import {
   DragOverlay,
   DropAnimation,
   PointerSensor,
-  closestCenter,
   closestCorners,
   defaultDropAnimationSideEffects,
   getFirstCollision,
@@ -17,9 +16,9 @@ import {
 import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { generatePlaceholderCard, mapOrder } from '@/utils'
+import { generatePlaceholderCard } from '@/utils'
 import ExpandButton from '../ExpandButton'
 
 import CardContent from '@/components/CardContent'
@@ -28,10 +27,10 @@ import CreateColumn from '@/components/CreateColumn'
 import { IBoard, ICard, IColumn } from '@/types'
 
 import './BoardContent.css'
-import { isEmpty } from 'lodash'
-import { useStoreBoard } from '@/store'
-import instance from '@/services/axiosConfig'
+
 import { ITEM_TYPE } from '@/constants'
+import instance from '@/services/axiosConfig'
+import { useStoreBoard } from '@/store'
 
 type TBoardContent = { board: IBoard }
 function BoardContent({ board }: TBoardContent) {
@@ -123,7 +122,16 @@ function BoardContent({ board }: TBoardContent) {
     return orderedColumns?.find((column) => column?.cards?.map((card: ICard) => card._id)?.includes(id))
   }
 
-  const moveCardBetweenDifferenctColumns = (overCardId: any, overColumn: any, active: any, over: any, activeColumn: any, activeDraggingCardId: any, activeDraggingCardData: any) => {
+  const moveCardBetweenDifferenctColumns = (
+    overCardId: string,
+    overColumn: IColumn,
+    active: any,
+    over: any,
+    activeColumn: IColumn,
+    activeDraggingCardId: string,
+    activeDraggingCardData: ICard,
+    triggerForm: '_handleDragEnd' | '_handleDragOver',
+  ) => {
     setOrderedColumns((prevColumns) => {
       let newCardIndex: number
 
@@ -168,10 +176,16 @@ function BoardContent({ board }: TBoardContent) {
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
 
         // delete placeholder card if exits
-        nextColumns.cards = nextOverColumn.cards.filter((card: any) => card?.FE_PlaceholderCard)
-
+        nextColumns.cards = nextOverColumn.cards.filter((card: any) => {
+          return !card?.FE_PlaceholderCard
+        })
         //update cardOrderIds
+
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map((card: ICard) => card._id)
+      }
+
+      if (triggerForm === '_handleDragEnd') {
+        moveCardToDifferentColumn(activeDraggingCardId, oldCloumnWhenDraggingCard._id, nextOverColumn._id, nextColumns)
       }
 
       return [...nextColumns]
@@ -204,15 +218,38 @@ function BoardContent({ board }: TBoardContent) {
       columnToUpdate.cardOrderIds = dndOrderedCardsIds
     }
 
-    storeBoard(cloneBoard)
-
     try {
       await instance.put(`/v1/columns/${columnId}`, {
         cardOrderIds: dndOrderedCardsIds,
       })
+      storeBoard(cloneBoard)
     } catch (error) {
       console.log(error)
     }
+  }
+
+  const moveCardToDifferentColumn = async (currentCardId: string, prevColumnId: string, nextColumnId: string, dndOrderedColumns: IColumn[]) => {
+    const dndOrderedColumnsIds = dndOrderedColumns.map((item) => item._id)
+    const cloneBoard = { ...board }
+    cloneBoard.columns = dndOrderedColumns
+    cloneBoard.columnOrderIds = dndOrderedColumnsIds
+
+    const payload = {
+      currentCardId,
+      prevColumnId,
+      prevCardOrderIds: dndOrderedColumns.find((c) => c._id === prevColumnId)?.cardOrderIds,
+      nextColumnId,
+      nextCardOrderIds: dndOrderedColumns.find((c) => c._id === nextColumnId)?.cardOrderIds,
+    }
+    console.log({ board })
+    //boardID: "660ad0e171158d225fd8def9"
+    //columnId:"66101e554ae3d8e9e2bc8be7"
+    //currentCardId:"66101f334ae3d8e9e2bc8bef"
+    //activeDraggingCardId, oldCloumnWhenDraggingCard._id, nextOverColumn._id, nextColumns
+    console.log(payload)
+    // try {
+    //   await instance.put('/v1/boards/supports/moving_card', payload)
+    // } catch (error) {}
   }
 
   const _handleDragStart = (e: any) => {
@@ -246,7 +283,7 @@ function BoardContent({ board }: TBoardContent) {
     if (!activeColumn || !overColumn) return
 
     if (activeColumn._id !== overColumn._id) {
-      moveCardBetweenDifferenctColumns(overCardId, overColumn, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData)
+      moveCardBetweenDifferenctColumns(overCardId, overColumn, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData, '_handleDragOver')
     }
   }
 
@@ -271,7 +308,7 @@ function BoardContent({ board }: TBoardContent) {
 
       //drag and drop between 2 difference column
       if (oldCloumnWhenDraggingCard?._id !== overColumn?._id) {
-        moveCardBetweenDifferenctColumns(overCardId, overColumn, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData)
+        moveCardBetweenDifferenctColumns(overCardId, overColumn, active, over, activeColumn, activeDraggingCardId, activeDraggingCardData, '_handleDragEnd')
       } else {
         const oldCardIndex = oldCloumnWhenDraggingCard?.cards?.findIndex((card: ICard) => card._id === activeDragItemId)
         const newCardIndex = overColumn?.cards?.findIndex((card: ICard) => card._id === overCardId)

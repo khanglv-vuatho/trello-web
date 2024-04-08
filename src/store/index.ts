@@ -25,7 +25,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
       cloneData.columns = mapOrder(cloneData?.columns, cloneData?.columnOrderIds, '_id')
 
       cloneData?.columns?.forEach((column: any) => {
-        if (isEmpty(column.cards)) {
+        if (column.cards.length === 0) {
           column.cards = [generatePlaceholderCard(column)]
           column.cardOrderIds = [generatePlaceholderCard(column)._id]
         } else {
