@@ -31,6 +31,10 @@ import './BoardContent.css'
 import { ITEM_TYPE } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
+import { Card, CardAdd, Trash } from 'iconsax-react'
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, useDisclosure } from '@nextui-org/react'
+import Modal from '../Modal'
+import Toast from '../Toast'
 
 type TBoardContent = { board: IBoard }
 function BoardContent({ board }: TBoardContent) {
@@ -387,6 +391,16 @@ const ListColumn = ({ columns }: { columns: IColumn[] }) => {
 const Column = ({ column }: { column: IColumn }) => {
   const [orderedCards, setOrderedCards] = useState<any[]>([])
   const [cardTitle, setCardTitle] = useState<string>('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
+  const { storeBoard, board } = useStoreBoard()
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
+
+  const listExpandColumnButton = [
+    { title: 'Delete Column', icon: <Trash />, handleAction: () => onOpen() },
+    { title: 'Add new card ', icon: <CardAdd />, handleAction: () => console.log('Add new card') },
+  ]
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
@@ -400,23 +414,69 @@ const Column = ({ column }: { column: IColumn }) => {
     opacity: isDragging ? 0.7 : 1,
   }
 
+  const handleDeleteColumn = async () => {
+    try {
+      const cloneBoard: any = { ...board }
+      cloneBoard.columnOrderIds = cloneBoard.columnOrderIds?.filter((columnId: string) => columnId !== column._id)
+      cloneBoard.columns = cloneBoard.columns?.filter((item: IColumn) => item._id !== column._id)
+
+      const data: any = await instance.delete(`v1/columns/${column._id}`)
+
+      Toast({ message: data.deleteDefault, type: 'success' })
+      storeBoard(cloneBoard)
+
+      onOpenChange()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     setOrderedCards(column?.cards)
   }, [column])
 
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners} style={dndKitColumnStyle} className='max-w-[300px] min-w-[300px] '>
-      <div className={`rounded-lg bg-[#f1f2f4] w-full h-[fit-content]`}>
-        <div className='flex items-center justify-between p-2'>
-          <h3 className='pl-3 font-semibold select-none'>{column?.title}</h3>
-          <ExpandButton isIconOnly content={<>Expand ...</>}>
-            <MoreHorizIcon className='text-black' />
-          </ExpandButton>
+    <>
+      <div ref={setNodeRef} {...attributes} {...listeners} style={dndKitColumnStyle} className='max-w-[300px] min-w-[300px] '>
+        <div className={`rounded-lg bg-[#f1f2f4] w-full h-[fit-content]`}>
+          <div className='flex items-center justify-between p-2'>
+            <h3 className='pl-3 font-semibold select-none'>{column?.title}</h3>
+            <Dropdown isOpen={isDropdownOpen} onClose={() => setIsDropdownOpen(false)}>
+              <DropdownTrigger>
+                <div onClick={() => setIsDropdownOpen(!isDropdownOpen)} className='p-2 hover:bg-white/60 rounded-full'>
+                  <MoreHorizIcon className='text-black' />
+                </div>
+              </DropdownTrigger>
+              <DropdownMenu aria-label='Static Actions'>
+                {listExpandColumnButton.map((item) => (
+                  <DropdownItem key={item.title} startContent={item.icon} onClick={item.handleAction}>
+                    {item.title}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+          <ListCard cards={orderedCards} />
+          <CreateCard value={cardTitle} setValue={setCardTitle} column={column} />
         </div>
-        <ListCard cards={orderedCards} />
-        <CreateCard value={cardTitle} setValue={setCardTitle} column={column} />
       </div>
-    </div>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        modalTitle='Delete Column'
+        modalBody='Are you sure you want to delete this column?'
+        modalFooter={
+          <div className='flex items-center gap-2'>
+            <Button variant='light' color='danger' onClick={handleDeleteColumn} className='py-3 px-6'>
+              Delete
+            </Button>
+            <Button onClick={onOpenChange} className='bg-colorBoardContent text-white py-3 px-6'>
+              Cancel
+            </Button>
+          </div>
+        }
+      />
+    </>
   )
 }
 

@@ -8,7 +8,7 @@ type TExpandButton = {
   startContent?: React.ReactNode
   props?: any
   children?: React.ReactNode
-  content: React.ReactNode
+  content?: React.ReactNode
   endContent?: React.ReactNode
   style?: string
   variant?: 'solid' | 'faded' | 'bordered' | 'light' | 'flat' | 'ghost' | 'shadow'

@@ -13,7 +13,7 @@ export default function Home() {
   const board: any = useStoreBoard((state) => state.board)
   const handleFetchingBoard = async () => {
     try {
-      await fetchBoard('660ad0e171158d225fd8def9')
+      await fetchBoard('66156a694010689c9ede9913')
     } catch (error) {
       console.log(error)
     } finally {
