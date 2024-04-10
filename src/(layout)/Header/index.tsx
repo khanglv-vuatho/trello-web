@@ -2,20 +2,33 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 
-import {
-  Apps as AppsIcon,
-  NotificationsNoneOutlined as NotificationsIcon,
-  HelpOutlineOutlined as HelpIcon,
-} from '@mui/icons-material'
-import { Avatar, Badge, Input } from '@nextui-org/react'
+import { Apps as AppsIcon, NotificationsNoneOutlined as NotificationsIcon, HelpOutlineOutlined as HelpIcon } from '@mui/icons-material'
+import { Avatar, Badge, Button, Input, useDisclosure } from '@nextui-org/react'
 import { Add, ArrowDown2, SearchNormal1, Trello } from 'iconsax-react'
 
 import ExpandButton from '@/components/ExpandButton'
 import { LoadingSearch } from '@/components/Icons'
+import { UserButton } from '@clerk/nextjs'
+import Modal from '@/components/Modal'
+import instance from '@/services/axiosConfig'
+import Toast from '@/components/Toast'
+import { useRouter } from 'next/navigation'
+
+type TInitalState = { title: string; description: string }
 
 function Header() {
   const [searchValue, setSearchValue] = useState('')
   const [onSearching, setOnSearching] = useState(false)
+  const [onSending, setOnSending] = useState(false)
+
+  const router = useRouter()
+
+  const initalState: TInitalState = {
+    title: '',
+    description: '',
+  }
+  const [infoNewColumn, setInfoNewColumn] = useState<TInitalState>(initalState)
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
 
   const inputRef = useRef<any>(null)
 
@@ -34,14 +47,7 @@ function Header() {
     {
       id: 1,
       children: (
-        <Badge
-          content='7'
-          shape='circle'
-          color='danger'
-          placement='top-right'
-          size='sm'
-          classNames={{ badge: '!size-5' }}
-        >
+        <Badge content='7' shape='circle' color='danger' placement='top-right' size='sm' classNames={{ badge: '!size-5' }}>
           <NotificationsIcon />
         </Badge>
       ),
@@ -51,23 +57,6 @@ function Header() {
       id: 2,
       children: <HelpIcon />,
       content: <div className=''>HelpIcon</div>,
-    },
-    {
-      id: 3,
-      children: (
-        <Avatar
-          src='https://i.pravatar.cc/150?u=a042581f4e29026024d'
-          className='!size-8 flex-shrink-0 cursor-pointer'
-          classNames={{
-            base: '123',
-            fallback: '123123',
-            icon: '111',
-            img: '1133',
-            name: '12311',
-          }}
-        />
-      ),
-      content: <>Avatar</>,
     },
   ]
 
@@ -95,6 +84,26 @@ function Header() {
 
   const searchTimer = useRef<any>(null)
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+
+    setInfoNewColumn({ ...infoNewColumn, [name]: value })
+  }
+
+  const handleCreateNewColumn = async () => {
+    try {
+      const data: any = await instance.post('/v1/boards', { ...infoNewColumn, type: 'public' })
+
+      Toast({ message: 'Create Board Successful', type: 'success' })
+      router.push(`/board/${data?._id}`)
+      onClose()
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setOnSending(false)
+    }
+  }
+
   useEffect(() => {
     if (onSearching) {
       searchTimer.current = setTimeout(() => {
@@ -105,6 +114,10 @@ function Header() {
       clearTimeout(searchTimer.current)
     }
   }, [onSearching])
+
+  useEffect(() => {
+    onSending && handleCreateNewColumn()
+  }, [onSending])
 
   return (
     <header className='flex items-center justify-between px-4 h-header bg-colorHeader text-primary overflow-x-auto gap-5'>
@@ -120,18 +133,11 @@ function Header() {
         </div>
         <div className='flex items-center gap-1 mr-2'>
           {listExpandButton.map((item) => (
-            <ExpandButton
-              title={item.title}
-              key={item.title}
-              content={item.content}
-              endContent={<ArrowDown2 size={16} />}
-            />
+            <ExpandButton title={item.title} key={item.title} content={item.content} endContent={<ArrowDown2 size={16} />} />
           ))}
-          <ExpandButton
-            title={'Create'}
-            content={<>Create</>}
-            startContent={<Add size={24} />}
-          ></ExpandButton>
+          <Button onPress={() => onOpen()} className='flex items-center gap-2 font-medium text-primary px-4 min-h-10 bg-colorBoardBar' startContent={<Add size={24} />}>
+            Create
+          </Button>
         </div>
       </div>
       <div className='flex items-center gap-4'>
@@ -145,20 +151,12 @@ function Header() {
             onSearching && !!searchValue.length ? (
               <LoadingSearch className='animate-spin absolute right-1.5 text-white size-5 ' />
             ) : (
-              !!searchValue.length && (
-                <Add
-                  size={24}
-                  className='rotate-45 text-primary cursor-pointer absolute right-1'
-                  onClick={_handleClear}
-                />
-              )
+              !!searchValue.length && <Add size={24} className='rotate-45 text-primary cursor-pointer absolute right-1' onClick={_handleClear} />
             )
           }
           classNames={{
-            inputWrapper:
-              'max-h-10 border-primary data-[hover=true]:border-primary group-data-[focus=true]:border-primary',
-            input:
-              'text-primary placeholder:text-primary data-[has-start-content=true]:pr-4',
+            inputWrapper: 'max-h-10 border-primary data-[hover=true]:border-primary group-data-[focus=true]:border-primary',
+            input: 'text-primary placeholder:text-primary data-[has-start-content=true]:pr-4',
           }}
           className='min-w-[120px]'
           value={searchValue}
@@ -169,8 +167,47 @@ function Header() {
             {item.children}
           </ExpandButton>
         ))}
+        <UserButton />
       </div>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        modalTitle='Create new column'
+        modalBody={<ModalBodyCreateNewColumn handleChange={handleChange} initalState={initalState} infoNewColumn={infoNewColumn} />}
+        modalFooter={
+          <div className='flex items-center gap-2'>
+            <Button variant='light' color='default' onClick={onOpenChange} className='py-3 px-6'>
+              Cancel
+            </Button>
+            <Button onClick={() => setOnSending(true)} className='bg-colorBoardContent text-white py-3 px-6'>
+              Create
+            </Button>
+          </div>
+        }
+      />
     </header>
+  )
+}
+
+type TModalBodyCreateNewColumn = {
+  initalState: TInitalState
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  infoNewColumn: {
+    [key: string]: string
+  }
+}
+const ModalBodyCreateNewColumn = ({ initalState, handleChange, infoNewColumn }: TModalBodyCreateNewColumn) => {
+  return (
+    <div className='flex flex-col gap-4'>
+      {Object.keys(initalState).map((key) => (
+        <div key={key} className='flex flex-col gap-2'>
+          <label>
+            {key} <span className='text-red-700'>*</span>
+          </label>
+          <Input name={key} value={infoNewColumn[key]} placeholder={`Enter ${key}`} onChange={handleChange} isRequired type='text' />
+        </div>
+      ))}
+    </div>
   )
 }
 
