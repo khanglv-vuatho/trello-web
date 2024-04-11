@@ -8,7 +8,6 @@ import { Add, ArrowDown2, SearchNormal1, Trello } from 'iconsax-react'
 
 import ExpandButton from '@/components/ExpandButton'
 import { LoadingSearch } from '@/components/Icons'
-import { UserButton } from '@clerk/nextjs'
 import Modal from '@/components/Modal'
 import instance from '@/services/axiosConfig'
 import Toast from '@/components/Toast'
@@ -167,7 +166,6 @@ function Header() {
             {item.children}
           </ExpandButton>
         ))}
-        <UserButton />
       </div>
       <Modal
         isOpen={isOpen}

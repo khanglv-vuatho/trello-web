@@ -1,6 +1,5 @@
 'use client'
 
-import { currentUser } from '@clerk/nextjs'
 import { Button } from '@nextui-org/react'
 import { Clock, Star1 } from 'iconsax-react'
 import React, { useState } from 'react'

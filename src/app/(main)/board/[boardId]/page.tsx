@@ -2,7 +2,6 @@
 
 import { CircularProgress } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
-import { currentUser } from '@clerk/nextjs'
 
 import Header from '@/(layout)/Header'
 import BoardBar from '@/components/BoardBar'
