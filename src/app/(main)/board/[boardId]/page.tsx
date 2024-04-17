@@ -30,21 +30,6 @@ const BoardDetails = ({ params }: { params: { boardId: string } }) => {
     setOnFetching(true)
   }, [])
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const user = await currentUser()
-
-        console.log({ user })
-        // Do something with user data if needed
-      } catch (error) {
-        console.error('Error fetching user data:', error)
-      }
-    }
-
-    fetchUserData()
-  }, [])
-
   if (!board)
     return (
       <div className='flex h-[100dvh] items-center gap-2 justify-center'>

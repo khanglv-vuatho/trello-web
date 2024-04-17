@@ -1,8 +1,9 @@
 'use client'
 
+import instance from '@/services/axiosConfig'
 import { Button } from '@nextui-org/react'
 import { Clock, Star1 } from 'iconsax-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 type Boards = {
   title: string

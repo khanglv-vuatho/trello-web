@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { googleLogout } from '@react-oauth/google'
 
 import { Apps as AppsIcon, NotificationsNoneOutlined as NotificationsIcon, HelpOutlineOutlined as HelpIcon } from '@mui/icons-material'
 import { Avatar, Badge, Button, Input, useDisclosure } from '@nextui-org/react'
@@ -12,13 +13,18 @@ import Modal from '@/components/Modal'
 import instance from '@/services/axiosConfig'
 import Toast from '@/components/Toast'
 import { useRouter } from 'next/navigation'
+import ImageFallback from '@/components/ImageFallback'
+import { TUserInfo } from '@/types'
 
 type TInitalState = { title: string; description: string }
 
 function Header() {
-  const [searchValue, setSearchValue] = useState('')
-  const [onSearching, setOnSearching] = useState(false)
-  const [onSending, setOnSending] = useState(false)
+  const [onSearching, setOnSearching] = useState<boolean>(false)
+  const [onSending, setOnSending] = useState<boolean>(false)
+  const [onFetching, setOnFetching] = useState<boolean>(false)
+
+  const [infoUser, setInfoUser] = useState<TUserInfo>()
+  const [searchValue, setSearchValue] = useState<string>('')
 
   const router = useRouter()
 
@@ -114,9 +120,28 @@ function Header() {
     }
   }, [onSearching])
 
+  const token = localStorage.getItem('access_token')
+
+  const handleFetchingUser = async () => {
+    try {
+      const data: any = await instance.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${token}`)
+      setInfoUser(data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     onSending && handleCreateNewColumn()
   }, [onSending])
+
+  useEffect(() => {
+    onFetching && handleFetchingUser()
+  }, [onFetching])
+
+  useEffect(() => {
+    setOnFetching(true)
+  }, [])
 
   return (
     <header className='flex items-center justify-between px-4 h-header bg-colorHeader text-primary overflow-x-auto gap-5'>
@@ -166,6 +191,9 @@ function Header() {
             {item.children}
           </ExpandButton>
         ))}
+        <ExpandButton isIconOnly content={<ContentUser infoUser={infoUser as any} />}>
+          <Avatar src={infoUser?.picture} className='flex flex-shrink-0 max-w-8 max-h-8' />
+        </ExpandButton>
       </div>
       <Modal
         isOpen={isOpen}
@@ -205,6 +233,30 @@ const ModalBodyCreateNewColumn = ({ initalState, handleChange, infoNewColumn }: 
           <Input name={key} value={infoNewColumn[key]} placeholder={`Enter ${key}`} onChange={handleChange} isRequired type='text' />
         </div>
       ))}
+    </div>
+  )
+}
+
+const ContentUser = ({ infoUser }: { infoUser: TUserInfo }) => {
+  const router = useRouter()
+  const handleLogout = () => {
+    localStorage.removeItem('access_token')
+    googleLogout()
+
+    router.push('/login')
+  }
+  return (
+    <div className='min-w-[200px] flex flex-col gap-2 p-2'>
+      <div className='flex items-center gap-2'>
+        <ImageFallback src={infoUser.picture} className='w-8 h-8 rounded-full' height={32} width={32} alt={infoUser.given_name} />
+        <div className='flex flex-col'>
+          <p>{infoUser.given_name}</p>
+          <p>{infoUser.email}</p>
+        </div>
+      </div>
+      <Button onPress={handleLogout} className='bg-colorBoardBar text-white py-2 w-full'>
+        Đăng xuất
+      </Button>
     </div>
   )
 }
