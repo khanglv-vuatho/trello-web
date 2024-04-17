@@ -1,12 +1,12 @@
 import instance from '@/services/axiosConfig'
-import { IBoard, IColumn } from '@/types'
+import { IBoard, IColumn, TUserInfo } from '@/types'
 import { create } from 'zustand'
 import { isEmpty } from 'lodash'
 import { generatePlaceholderCard, mapOrder } from '@/utils'
 
 type TBoardState = {
   board?: IBoard
-  storeBoard: (board: IBoard) => Promise<void>
+  storeBoard: (board: IBoard) => void
   fetchBoard: (boardId: string) => Promise<IBoard>
   createNewColumn: (board: IBoard, title: string) => Promise<void>
   createNewCard: (column: IColumn, board: IBoard, title: string) => Promise<void>
@@ -14,7 +14,7 @@ type TBoardState = {
 }
 
 export const useStoreBoard = create<TBoardState>((set, get) => ({
-  storeBoard: async (board) => {
+  storeBoard: (board) => {
     set({ board })
   },
   fetchBoard: async (boardId) => {
@@ -92,5 +92,15 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
 
     console.log(newBoard)
     set({ board: newBoard })
+  },
+}))
+
+type TUserState = {
+  userInfo?: TUserInfo
+  storeUser: (user: TUserInfo) => void
+}
+export const useStoreUser = create<TUserState>((set) => ({
+  storeUser: (userInfo) => {
+    set({ userInfo })
   },
 }))

@@ -15,6 +15,7 @@ import Toast from '@/components/Toast'
 import { useRouter } from 'next/navigation'
 import ImageFallback from '@/components/ImageFallback'
 import { TUserInfo } from '@/types'
+import { useStoreUser } from '@/store'
 
 type TInitalState = { title: string; description: string }
 
@@ -23,10 +24,13 @@ function Header() {
   const [onSending, setOnSending] = useState<boolean>(false)
   const [onFetching, setOnFetching] = useState<boolean>(false)
 
-  const [infoUser, setInfoUser] = useState<TUserInfo>()
   const [searchValue, setSearchValue] = useState<string>('')
 
   const router = useRouter()
+
+  const { storeUser } = useStoreUser()
+
+  const userInfo = useStoreUser((state) => state.userInfo)
 
   const initalState: TInitalState = {
     title: '',
@@ -124,8 +128,8 @@ function Header() {
 
   const handleFetchingUser = async () => {
     try {
-      const data: any = await instance.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${token}`)
-      setInfoUser(data)
+      const dataUser: any = await instance.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${token}`)
+      storeUser(dataUser)
     } catch (error) {
       console.log(error)
     }
@@ -191,8 +195,8 @@ function Header() {
             {item.children}
           </ExpandButton>
         ))}
-        <ExpandButton isIconOnly content={<ContentUser infoUser={infoUser as any} />}>
-          <Avatar src={infoUser?.picture} className='flex flex-shrink-0 max-w-8 max-h-8' />
+        <ExpandButton isIconOnly content={<ContentUser />}>
+          <Avatar src={userInfo?.picture} className='flex flex-shrink-0 max-w-8 max-h-8' />
         </ExpandButton>
       </div>
       <Modal
@@ -237,8 +241,11 @@ const ModalBodyCreateNewColumn = ({ initalState, handleChange, infoNewColumn }: 
   )
 }
 
-const ContentUser = ({ infoUser }: { infoUser: TUserInfo }) => {
+const ContentUser = () => {
   const router = useRouter()
+
+  const userInfo = useStoreUser((state) => state.userInfo)
+
   const handleLogout = () => {
     localStorage.removeItem('access_token')
     googleLogout()
@@ -248,10 +255,10 @@ const ContentUser = ({ infoUser }: { infoUser: TUserInfo }) => {
   return (
     <div className='min-w-[200px] flex flex-col gap-2 p-2'>
       <div className='flex items-center gap-2'>
-        <ImageFallback src={infoUser.picture} className='w-8 h-8 rounded-full' height={32} width={32} alt={infoUser.given_name} />
+        <ImageFallback src={userInfo?.picture as string} className='w-8 h-8 rounded-full' height={32} width={32} alt={userInfo?.given_name as string} />
         <div className='flex flex-col'>
-          <p>{infoUser.given_name}</p>
-          <p>{infoUser.email}</p>
+          <p>{userInfo?.given_name}</p>
+          <p>{userInfo?.email}</p>
         </div>
       </div>
       <Button onPress={handleLogout} className='bg-colorBoardBar text-white py-2 w-full'>

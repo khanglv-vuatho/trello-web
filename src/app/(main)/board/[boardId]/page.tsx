@@ -7,7 +7,6 @@ import Header from '@/(layout)/Header'
 import BoardBar from '@/components/BoardBar'
 import BoardContent from '@/components/BoardContent'
 import { useStoreBoard } from '@/store'
-
 const BoardDetails = ({ params }: { params: { boardId: string } }) => {
   const [onFetching, setOnFetching] = useState<boolean>(false)
   const { fetchBoard } = useStoreBoard()
