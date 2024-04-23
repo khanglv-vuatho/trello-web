@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import ImageFallback from '@/components/ImageFallback'
 import { TUserInfo } from '@/types'
 import { useStoreUser } from '@/store'
+import Link from 'next/link'
 
 type TInitalState = { title: string; description: string }
 
@@ -101,7 +102,8 @@ function Header() {
 
   const handleCreateNewColumn = async () => {
     try {
-      const data: any = await instance.post('/v1/boards', { ...infoNewColumn, type: 'public' })
+      const payload = { ...infoNewColumn, type: 'public', ownerId: userInfo?.email }
+      const data: any = await instance.post('/v1/boards', payload)
 
       Toast({ message: 'Create Board Successful', type: 'success' })
       router.push(`/board/${data?._id}`)
@@ -124,14 +126,21 @@ function Header() {
     }
   }, [onSearching])
 
-  const token = localStorage.getItem('access_token')
+  const token = localStorage?.getItem('access_token')
 
   const handleFetchingUser = async () => {
     try {
       const dataUser: any = await instance.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${token}`)
       storeUser(dataUser)
     } catch (error) {
+      if (error) {
+        Toast({ message: 'Login Failed', type: 'error' })
+        localStorage.removeItem('access_token')
+        router.push('/login')
+      }
       console.log(error)
+    } finally {
+      setOnFetching(false)
     }
   }
 
@@ -154,10 +163,10 @@ function Header() {
           <div className='size-10 hover:bg-default/40 rounded-[3px] cursor-pointer flex items-center justify-center'>
             <AppsIcon />
           </div>
-          <div className='flex items-center justify-center min-h-10 gap-1 px-2 hover:bg-default/40 rounded-[3px] cursor-pointer'>
+          <Link href={'/'} className='flex items-center justify-center min-h-10 gap-1 px-2 hover:bg-default/40 rounded-[3px] cursor-pointer'>
             <Trello size='24' color='#fff' variant='Bold' />
             <p className='text-xl font-bold'>Trello</p>
-          </div>
+          </Link>
         </div>
         <div className='flex items-center gap-1 mr-2'>
           {listExpandButton.map((item) => (
@@ -209,7 +218,7 @@ function Header() {
             <Button variant='light' color='default' onClick={onOpenChange} className='py-3 px-6'>
               Cancel
             </Button>
-            <Button onClick={() => setOnSending(true)} className='bg-colorBoardContent text-white py-3 px-6'>
+            <Button isLoading={onSending} onClick={() => setOnSending(true)} className='bg-colorBoardContent text-white py-3 px-6'>
               Create
             </Button>
           </div>

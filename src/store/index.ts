@@ -60,6 +60,12 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     }
   },
   createNewCard: async (column, board, title) => {
+    const clonedColumn = { ...column }
+
+    const newBoard = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
+
+    set({ board: newBoard })
+
     const payload = {
       title,
       boardId: board?._id,
@@ -67,14 +73,8 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     }
     const card: any = await instance.post('/v1/cards', payload)
 
-    const clonedColumn = { ...column }
-
     clonedColumn.cards.push(card)
     clonedColumn.cardOrderIds.push(card?._id)
-
-    const newBoard = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
-
-    set({ board: newBoard })
   },
   moveColumn: async (column, board, title) => {
     const payload = {
@@ -90,7 +90,6 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
 
     const newBoard = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
 
-    console.log(newBoard)
     set({ board: newBoard })
   },
 }))

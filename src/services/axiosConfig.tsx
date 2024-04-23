@@ -12,7 +12,7 @@ const instance = axios.create({
 const urlExceptAuthorization = ['Authenticate']
 
 const authorization = async () => {
-  const token = localStorage.getItem('access_token')
+  const token = localStorage?.getItem('access_token')
 
   if (token) {
     return { Authorization: 'Bearer ' + token }

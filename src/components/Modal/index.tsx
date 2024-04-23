@@ -1,4 +1,4 @@
-import { Modal as ModalNextUI, ModalBody, ModalContent, ModalHeader, ModalFooter, Button } from '@nextui-org/react'
+import { Modal as ModalNextUI, ModalBody, ModalContent, ModalHeader, ModalFooter, Button, ModalProps } from '@nextui-org/react'
 
 type TModal = {
   isOpen: boolean
@@ -6,10 +6,10 @@ type TModal = {
   modalTitle: string
   modalBody: React.ReactNode | string
   modalFooter?: React.ReactNode | string
-}
-const Modal = ({ isOpen, onOpenChange, modalTitle, modalBody, modalFooter }: TModal) => {
+} & Omit<ModalProps, 'children'>
+const Modal = ({ isOpen, onOpenChange, modalTitle, modalBody, modalFooter, ...props }: TModal) => {
   return (
-    <ModalNextUI isOpen={isOpen} onOpenChange={onOpenChange}>
+    <ModalNextUI {...props} isOpen={isOpen} onOpenChange={onOpenChange}>
       <ModalContent>
         {(onClose) => (
           <>

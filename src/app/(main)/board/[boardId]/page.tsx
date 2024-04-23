@@ -29,7 +29,7 @@ const BoardDetails = ({ params }: { params: { boardId: string } }) => {
     setOnFetching(true)
   }, [])
 
-  if (!board)
+  if (!board || onFetching)
     return (
       <div className='flex h-[100dvh] items-center gap-2 justify-center'>
         <CircularProgress aria-label='Loading...' />
