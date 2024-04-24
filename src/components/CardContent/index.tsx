@@ -2,7 +2,7 @@ import { IBoard, ICard, IColumn } from '@/types'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Attachment as AttachmentIcon, Comment as CommentIcon, Group as GroupIcon } from '@mui/icons-material'
-import { Button, CardBody, Card as CardNextUI, useDisclosure } from '@nextui-org/react'
+import { Button, CardBody, Card as CardNextUI, Input, useDisclosure } from '@nextui-org/react'
 import ImageFallback from '../ImageFallback'
 import { Trash } from 'iconsax-react'
 import Modal from '@/components/Modal'
@@ -13,7 +13,11 @@ import { useStoreBoard } from '@/store'
 
 const CardContent = ({ card }: { card: ICard }) => {
   const [onDeletingCard, setOnDeletingCard] = useState(false)
+  const [cardTitle, setCardTitle] = useState<string>('')
 
+  const [onFixTitleCard, setOnFixTitleCard] = useState<boolean>(false)
+
+  const [valueTitleCard, setValueTitleCard] = useState<string>(card?.title)
   const { storeBoard } = useStoreBoard()
 
   const board = useStoreBoard((state) => state.board)
@@ -66,6 +70,31 @@ const CardContent = ({ card }: { card: ICard }) => {
     }
   }
 
+  const handleRenameCard = async () => {
+    if (valueTitleCard === card?.title) return
+    const payload = { cardId: card._id, columnId: card.columnId, title: valueTitleCard }
+
+    try {
+      const updatedBoard: any = { ...board }
+      const columnIndex = updatedBoard.columns.findIndex((column: IColumn) => column._id === card.columnId)
+
+      if (columnIndex !== -1) {
+        const column = updatedBoard.columns[columnIndex]
+        const cardIndex = column.cards.findIndex((item: ICard) => item._id === card._id)
+        column.cards[cardIndex].title = valueTitleCard
+      }
+
+      storeBoard(updatedBoard)
+
+      await instance.put('/v1/cards/rename', payload)
+      Toast({ message: 'Card renamed successfully', type: 'success' })
+    } catch {
+      Toast({ message: 'Failed to rename card', type: 'error' })
+    } finally {
+      setOnFixTitleCard(false)
+    }
+  }
+
   useEffect(() => {
     onDeletingCard && deleteCard()
   }, [onDeletingCard])
@@ -74,10 +103,30 @@ const CardContent = ({ card }: { card: ICard }) => {
     <div ref={setNodeRef} {...listeners} {...attributes}>
       <CardNextUI className={`cursor-pointer rounded-lg group`} style={dndKitCardStyle}>
         <CardBody className={`p-0 ${card?.FE_PlaceholderCard ? 'hidden' : 'block'}`}>
-          <div className='flex items-center justify-between pr-1'>
-            <div>
+          <div className='flex items-center justify-between pr-1 w-full'>
+            <div className='w-[90%]'>
               {card?.cover && <ImageFallback alt={card?.cover} className='object-contain max-h-[200px] w-full' src={card?.cover} width={270} height={400} />}
-              <p className='p-2 select-none'>{card?.title}</p>
+              {onFixTitleCard ? (
+                <Input
+                  onKeyUp={(e) => {
+                    if (e.key === 'Enter') {
+                      handleRenameCard()
+                    }
+                  }}
+                  variant='bordered'
+                  autoFocus
+                  onBlur={() => handleRenameCard()}
+                  value={valueTitleCard}
+                  onChange={(e) => {
+                    setValueTitleCard(e.target.value)
+                  }}
+                  className='w-full'
+                />
+              ) : (
+                <p className='p-2 select-none' onDoubleClick={() => setOnFixTitleCard(!onFixTitleCard)}>
+                  {card?.title}
+                </p>
+              )}
               {shouldShowCardAction() && (
                 <div className='flex items-center gap-2 p-2'>
                   {!!card?.memberIds?.length && (

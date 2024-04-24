@@ -402,8 +402,13 @@ const Column = ({ column }: { column: IColumn }) => {
   const listExpandColumnButton = [
     { title: 'Delete Column', icon: <Trash />, handleAction: () => onOpen() },
     { title: 'Add new card ', icon: <CardAdd />, handleAction: () => console.log('Add new card') },
-    { title: 'Rename column', icon: <Edit />, handleAction: () => setOnFixTitleColumn(!onFixTitleColumn) },
-    ,
+    {
+      title: 'Rename column',
+      icon: <Edit />,
+      handleAction: () => {
+        setOnFixTitleColumn(!onFixTitleColumn)
+      },
+    },
   ]
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -496,7 +501,7 @@ const Column = ({ column }: { column: IColumn }) => {
               </DropdownTrigger>
               <DropdownMenu aria-label='Static Actions'>
                 {listExpandColumnButton.map((item) => (
-                  <DropdownItem key={item?.title} startContent={item?.icon} onClick={item?.handleAction}>
+                  <DropdownItem key={item.title} startContent={item?.icon} onClick={() => item.handleAction()}>
                     {item?.title}
                   </DropdownItem>
                 ))}
