@@ -2,6 +2,7 @@ delete board
 rename card 
 rename board 
 rename column
+animation card rotate is dragging
 check limit create board
 recent
 stared

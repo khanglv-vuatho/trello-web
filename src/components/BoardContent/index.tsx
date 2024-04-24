@@ -31,8 +31,8 @@ import './BoardContent.css'
 import { ITEM_TYPE } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
-import { Card, CardAdd, Trash } from 'iconsax-react'
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, useDisclosure } from '@nextui-org/react'
+import { Card, CardAdd, Edit, Trash } from 'iconsax-react'
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, useDisclosure } from '@nextui-org/react'
 import Modal from '../Modal'
 import Toast from '../Toast'
 
@@ -393,6 +393,8 @@ const Column = ({ column }: { column: IColumn }) => {
   const [cardTitle, setCardTitle] = useState<string>('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
+  const [onFixTitleColumn, setOnFixTitleColumn] = useState<boolean>(false)
+  const [valueTitleColumn, setValueTitleColumn] = useState<string>(column.title)
   const { storeBoard, board } = useStoreBoard()
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -400,6 +402,8 @@ const Column = ({ column }: { column: IColumn }) => {
   const listExpandColumnButton = [
     { title: 'Delete Column', icon: <Trash />, handleAction: () => onOpen() },
     { title: 'Add new card ', icon: <CardAdd />, handleAction: () => console.log('Add new card') },
+    { title: 'Rename column', icon: <Edit />, handleAction: () => setOnFixTitleColumn(!onFixTitleColumn) },
+    ,
   ]
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -431,6 +435,29 @@ const Column = ({ column }: { column: IColumn }) => {
     }
   }
 
+  const handleRenameColumn = async () => {
+    if (valueTitleColumn === column.title) return setOnFixTitleColumn(!onFixTitleColumn)
+    try {
+      const cloneBoard: any = { ...board }
+
+      cloneBoard.columns = cloneBoard.columns?.map((item: IColumn) => {
+        if (item._id === column._id) {
+          return { ...item, title: valueTitleColumn }
+        }
+        return item
+      })
+
+      storeBoard(cloneBoard)
+
+      await instance.put(`v1/columns/${column._id}`, { title: valueTitleColumn })
+
+      Toast({ message: 'Rename column successfully', type: 'success' })
+      setOnFixTitleColumn(!onFixTitleColumn)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     setOrderedCards(column?.cards)
   }, [column])
@@ -440,7 +467,27 @@ const Column = ({ column }: { column: IColumn }) => {
       <div ref={setNodeRef} {...attributes} {...listeners} style={dndKitColumnStyle} className='max-w-[300px] min-w-[300px] '>
         <div className={`rounded-lg bg-[#f1f2f4] w-full h-[fit-content]`}>
           <div className='flex items-center justify-between p-2'>
-            <h3 className='pl-3 font-semibold select-none'>{column?.title}</h3>
+            {onFixTitleColumn ? (
+              <Input
+                onKeyUp={(e) => {
+                  if (e.key === 'Enter') {
+                    handleRenameColumn()
+                  }
+                }}
+                variant='bordered'
+                autoFocus
+                onBlur={() => handleRenameColumn()}
+                value={valueTitleColumn}
+                onChange={(e) => {
+                  setValueTitleColumn(e.target.value)
+                }}
+                className='w-full'
+              />
+            ) : (
+              <h3 className='pl-3 py-2 w-full font-semibold select-none' onDoubleClick={() => setOnFixTitleColumn(!onFixTitleColumn)}>
+                {column?.title}
+              </h3>
+            )}
             <Dropdown isOpen={isDropdownOpen} onClose={() => setIsDropdownOpen(false)}>
               <DropdownTrigger>
                 <div onClick={() => setIsDropdownOpen(!isDropdownOpen)} className='p-2 hover:bg-white/60 rounded-full'>
@@ -449,8 +496,8 @@ const Column = ({ column }: { column: IColumn }) => {
               </DropdownTrigger>
               <DropdownMenu aria-label='Static Actions'>
                 {listExpandColumnButton.map((item) => (
-                  <DropdownItem key={item.title} startContent={item.icon} onClick={item.handleAction}>
-                    {item.title}
+                  <DropdownItem key={item?.title} startContent={item?.icon} onClick={item?.handleAction}>
+                    {item?.title}
                   </DropdownItem>
                 ))}
               </DropdownMenu>
