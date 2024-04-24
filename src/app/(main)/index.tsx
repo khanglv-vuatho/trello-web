@@ -35,6 +35,8 @@ export const MainPage = () => {
       setBoardsInfo(data)
     } catch (error) {
       console.log(error)
+    } finally {
+      setOnFeching(false)
     }
   }
 
@@ -66,25 +68,33 @@ export const MainPage = () => {
           <div className=''>123</div>
           <div className='col-span-3'>
             <div className='flex flex-col gap-10'>
-              {listInfoBoards?.map((item) => {
-                if (!item.boards) return
-                return (
-                  <div key={item.title} className='flex flex-col gap-4'>
-                    <div className='flex justify-between items-center'>
-                      <div className='flex items-center gap-2'>
-                        {item.icon}
-                        <p>{item.title}</p>
+              {listInfoBoards?.length > 0 ? (
+                onFeching ? (
+                  <>Loading...</>
+                ) : (
+                  listInfoBoards?.map((item) => {
+                    if (!item.boards) return
+                    return (
+                      <div key={item.title} className='flex flex-col gap-4'>
+                        <div className='flex justify-between items-center'>
+                          <div className='flex items-center gap-2'>
+                            {item.icon}
+                            <p>{item.title}</p>
+                          </div>
+                          <p>{item?.boards?.length}/3</p>
+                        </div>
+                        <div className='grid grid-cols-4 gap-2 '>
+                          {item?.boards?.map((board) => (
+                            <BoardItem key={item.title} board={board} />
+                          ))}
+                        </div>
                       </div>
-                      <p>{item?.boards?.length}/3</p>
-                    </div>
-                    <div className='grid grid-cols-4 gap-2 '>
-                      {item?.boards?.map((board) => (
-                        <BoardItem key={item.title} board={board} />
-                      ))}
-                    </div>
-                  </div>
+                    )
+                  })
                 )
-              })}
+              ) : (
+                <></>
+              )}
             </div>
           </div>
         </div>
@@ -92,18 +102,38 @@ export const MainPage = () => {
     </div>
   )
 }
-
 const BoardItem = ({ board }: { board: Boards }) => {
   const [isStared, setIsStared] = useState<boolean>(board.isStared)
-  console.log({ board })
-  const _handleToggleStar = () => {
+  const [onSending, setOnSending] = useState<boolean>(false)
+  const _handleToggleStar = (e: any) => {
+    e.preventDefault()
+    setOnSending(true)
     setIsStared(!isStared)
   }
+  const handleToggleStartApi = async () => {
+    try {
+      await instance.put('/v1/boards/' + board._id, { isStared: !isStared })
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setOnSending(false)
+    }
+  }
+  useEffect(() => {
+    onSending && handleToggleStartApi()
+  }, [onSending])
+
   return (
-    <Link href={`/board/${board?._id}`} className='flex flex-col justify-between p-2 rounded-md bg-red-200 h-[100px] relative group overflow-hidden'>
+    <Link href={`/board/${board._id}`} className='group flex flex-col justify-between p-2 rounded-md bg-white/10 h-[100px] relative  overflow-hidden'>
       <p>{board.title}</p>
       <p>{board.description}</p>
-      <Button onPress={() => _handleToggleStar()} disableRipple isIconOnly className='p-0 bg-transparent absolute bottom-2 right-0 translate-x-[100%] duration-200 group-hover:-translate-x-2'>
+      <Button
+        as={'button'}
+        disableRipple
+        isDisabled={onSending}
+        onClick={_handleToggleStar}
+        className='p-0 bg-transparent absolute bottom-2 right-0 translate-x-[100%] duration-200 group-hover:-translate-x-2'
+      >
         <Star1 variant={isStared ? 'Bold' : 'Outline'} className={isStared ? 'text-yellow-500' : 'text-white'} />
       </Button>
     </Link>

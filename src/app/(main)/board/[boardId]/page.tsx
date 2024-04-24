@@ -3,7 +3,6 @@
 import { CircularProgress } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
 
-import Header from '@/(layout)/Header'
 import BoardBar from '@/components/BoardBar'
 import BoardContent from '@/components/BoardContent'
 import { useStoreBoard } from '@/store'

@@ -376,11 +376,11 @@ function BoardContent({ board }: TBoardContent) {
 const ListColumn = ({ columns }: { columns: IColumn[] }) => {
   const [titleColumn, setTitleColumn] = useState<string>('')
 
-  const columnsDndKit = columns.map((item) => item._id)
+  const columnsDndKit = columns?.map((item) => item._id)
   return (
     <SortableContext strategy={horizontalListSortingStrategy} items={columnsDndKit}>
       <div className='flex gap-4 p-2'>
-        {columns.map((column) => (
+        {columns?.map((column) => (
           <Column key={column._id} column={column} />
         ))}
         <CreateColumn value={titleColumn} setValue={setTitleColumn} />
@@ -419,11 +419,11 @@ const Column = ({ column }: { column: IColumn }) => {
       const cloneBoard: any = { ...board }
       cloneBoard.columnOrderIds = cloneBoard.columnOrderIds?.filter((columnId: string) => columnId !== column._id)
       cloneBoard.columns = cloneBoard.columns?.filter((item: IColumn) => item._id !== column._id)
+      storeBoard(cloneBoard)
 
       const data: any = await instance.delete(`v1/columns/${column._id}`)
 
       Toast({ message: data.deleteDefault, type: 'success' })
-      storeBoard(cloneBoard)
 
       onOpenChange()
     } catch (error) {

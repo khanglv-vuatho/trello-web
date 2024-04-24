@@ -1,4 +1,4 @@
-import { ICard } from '@/types'
+import { IBoard, ICard, IColumn } from '@/types'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Attachment as AttachmentIcon, Comment as CommentIcon, Group as GroupIcon } from '@mui/icons-material'
@@ -8,8 +8,16 @@ import { Trash } from 'iconsax-react'
 import Modal from '@/components/Modal'
 import instance from '@/services/axiosConfig'
 import Toast from '../Toast'
+import { useEffect, useState } from 'react'
+import { useStoreBoard } from '@/store'
 
 const CardContent = ({ card }: { card: ICard }) => {
+  const [onDeletingCard, setOnDeletingCard] = useState(false)
+
+  const { storeBoard } = useStoreBoard()
+
+  const board = useStoreBoard((state) => state.board)
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card._id,
     data: { ...card },
@@ -26,18 +34,41 @@ const CardContent = ({ card }: { card: ICard }) => {
 
   const shouldShowCardAction = () => !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
 
-  const hanleDeleteCard = async () => {
+  const handleDeleteCard = () => {
+    setOnDeletingCard(true)
+  }
+  const deleteCard = async () => {
+    const payload = { cardId: card._id, columnId: card.columnId }
+
     try {
-      await instance.post('/v1/cards/delete', {
-        cardId: card?._id,
-        columnId: card?.columnId,
-      })
-      Toast({ message: 'Delete Card Successful', type: 'success' })
+      const updatedBoard: any = { ...board }
+      const columnIndex = updatedBoard.columns.findIndex((column: IColumn) => column._id === card.columnId)
+
+      if (columnIndex !== -1) {
+        const column = updatedBoard.columns[columnIndex]
+
+        const cardIndex = column.cards.findIndex((item: ICard) => item._id === card._id)
+        column.cards.splice(cardIndex, 1)
+        column.cardOrderIds.splice(cardIndex, 1)
+
+        await instance.delete('/v1/cards/delete', { data: payload })
+        Toast({ message: 'Card deleted successfully', type: 'success' })
+
+        storeBoard(updatedBoard)
+      } else {
+        Toast({ message: 'Column not found', type: 'error' })
+      }
+    } catch {
+      Toast({ message: 'Failed to delete card', type: 'error' })
+    } finally {
+      setOnDeletingCard(false)
       onClose()
-    } catch (error) {
-      console.log(error)
     }
   }
+
+  useEffect(() => {
+    onDeletingCard && deleteCard()
+  }, [onDeletingCard])
 
   return (
     <div ref={setNodeRef} {...listeners} {...attributes}>
@@ -80,7 +111,7 @@ const CardContent = ({ card }: { card: ICard }) => {
         modalBody='Are you sure you want to delete this card?'
         modalFooter={
           <div className='flex items-center gap-2'>
-            <Button variant='light' color='danger' onClick={() => hanleDeleteCard()} className='py-3 px-6'>
+            <Button isLoading={onDeletingCard} variant='light' color='danger' onClick={() => handleDeleteCard()} className='py-3 px-6'>
               Delete
             </Button>
             <Button onClick={onOpenChange} className='bg-colorBoardContent text-white py-3 px-6'>
