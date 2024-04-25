@@ -46,8 +46,6 @@ function BoardContent({ board }: TBoardContent) {
   const [activeDragItemData, setActiveDragItemData] = useState<any>(null)
   const [oldCloumnWhenDraggingCard, setOldCloumnWhenDraggingCard] = useState<any>(null)
 
-  const [onSendingMoveCard, setOnSendingMoveCard] = useState<boolean>(false)
-
   const { storeBoard } = useStoreBoard()
 
   const mouseSensor = useSensor(PointerSensor, {
@@ -251,8 +249,6 @@ function BoardContent({ board }: TBoardContent) {
       await instance.put('/v1/boards/supports/moving_card', payload)
     } catch (error) {
       console.log(error)
-    } finally {
-      setOnSendingMoveCard(false)
     }
   }
 
@@ -366,7 +362,13 @@ function BoardContent({ board }: TBoardContent) {
       <DndContext collisionDetection={collisionDetectionStrategy as any} onDragStart={_handleDragStart} onDragEnd={_handleDragEnd} sensors={sensors} onDragOver={_handleDragOver}>
         <ListColumn columns={orderedColumns} />
         <DragOverlay dropAnimation={dropAnimation}>
-          {activeItemDragStart?.id && activeItemType === 'ACTIVE_ITEM_COLUMN' ? <Column column={activeDragItemData} /> : <CardContent card={activeDragItemData} />}
+          {activeItemDragStart?.id && activeItemType === 'ACTIVE_ITEM_COLUMN' ? (
+            <Column column={activeDragItemData} />
+          ) : (
+            <div className='rotate-2'>
+              <CardContent card={activeDragItemData} />
+            </div>
+          )}
         </DragOverlay>
       </DndContext>
     </div>
@@ -400,15 +402,15 @@ const Column = ({ column }: { column: IColumn }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   const listExpandColumnButton = [
-    { title: 'Delete Column', icon: <Trash />, handleAction: () => onOpen() },
-    { title: 'Add new card ', icon: <CardAdd />, handleAction: () => console.log('Add new card') },
-    {
-      title: 'Rename column',
-      icon: <Edit />,
-      handleAction: () => {
-        setOnFixTitleColumn(!onFixTitleColumn)
-      },
-    },
+    { title: 'Delete Column', icon: <Trash color='red' />, handleAction: () => onOpen() },
+    // { title: 'Add new card ', icon: <CardAdd />, handleAction: () => console.log('Add new card') },
+    // {
+    //   title: 'Rename column',
+    //   icon: <Edit />,
+    //   handleAction: () => {
+    //     setOnFixTitleColumn(!onFixTitleColumn)
+    //   },
+    // },
   ]
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -441,7 +443,13 @@ const Column = ({ column }: { column: IColumn }) => {
   }
 
   const handleRenameColumn = async () => {
-    if (valueTitleColumn === column.title) return setOnFixTitleColumn(!onFixTitleColumn)
+    if (valueTitleColumn === column.title || !valueTitleColumn) return setOnFixTitleColumn(!onFixTitleColumn)
+
+    if (valueTitleColumn?.length <= 3 || valueTitleColumn?.length > 50) {
+      Toast({ message: 'Column name must be at least 4 and max 50 characters', type: 'error' })
+      return setOnFixTitleColumn(!onFixTitleColumn)
+    }
+
     try {
       const cloneBoard: any = { ...board }
 

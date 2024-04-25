@@ -37,7 +37,8 @@ function Header() {
     title: '',
     description: '',
   }
-  const [infoNewColumn, setInfoNewColumn] = useState<TInitalState>(initalState)
+
+  const [infoNewBoard, setInfoNewBoard] = useState<TInitalState>(initalState)
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
 
   const inputRef = useRef<any>(null)
@@ -97,15 +98,21 @@ function Header() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
 
-    setInfoNewColumn({ ...infoNewColumn, [name]: value })
+    setInfoNewBoard({ ...infoNewBoard, [name]: value })
   }
 
-  const handleCreateNewColumn = async () => {
+  const handleCreateNewBoard = async () => {
+    if (infoNewBoard.title.length <= 3 || infoNewBoard.title.length > 50 || infoNewBoard.description.length <= 3 || infoNewBoard.description.length > 50) {
+      Toast({ message: 'Board name and description must be at least 4 and max 50 characters', type: 'error' })
+    }
+
     try {
-      const payload = { ...infoNewColumn, type: 'public', ownerId: userInfo?.email }
+      const payload = { ...infoNewBoard, type: 'public', ownerId: userInfo?.email }
       const data: any = await instance.post('/v1/boards', payload)
 
       Toast({ message: 'Create Board Successful', type: 'success' })
+
+      setInfoNewBoard({ ...initalState })
       router.push(`/board/${data?._id}`)
       onClose()
     } catch (error) {
@@ -145,7 +152,7 @@ function Header() {
   }
 
   useEffect(() => {
-    onSending && handleCreateNewColumn()
+    onSending && handleCreateNewBoard()
   }, [onSending])
 
   useEffect(() => {
@@ -211,8 +218,8 @@ function Header() {
       <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        modalTitle='Create new column'
-        modalBody={<ModalBodyCreateNewColumn handleChange={handleChange} initalState={initalState} infoNewColumn={infoNewColumn} />}
+        modalTitle='Create new board'
+        modalBody={<ModalBodyCreateNewBoard handleChange={handleChange} initalState={initalState} infoNewBoard={infoNewBoard} />}
         modalFooter={
           <div className='flex items-center gap-2'>
             <Button variant='light' color='default' onClick={onOpenChange} className='py-3 px-6'>
@@ -228,14 +235,14 @@ function Header() {
   )
 }
 
-type TModalBodyCreateNewColumn = {
+type TModalBodyCreateNewBoard = {
   initalState: TInitalState
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  infoNewColumn: {
+  infoNewBoard: {
     [key: string]: string
   }
 }
-const ModalBodyCreateNewColumn = ({ initalState, handleChange, infoNewColumn }: TModalBodyCreateNewColumn) => {
+const ModalBodyCreateNewBoard = ({ initalState, handleChange, infoNewBoard }: TModalBodyCreateNewBoard) => {
   return (
     <div className='flex flex-col gap-4'>
       {Object.keys(initalState).map((key) => (
@@ -243,7 +250,7 @@ const ModalBodyCreateNewColumn = ({ initalState, handleChange, infoNewColumn }: 
           <label>
             {key} <span className='text-red-700'>*</span>
           </label>
-          <Input name={key} value={infoNewColumn[key]} placeholder={`Enter ${key}`} onChange={handleChange} isRequired type='text' />
+          <Input name={key} value={infoNewBoard[key]} placeholder={`Enter ${key}`} onChange={handleChange} isRequired type='text' />
         </div>
       ))}
     </div>

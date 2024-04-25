@@ -13,7 +13,6 @@ import { useStoreBoard } from '@/store'
 
 const CardContent = ({ card }: { card: ICard }) => {
   const [onDeletingCard, setOnDeletingCard] = useState(false)
-  const [cardTitle, setCardTitle] = useState<string>('')
 
   const [onFixTitleCard, setOnFixTitleCard] = useState<boolean>(false)
 
@@ -71,8 +70,14 @@ const CardContent = ({ card }: { card: ICard }) => {
   }
 
   const handleRenameCard = async () => {
-    if (valueTitleCard === card?.title) return
-    const payload = { cardId: card._id, columnId: card.columnId, title: valueTitleCard }
+    if (valueTitleCard === card?.title || valueTitleCard === '') return setOnFixTitleCard(false)
+
+    if (valueTitleCard?.length <= 3 || valueTitleCard?.length > 50) {
+      Toast({ message: 'Card name must be at least 4 and max 50 characters', type: 'error' })
+      return setOnFixTitleCard(false)
+    }
+
+    const payload = { columnId: card.columnId, title: valueTitleCard }
 
     try {
       const updatedBoard: any = { ...board }
@@ -86,7 +91,7 @@ const CardContent = ({ card }: { card: ICard }) => {
 
       storeBoard(updatedBoard)
 
-      await instance.put('/v1/cards/rename', payload)
+      await instance.put(`/v1/cards/rename/${card._id}`, payload)
       Toast({ message: 'Card renamed successfully', type: 'success' })
     } catch {
       Toast({ message: 'Failed to rename card', type: 'error' })

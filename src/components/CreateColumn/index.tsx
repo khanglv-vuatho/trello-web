@@ -34,6 +34,11 @@ const CreateColumn = ({ value, setValue }: TCreateColumn) => {
     }
   }
   const handleSendingColumn = async () => {
+    if (value.length <= 3 || value.length > 50) {
+      Toast({ message: 'Column name must be at least 4 and max 50 characters', type: 'error' })
+      return setIsCreateNewColumn(false)
+    }
+
     try {
       await createNewColumn(board as IBoard, value)
 
@@ -55,14 +60,7 @@ const CreateColumn = ({ value, setValue }: TCreateColumn) => {
     <div>
       {isCreateNewColumn ? (
         <div className='flex flex-col gap-2 bg-white/10 p-2 rounded-lg w-[300px]'>
-          <Input
-            autoFocus
-            value={value}
-            onChange={handleInputChange}
-            // classNames={{ inputWrapper: 'group-data-[focus=true]:border-white data-[hover=true]:border-white', mainWrapper: 'border-white', input: 'placeholder:text-white text-white' }}
-            // variant='bordered'
-            placeholder='Enter card title'
-          />
+          <Input autoFocus value={value} onChange={handleInputChange} placeholder='Enter column title' />
           <div className='flex items-center gap-2'>
             <AddButton onClick={handleAddColumn}>Add column</AddButton>
             <CloseButton onClick={handleToggleCreateNewColumn} />

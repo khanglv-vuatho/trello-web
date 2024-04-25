@@ -3,6 +3,7 @@ import type { Config } from 'tailwindcss'
 
 export const HEADER_HEIGHT = '70px'
 export const BOARDBAR_HEIGHT = '80px'
+export const BOARDCONTAINER_HEIGHT = `calc(100vh - ${HEADER_HEIGHT})`
 export const BOARDCONTENT_HEIGHT = `calc(100vh - (${HEADER_HEIGHT} + ${BOARDBAR_HEIGHT}))`
 export const CLOUMN_HEIGHT = `calc(${BOARDCONTENT_HEIGHT} - 116px)`
 
@@ -20,6 +21,7 @@ const config: Config = {
       boardBar: BOARDBAR_HEIGHT,
       boardContent: BOARDCONTENT_HEIGHT,
       column: CLOUMN_HEIGHT,
+      boardContainer: BOARDCONTAINER_HEIGHT,
     },
   },
   darkMode: 'class',

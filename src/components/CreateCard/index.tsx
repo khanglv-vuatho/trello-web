@@ -22,7 +22,11 @@ const CreateCard = ({ column, value, setValue }: TCreateCard) => {
     setValue(e.target.value)
   }
 
-  const handleAddColumn: () => void = async () => {
+  const handleAddCard: () => void = async () => {
+    if (value?.length <= 3 || value?.length > 50) {
+      Toast({ message: 'card name must be at least 4 and max 50 characters', type: 'error' })
+      return setIsCreateNewCard(false)
+    }
     if (value === '') {
       Toast({ message: 'Enter card title', type: 'error' })
     } else {
@@ -49,7 +53,7 @@ const CreateCard = ({ column, value, setValue }: TCreateCard) => {
               value={value}
               onChange={handleInputChange}
             />
-            <AddButton onPress={handleAddColumn}>Add</AddButton>
+            <AddButton onPress={handleAddCard}>Add</AddButton>
             <CloseButton onPress={handleToggleCreateNewCard} />
           </div>
         ) : (

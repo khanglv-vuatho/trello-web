@@ -14,7 +14,7 @@ type TToast = {
 const Toast = ({ message, autoClose, hideProgressBar, closeOnClick, pauseOnHover, draggable, type, ...props }: TToast) => {
   toast(message, {
     position: 'top-right',
-    autoClose: autoClose || 2000,
+    autoClose: autoClose || 3000,
     hideProgressBar: hideProgressBar || false,
     closeOnClick: closeOnClick || true,
     pauseOnHover: pauseOnHover || true,

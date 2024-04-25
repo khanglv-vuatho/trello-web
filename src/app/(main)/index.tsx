@@ -3,8 +3,8 @@
 import instance from '@/services/axiosConfig'
 import { useStoreUser } from '@/store'
 import { IBoard } from '@/types'
-import { Button } from '@nextui-org/react'
-import { Clock, Star1 } from 'iconsax-react'
+import { Button, Skeleton } from '@nextui-org/react'
+import { Clock, MoreCircle, Star1 } from 'iconsax-react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 
@@ -27,6 +27,7 @@ type TBoardsInfo = {
 export const MainPage = () => {
   const [onFeching, setOnFeching] = useState<boolean>(false)
   const [boardsInfo, setBoardsInfo] = useState<TBoardsInfo>()
+
   const { userInfo } = useStoreUser()
   const handleGetMe = async () => {
     try {
@@ -63,35 +64,35 @@ export const MainPage = () => {
 
   return (
     <div className='bg-colorBoardContent text-white'>
-      <div className='ct-container py-10 '>
+      <div className='ct-container py-10 h-boardContainer'>
         <div className='grid grid-cols-4'>
           <div className=''>123</div>
           <div className='col-span-3'>
             <div className='flex flex-col gap-10'>
               {listInfoBoards?.length > 0 ? (
-                onFeching ? (
-                  <>Loading...</>
-                ) : (
-                  listInfoBoards?.map((item) => {
-                    if (!item.boards) return
-                    return (
-                      <div key={item.title} className='flex flex-col gap-4'>
-                        <div className='flex justify-between items-center'>
-                          <div className='flex items-center gap-2'>
-                            {item.icon}
-                            <p>{item.title}</p>
-                          </div>
-                          <p>{item?.boards?.length}/3</p>
+                listInfoBoards?.map((item) => {
+                  if (!item.boards) return
+                  return (
+                    <div key={item.title} className='flex flex-col gap-4'>
+                      <div className='flex justify-between items-center'>
+                        <div className='flex items-center gap-2'>
+                          {item.icon}
+                          <p>{item.title}</p>
                         </div>
-                        <div className='grid grid-cols-4 gap-2 '>
+                        <p>{item?.boards?.length}/5</p>
+                      </div>
+                      {onFeching ? (
+                        <Skeleton className='w-[200px] before:border-0 before:via-white/20 h-[100px] rounded-[4px] bg-white/10' />
+                      ) : (
+                        <div className='flex gap-2 w-full overflow-auto pb-2'>
                           {item?.boards?.map((board) => (
                             <BoardItem key={item.title} board={board} />
                           ))}
                         </div>
-                      </div>
-                    )
-                  })
-                )
+                      )}
+                    </div>
+                  )
+                })
               ) : (
                 <></>
               )}
@@ -124,15 +125,25 @@ const BoardItem = ({ board }: { board: Boards }) => {
   }, [onSending])
 
   return (
-    <Link href={`/board/${board._id}`} className='group flex flex-col justify-between p-2 rounded-md bg-white/10 h-[100px] relative  overflow-hidden'>
-      <p>{board.title}</p>
-      <p>{board.description}</p>
+    <Link href={`/board/${board._id}`} className='min-w-[200px] group flex flex-col justify-between p-2 rounded-md bg-white/10 h-[100px] relative overflow-hidden'>
+      <p className='line-clamp-1 max-w-[140px]'>{board.title}</p>
+      <p className='line-clamp-1 max-w-[140px]'>{board.description}</p>
       <Button
         as={'button'}
         disableRipple
         isDisabled={onSending}
         onClick={_handleToggleStar}
-        className='p-0 bg-transparent absolute bottom-2 right-0 translate-x-[100%] duration-200 group-hover:-translate-x-2'
+        className='p-0 bg-transparent absolute top-2 right-0 translate-x-[100%] duration-200 group-hover:translate-x-[10px]'
+      >
+        {/* dots icon */}
+        <MoreCircle variant={isStared ? 'Bold' : 'Outline'} className={isStared ? 'text-yellow-500' : 'text-white'} />
+      </Button>
+      <Button
+        as={'button'}
+        disableRipple
+        isDisabled={onSending}
+        onClick={_handleToggleStar}
+        className='p-0 bg-transparent absolute bottom-2 right-0 translate-x-[100%] duration-200 group-hover:translate-x-[10px]'
       >
         <Star1 variant={isStared ? 'Bold' : 'Outline'} className={isStared ? 'text-yellow-500' : 'text-white'} />
       </Button>

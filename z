@@ -1,11 +1,27 @@
+rename card => done
+rename board => done
+animation card rotate is dragging => done
+
+check limit create board
+dragging card close create card 
+
 delete board
-rename card 
-rename board 
-animation card rotate is dragging
+xoá description của board
+recent
+render stared
+reponsive
+update UI 
+
+
+
+
+
+delete board
+xoá description của board
 check limit create board
 recent
-stared
-reponsive 
+render stared
+reponsive
 update UI 
 
 
