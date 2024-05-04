@@ -1,7 +1,11 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Providers from '@/components/Providers'
-import Header from '@/(layout)/Header'
+import dynamic from 'next/dynamic'
+
+const HeaderDynamic = dynamic(() => import('../../(layout)/Header'), {
+  ssr: false,
+})
 
 export const metadata: Metadata = {
   title: 'Trello vika',
@@ -13,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html>
       <body>
         <Providers>
-          <Header />
+          <HeaderDynamic />
           <>{children}</>
         </Providers>
       </body>

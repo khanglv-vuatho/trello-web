@@ -1,9 +1,7 @@
 'use client'
+
 import ImageFallback from '@/components/ImageFallback'
 import Toast from '@/components/Toast'
-import instance from '@/services/axiosConfig'
-import { useStoreUser } from '@/store'
-import { TUserInfo } from '@/types'
 import { Button } from '@nextui-org/react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useRouter } from 'next/navigation'
@@ -30,6 +28,7 @@ const Login = () => {
       })
     },
   })
+
   return (
     <div className='relative w-full min-h-screen max-h-dvh flex items-center justify-center'>
       <ImageFallback src={'/login/background.png'} alt='background' height={4000} width={4000} className='absolute inset-0 object-cover -z-10 max-h-dvh' />

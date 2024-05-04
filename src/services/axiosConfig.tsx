@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios'
 
 const apiConfig = {
-  baseUrl: process.env.NEXT_PUBLIC_API_URL,
+  baseUrl: `${process.env.NEXT_PUBLIC_API_URL}`,
 }
 
 const instance = axios.create({
@@ -12,7 +12,7 @@ const instance = axios.create({
 const urlExceptAuthorization = ['Authenticate']
 
 const authorization = async () => {
-  const token = localStorage?.getItem('access_token')
+  const token = localStorage.getItem('access_token')
 
   if (token) {
     return { Authorization: 'Bearer ' + token }
@@ -46,6 +46,7 @@ instance.interceptors.request.use(
     }
     return config
   },
+
   (error: any) => Promise.reject(error),
 )
 
@@ -61,7 +62,6 @@ instance.interceptors.response.use(
   (error: any) => {
     if (process.env.NODE_ENV !== 'production') {
       if (error?.response) {
-        console.log(error)
         console.log('====== Server Error =====')
       } else if (error?.request) {
         console.log('====== Timeout =====')

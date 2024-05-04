@@ -11,7 +11,8 @@ function Providers({ children }: { children: React.ReactNode }) {
   return (
     <NextUIProvider>
       <NextThemesProvider attribute='class' defaultTheme='light'>
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID as string}>{children}</GoogleOAuthProvider>
+        {children}
+
         <ToastContainer />
       </NextThemesProvider>
     </NextUIProvider>
