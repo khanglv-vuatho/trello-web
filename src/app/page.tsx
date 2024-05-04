@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { MainPage } from './index'
+import { MainPage } from '.'
 
 const Page = () => {
   const token = localStorage?.getItem('access_token')
