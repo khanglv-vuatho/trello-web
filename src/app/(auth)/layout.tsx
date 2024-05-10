@@ -11,7 +11,7 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
   return (
     <html>
       <body>
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID as string}>{children}</GoogleOAuthProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string}>{children}</GoogleOAuthProvider>
       </body>
     </html>
   )
