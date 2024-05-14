@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
-      <GoogleTagManager gtmId='G-M7CBSRN0W9' />
+      <GoogleTagManager gtmId='G-06FGH3XJJZ' />
 
       <meta name='google-adsense-account' content='ca-pub-8862200387332284' />
 
