@@ -20,9 +20,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html>
       <GoogleTagManager gtmId='G-06FGH3XJJZ' />
-      <Script src='https://alwingulla.com/88/tag.min.js' data-zone='65681' async data-cfasync='false'></Script>
-
-      <Script async data-cfasync='false' src='thubanoa.com/1?z=7480785'></Script>
+      <script src='https://alwingulla.com/88/tag.min.js' data-zone='65681' async data-cfasync='false'></script>
+      <script async data-cfasync='false' src='thubanoa.com/1?z=7480785'></script>
       <meta name='google-adsense-account' content='ca-pub-8862200387332284' />
       <meta name='monetag' content='bf1b32bb19ba22d925d491d8d77913fa' />
       <body>
