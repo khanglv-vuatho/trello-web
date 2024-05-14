@@ -19,9 +19,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html>
       <GoogleTagManager gtmId='G-M7CBSRN0W9' />
-      <Head>
-        <AdSense pId={process.env.NEXT_PUBLIC_ADSENSE?.toString() || ''} />
-      </Head>
+
+      <meta name='google-adsense-account' content='ca-pub-8862200387332284' />
+
       <body>
         <Providers>
           <HeaderDynamic />
