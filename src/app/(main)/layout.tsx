@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { GoogleTagManager } from '@next/third-parties/google'
 import Head from 'next/head'
 import AdSense from '@/AdsSense'
+import Script from 'next/script'
 
 const HeaderDynamic = dynamic(() => import('../../(layout)/Header'), {
   ssr: false,
@@ -19,9 +20,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html>
       <GoogleTagManager gtmId='G-06FGH3XJJZ' />
+      <Script src='https://alwingulla.com/88/tag.min.js' data-zone='65681' async data-cfasync='false'></Script>
 
       <meta name='google-adsense-account' content='ca-pub-8862200387332284' />
-
+      <meta name='monetag' content='bf1b32bb19ba22d925d491d8d77913fa' />
       <body>
         <Providers>
           <HeaderDynamic />
