@@ -21,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <Head>
         <meta name='monetag' content='bf1b32bb19ba22d925d491d8d77913fa' />
       </Head>
+      <meta name='monetag' content='bf1b32bb19ba22d925d491d8d77913fa' />
       <body>
         <Providers>
           <HeaderDynamic />
