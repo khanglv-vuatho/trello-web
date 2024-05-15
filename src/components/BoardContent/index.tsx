@@ -38,6 +38,7 @@ import Toast from '../Toast'
 
 type TBoardContent = { board: IBoard }
 function BoardContent({ board }: TBoardContent) {
+  console.log({ board })
   const [orderedColumns, setOrderedColumns] = useState<any[]>([])
 
   const [activeDragItemId, setActiveDragItemId] = useState<any>(null)
@@ -237,6 +238,8 @@ function BoardContent({ board }: TBoardContent) {
 
     if (prevCardOrderIds[0]?.includes('placeholder-card')) prevCardOrderIds = []
 
+    let nextCardOrderIds: any = dndOrderedColumns.find((c) => c._id === nextColumnId)?.cardOrderIds || []
+
     const payload = {
       currentCardId,
       prevColumnId,
@@ -246,10 +249,12 @@ function BoardContent({ board }: TBoardContent) {
     }
 
     try {
-      await instance.put('/v1/boards/supports/moving_card', payload)
+      const data = await instance.put('/v1/boards/supports/moving_card', payload)
+      console.log(data)
     } catch (error) {
       console.log(error)
     }
+    console.log({ cloneBoard })
   }
 
   const _handleDragStart = (e: any) => {
