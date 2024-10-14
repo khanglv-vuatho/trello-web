@@ -2,9 +2,10 @@ rename card => done
 rename board => done
 dragging card bug
 animation card rotate is dragging => done
-
+middleware login => done
 
 //core
+update UI boardBar (update button)
 update layout root (header)
 loading for board/id page
 update UI name of board in board/id page
@@ -15,6 +16,7 @@ filter board
 show real member in board/id page
 detail of card (show in drawer)
 crud detail of card
+profile
 
 //optimize 
 split code to component

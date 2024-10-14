@@ -1,10 +1,10 @@
 'use client'
 
 import { GoogleIcon } from '@/components/Icons'
-import ImageFallback from '@/components/ImageFallback'
 import Toast from '@/components/Toast'
 import { Button } from '@nextui-org/react'
 import { useGoogleLogin } from '@react-oauth/google'
+import { setCookie } from 'cookies-next'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -18,9 +18,7 @@ const Login = () => {
     onSuccess: async (tokenResponse) => {
       if (tokenResponse) {
         setIsLoading(true)
-        console.log(tokenResponse)
-        localStorage.setItem('access_token', tokenResponse.access_token)
-
+        setCookie('access_token', tokenResponse.access_token)
         Toast({
           message: 'Login Successful',
           type: 'success',

@@ -16,6 +16,7 @@ import instance from '@/services/axiosConfig'
 import { useStoreUser } from '@/store'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { deleteCookie, getCookie } from 'cookies-next'
 
 type TInitalState = { title: string; description: string }
 
@@ -132,16 +133,16 @@ function Header() {
     }
   }, [onSearching])
 
-  const token = localStorage?.getItem('access_token')
-
+  const token = getCookie('access_token')
+  console.log({ token })
   const handleFetchingUser = async () => {
     try {
       const dataUser: any = await instance.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${token}`)
       storeUser(dataUser)
     } catch (error) {
       if (error) {
-        Toast({ message: 'Login Failed', type: 'error' })
-        localStorage.removeItem('access_token')
+        Toast({ message: 'Login Failed123', type: 'error' })
+        deleteCookie('access_token')
         router.push('/login')
       }
       console.log(error)
@@ -263,7 +264,7 @@ const ContentUser = () => {
   const userInfo = useStoreUser((state) => state.userInfo)
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token')
+    deleteCookie('access_token')
     googleLogout()
 
     router.push('/login')

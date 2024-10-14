@@ -1,5 +1,6 @@
 'use client'
 
+import Drawer from '@/components/Drawer'
 import instance from '@/services/axiosConfig'
 import { useStoreUser } from '@/store'
 import { Button, Skeleton } from '@nextui-org/react'
@@ -26,7 +27,7 @@ type TBoardsInfo = {
 export const MainPage = () => {
   const [onFeching, setOnFeching] = useState<boolean>(false)
   const [boardsInfo, setBoardsInfo] = useState<TBoardsInfo>()
-
+  const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false)
   const { userInfo } = useStoreUser()
   const handleGetMe = async () => {
     try {
@@ -61,11 +62,19 @@ export const MainPage = () => {
     },
   ]
 
+  const handleToggleDrawer = () => {
+    setIsOpenDrawer(!isOpenDrawer)
+  }
+
   return (
     <div className='bg-colorBoardContent text-white'>
+      <Drawer isOpen={isOpenDrawer} onClose={handleToggleDrawer}>
+        <div className='p-4'>123</div>
+      </Drawer>
       <div className='ct-container py-10 h-boardContainer'>
         <div className='grid grid-cols-4'>
           <Button>Boards</Button>
+          <div onClick={handleToggleDrawer}>123</div>
           <div className='col-span-3'>
             <div className='flex flex-col gap-10'>
               {listInfoBoards?.length > 0 ? (
