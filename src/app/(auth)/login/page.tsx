@@ -1,27 +1,36 @@
 'use client'
 
+import { GoogleIcon } from '@/components/Icons'
 import ImageFallback from '@/components/ImageFallback'
 import Toast from '@/components/Toast'
 import { Button } from '@nextui-org/react'
 import { useGoogleLogin } from '@react-oauth/google'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 const Login = () => {
+  const [isLoading, setIsLoading] = useState(false)
+
   const router = useRouter()
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       if (tokenResponse) {
+        setIsLoading(true)
+        console.log(tokenResponse)
         localStorage.setItem('access_token', tokenResponse.access_token)
 
         Toast({
           message: 'Login Successful',
           type: 'success',
         })
+
         router.push('/')
       }
     },
     onError: () => {
+      setIsLoading(false)
       Toast({
         message: 'Login Failed',
         type: 'error',
@@ -29,15 +38,33 @@ const Login = () => {
     },
   })
 
+  const handleLogin = () => {
+    setIsLoading(true)
+    login()
+  }
   return (
-    <div className='relative w-full min-h-screen max-h-dvh flex items-center justify-center'>
-      <ImageFallback src={'/login/background.png'} alt='background' height={4000} width={4000} className='absolute inset-0 object-cover -z-10 max-h-dvh' />
-      <form className='flex min-w-[400px] flex-col gap-6 items-center justify-center bg-transparent border-1 border-white py-10 px-4 rounded-2xl shadow-lg backdrop-blur-sm'>
-        <h1 className='text-white text-4xl'>Login</h1>
-        <Button className='py-2 w-full text-lg' onClick={() => login()}>
-          Sign in with Google 🚀
-        </Button>
-      </form>
+    <div className='flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-purple-700 via-indigo-800 to-blue-900 p-4'>
+      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className='relative w-full max-w-md'>
+        {/* Animated background shapes */}
+
+        {/* Main content */}
+        <motion.div
+          className='relative rounded-3xl border border-white border-opacity-20 bg-white bg-opacity-10 p-8 shadow-2xl backdrop-blur-lg backdrop-filter'
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+        >
+          <motion.div className='mb-8 text-center' initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3, duration: 0.3 }}>
+            <h2 className='mb-2 text-4xl font-extrabold text-white'>Welcome</h2>
+            <p className='text-lg text-gray-300'>Sign in to continue</p>
+          </motion.div>
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4, duration: 0.3 }}>
+            <Button startContent={<GoogleIcon />} onClick={handleLogin} className='w-full rounded-2xl bg-white py-4'>
+              {isLoading ? 'Signing in...' : 'Sign in with Google'}
+            </Button>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </div>
   )
 }

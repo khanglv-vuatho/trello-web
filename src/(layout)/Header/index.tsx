@@ -1,22 +1,21 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
 import { googleLogout } from '@react-oauth/google'
+import React, { useEffect, useRef, useState } from 'react'
 
-import { Apps as AppsIcon, NotificationsNoneOutlined as NotificationsIcon, HelpOutlineOutlined as HelpIcon } from '@mui/icons-material'
+import { Apps as AppsIcon, HelpOutlineOutlined as HelpIcon, NotificationsNoneOutlined as NotificationsIcon } from '@mui/icons-material'
 import { Avatar, Badge, Button, Input, useDisclosure } from '@nextui-org/react'
 import { Add, ArrowDown2, SearchNormal1, Trello } from 'iconsax-react'
 
 import ExpandButton from '@/components/ExpandButton'
 import { LoadingSearch } from '@/components/Icons'
-import Modal from '@/components/Modal'
-import instance from '@/services/axiosConfig'
-import Toast from '@/components/Toast'
-import { useRouter } from 'next/navigation'
 import ImageFallback from '@/components/ImageFallback'
-import { TUserInfo } from '@/types'
+import Modal from '@/components/Modal'
+import Toast from '@/components/Toast'
+import instance from '@/services/axiosConfig'
 import { useStoreUser } from '@/store'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 type TInitalState = { title: string; description: string }
 
@@ -152,16 +151,16 @@ function Header() {
   }
 
   useEffect(() => {
-    onSending && handleCreateNewBoard()
-  }, [onSending])
-
-  useEffect(() => {
     onFetching && handleFetchingUser()
   }, [onFetching])
 
   useEffect(() => {
     setOnFetching(true)
   }, [])
+
+  useEffect(() => {
+    onSending && handleCreateNewBoard()
+  }, [onSending])
 
   return (
     <header className='flex items-center justify-between px-4 h-header bg-colorHeader text-primary overflow-x-auto gap-5'>
@@ -242,6 +241,7 @@ type TModalBodyCreateNewBoard = {
     [key: string]: string
   }
 }
+
 const ModalBodyCreateNewBoard = ({ initalState, handleChange, infoNewBoard }: TModalBodyCreateNewBoard) => {
   return (
     <div className='flex flex-col gap-4'>

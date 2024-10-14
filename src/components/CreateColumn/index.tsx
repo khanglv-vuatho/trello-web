@@ -26,12 +26,8 @@ const CreateColumn = ({ value, setValue }: TCreateColumn) => {
   }
 
   const handleAddColumn: () => void = async () => {
-    if (value === '') {
-      Toast({ message: 'Enter column title', type: 'error' })
-      return
-    } else {
-      setOnSending(true)
-    }
+    if (value === '') return Toast({ message: 'Enter column title', type: 'error' })
+    setOnSending(true)
   }
   const handleSendingColumn = async () => {
     if (value.length <= 3 || value.length > 50) {
@@ -60,7 +56,17 @@ const CreateColumn = ({ value, setValue }: TCreateColumn) => {
     <div>
       {isCreateNewColumn ? (
         <div className='flex flex-col gap-2 bg-white/10 p-2 rounded-lg w-[300px]'>
-          <Input autoFocus value={value} onChange={handleInputChange} placeholder='Enter column title' />
+          <Input
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleAddColumn()
+              }
+            }}
+            autoFocus
+            value={value}
+            onChange={handleInputChange}
+            placeholder='Enter column title'
+          />
           <div className='flex items-center gap-2'>
             <AddButton onClick={handleAddColumn}>Add column</AddButton>
             <CloseButton onClick={handleToggleCreateNewColumn} />

@@ -6,7 +6,7 @@ import { AddToDrive as AddToDriveIcon, Dashboard as DashboardIcon, VpnLock as Vp
 import ExpandButton from '@/components/ExpandButton'
 import { IBoard } from '@/types'
 import { capitalizeFirstLetter } from '@/utils'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import instance from '@/services/axiosConfig'
 import Toast from '../Toast'
 import { useStoreBoard } from '@/store'
@@ -110,4 +110,4 @@ function BoardBar({ board }: { board: IBoard }) {
   )
 }
 
-export default BoardBar
+export default memo(BoardBar)

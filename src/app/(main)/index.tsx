@@ -2,7 +2,6 @@
 
 import instance from '@/services/axiosConfig'
 import { useStoreUser } from '@/store'
-import { IBoard } from '@/types'
 import { Button, Skeleton } from '@nextui-org/react'
 import { Clock, MoreCircle, Star1 } from 'iconsax-react'
 import Link from 'next/link'
@@ -66,7 +65,7 @@ export const MainPage = () => {
     <div className='bg-colorBoardContent text-white'>
       <div className='ct-container py-10 h-boardContainer'>
         <div className='grid grid-cols-4'>
-          <div className=''>123</div>
+          <Button>Boards</Button>
           <div className='col-span-3'>
             <div className='flex flex-col gap-10'>
               {listInfoBoards?.length > 0 ? (
@@ -103,6 +102,7 @@ export const MainPage = () => {
     </div>
   )
 }
+
 const BoardItem = ({ board }: { board: Boards }) => {
   const [isStared, setIsStared] = useState<boolean>(board.isStared)
   const [onSending, setOnSending] = useState<boolean>(false)

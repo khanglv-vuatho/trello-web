@@ -16,7 +16,7 @@ import {
 import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 import { generatePlaceholderCard } from '@/utils'
 import ExpandButton from '../ExpandButton'
@@ -80,7 +80,7 @@ function BoardContent({ board }: TBoardContent) {
 
   const collisionDetectionStrategy = useCallback(
     (args: any) => {
-      if (activeItemType === 'ACTIVE_ITEM_COLUMN') {
+      if (activeItemType === ITEM_TYPE.COLUMN) {
         const pointerCollisions = pointerWithin(args)
 
         // Collision detection algorithms return an array of collisions
@@ -270,7 +270,7 @@ function BoardContent({ board }: TBoardContent) {
   }
 
   const _handleDragOver = (e: any) => {
-    if (activeItemType === 'ACTIVE_ITEM_COLUMN') return
+    if (activeItemType === ITEM_TYPE.COLUMN) return
 
     const { active, over } = e
     if (!active || !over) return
@@ -337,7 +337,7 @@ function BoardContent({ board }: TBoardContent) {
     }
 
     //drag and drop column action
-    if (activeItemType === 'ACTIVE_ITEM_COLUMN') {
+    if (activeItemType === ITEM_TYPE.COLUMN) {
       if (active.id !== over.id) {
         const oldColumnIndex = orderedColumns.findIndex((item) => item._id === active.id)
         const newColumnIndex = orderedColumns.findIndex((item) => item._id === over.id)
@@ -367,7 +367,7 @@ function BoardContent({ board }: TBoardContent) {
       <DndContext collisionDetection={collisionDetectionStrategy as any} onDragStart={_handleDragStart} onDragEnd={_handleDragEnd} sensors={sensors} onDragOver={_handleDragOver}>
         <ListColumn columns={orderedColumns} />
         <DragOverlay dropAnimation={dropAnimation}>
-          {activeItemDragStart?.id && activeItemType === 'ACTIVE_ITEM_COLUMN' ? (
+          {activeItemDragStart?.id && activeItemType === ITEM_TYPE.COLUMN ? (
             <Column column={activeDragItemData} />
           ) : (
             <div className='rotate-2'>
@@ -557,4 +557,4 @@ const ListCard = ({ cards }: { cards: ICard[] }) => {
   )
 }
 
-export default BoardContent
+export default memo(BoardContent)

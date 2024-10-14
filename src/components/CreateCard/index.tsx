@@ -44,6 +44,11 @@ const CreateCard = ({ column, value, setValue }: TCreateCard) => {
           <div className='flex items-center gap-2'>
             <Input
               autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleAddCard()
+                }
+              }}
               classNames={{
                 inputWrapper: 'group-data-[focus=true]:border-[#00a8ff] data-[hover=true]:border-[#00a8ff] border-[#00a8ff]',
                 input: 'placeholder:text-[#00a8ff] text-[#00a8ff]',

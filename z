@@ -3,27 +3,38 @@ rename board => done
 dragging card bug
 animation card rotate is dragging => done
 
-check limit create board
-dragging card close create card 
 
+//core
+update layout root (header)
+loading for board/id page
+update UI name of board in board/id page
+invite member (show up modal invite member by email)
+notification invite member
+workspace with member
+filter board
+show real member in board/id page
+detail of card (show in drawer)
+crud detail of card
+
+//optimize 
+split code to component
+check code to solid
+optimize toast to valid form
+
+// expand
+multi language
+light/dark mode
+
+
+dragging card close create card
 delete board
 xoá description của board
+check limit create board
 recent
 render stared
 reponsive
 update UI 
-
-
-
-
-
-delete board
-xoá description của board
-check limit create board
-recent
-render stared
-reponsive
-update UI 
+check limit create board (thinking)
 
 
 
