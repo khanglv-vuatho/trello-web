@@ -7,6 +7,7 @@ type TModal = {
   modalBody: React.ReactNode | string
   modalFooter?: React.ReactNode | string
 } & Omit<ModalProps, 'children'>
+
 const Modal = ({ isOpen, onOpenChange, modalTitle, modalBody, modalFooter, ...props }: TModal) => {
   return (
     <ModalNextUI {...props} isOpen={isOpen} onOpenChange={onOpenChange}>

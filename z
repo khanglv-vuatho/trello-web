@@ -3,6 +3,7 @@ rename board => done
 dragging card bug
 animation card rotate is dragging => done
 middleware login => done
+xoá description của board => done
 
 //core
 update UI boardBar (update button)
@@ -30,7 +31,6 @@ light/dark mode
 
 dragging card close create card
 delete board
-xoá description của board
 check limit create board
 recent
 render stared

@@ -33,12 +33,7 @@ function Header() {
 
   const userInfo = useStoreUser((state) => state.userInfo)
 
-  const initalState: TInitalState = {
-    title: '',
-    description: '',
-  }
-
-  const [infoNewBoard, setInfoNewBoard] = useState<TInitalState>(initalState)
+  const [titleBoard, setTitleBoard] = useState<string>('')
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
 
   const inputRef = useRef<any>(null)
@@ -96,23 +91,20 @@ function Header() {
   const searchTimer = useRef<any>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-
-    setInfoNewBoard({ ...infoNewBoard, [name]: value })
+    setTitleBoard(e.target.value)
   }
 
   const handleCreateNewBoard = async () => {
-    if (infoNewBoard.title.length <= 3 || infoNewBoard.title.length > 50 || infoNewBoard.description.length <= 3 || infoNewBoard.description.length > 50) {
+    if (titleBoard.length <= 3 || titleBoard.length > 50) {
       Toast({ message: 'Board name and description must be at least 4 and max 50 characters', type: 'error' })
     }
 
     try {
-      const payload = { ...infoNewBoard, type: 'public', ownerId: userInfo?.email }
+      const payload = { title: titleBoard, type: 'public', ownerId: userInfo?.email }
       const data: any = await instance.post('/v1/boards', payload)
 
       Toast({ message: 'Create Board Successful', type: 'success' })
-
-      setInfoNewBoard({ ...initalState })
+      setTitleBoard('')
       router.push(`/board/${data?._id}`)
       onClose()
     } catch (error) {
@@ -219,7 +211,7 @@ function Header() {
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         modalTitle='Create new board'
-        modalBody={<ModalBodyCreateNewBoard handleChange={handleChange} initalState={initalState} infoNewBoard={infoNewBoard} />}
+        modalBody={<ModalBodyCreateNewBoard handleChange={handleChange} titleBoard={titleBoard} />}
         modalFooter={
           <div className='flex items-center gap-2'>
             <Button variant='light' color='default' onClick={onOpenChange} className='py-3 px-6'>
@@ -236,24 +228,19 @@ function Header() {
 }
 
 type TModalBodyCreateNewBoard = {
-  initalState: TInitalState
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  infoNewBoard: {
-    [key: string]: string
-  }
+  titleBoard: string
 }
 
-const ModalBodyCreateNewBoard = ({ initalState, handleChange, infoNewBoard }: TModalBodyCreateNewBoard) => {
+const ModalBodyCreateNewBoard = ({ handleChange, titleBoard }: TModalBodyCreateNewBoard) => {
   return (
     <div className='flex flex-col gap-4'>
-      {Object.keys(initalState).map((key) => (
-        <div key={key} className='flex flex-col gap-2'>
-          <label>
-            {key} <span className='text-red-700'>*</span>
-          </label>
-          <Input name={key} value={infoNewBoard[key]} placeholder={`Enter ${key}`} onChange={handleChange} isRequired type='text' />
-        </div>
-      ))}
+      <div className='flex flex-col gap-2'>
+        <label>
+          Title <span className='text-red-700'>*</span>
+        </label>
+        <Input value={titleBoard} placeholder={`Enter your board name`} onChange={handleChange} isRequired type='text' />
+      </div>
     </div>
   )
 }
