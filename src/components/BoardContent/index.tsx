@@ -19,7 +19,6 @@ import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 import { generatePlaceholderCard } from '@/utils'
-import ExpandButton from '../ExpandButton'
 
 import CardContent from '@/components/CardContent'
 import CreateCard from '@/components/CreateCard'
@@ -395,6 +394,7 @@ const ListColumn = ({ columns }: { columns: IColumn[] }) => {
     </SortableContext>
   )
 }
+
 const Column = ({ column }: { column: IColumn }) => {
   const [orderedCards, setOrderedCards] = useState<any[]>([])
   const [cardTitle, setCardTitle] = useState<string>('')
@@ -529,7 +529,6 @@ const Column = ({ column }: { column: IColumn }) => {
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         modalTitle='Delete Column'
-        modalBody='Are you sure you want to delete this column?'
         modalFooter={
           <div className='flex items-center gap-2'>
             <Button variant='light' color='danger' onClick={handleDeleteColumn} className='py-3 px-6'>
@@ -540,7 +539,9 @@ const Column = ({ column }: { column: IColumn }) => {
             </Button>
           </div>
         }
-      />
+      >
+        <p>Are you sure you want to delete this column?</p>
+      </Modal>
     </>
   )
 }

@@ -15,7 +15,7 @@ type TExpandButton = {
   placement?: 'top' | 'bottom' | 'left' | 'right'
 }
 
-const ExpandButton: React.FC<TExpandButton> = ({ title, isIconOnly, props, children, placement, content, startContent, endContent, style, variant }) => {
+const ExpandButton: React.FC<TExpandButton> = ({ title, isIconOnly, children, placement, content, startContent, endContent, style, variant, ...props }) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false)
 
   const handlePopoverToggle = () => {

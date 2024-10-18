@@ -6,12 +6,15 @@ import { AddToDrive as AddToDriveIcon, Dashboard as DashboardIcon, VpnLock as Vp
 import ExpandButton from '@/components/ExpandButton'
 import { IBoard } from '@/types'
 import { capitalizeFirstLetter } from '@/utils'
-import { memo, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import instance from '@/services/axiosConfig'
 import Toast from '../Toast'
 import { useStoreBoard } from '@/store'
+import Modal from '../Modal'
 
 function BoardBar({ board }: { board: IBoard }) {
+  const MAX_USER_SHOW = 3
+
   const { storeBoard } = useStoreBoard()
 
   const [isFixTitleBoard, setIsFixTitleBoard] = useState<boolean>(false)
@@ -60,6 +63,33 @@ function BoardBar({ board }: { board: IBoard }) {
     }
   }
 
+  const [isOpenModalInviteMember, setIsOpenModalInviteMember] = useState(false)
+  const [isInvitingMember, setIsInvitingMember] = useState(false)
+  const [emailInviteMember, setEmailInviteMember] = useState('')
+  const handleToggleModalInviteMember = () => {
+    setIsOpenModalInviteMember(!isOpenModalInviteMember)
+  }
+
+  const handleInviteMember = () => {
+    setIsInvitingMember(true)
+  }
+
+  const handleInviteMemberApi = async () => {
+    try {
+      // await instance.post(`/v1/boards/${board?._id}/invite`, { email: emailInviteMember })
+      Toast({ message: `Invite member ${emailInviteMember} successfully`, type: 'success' })
+      setEmailInviteMember('')
+      handleToggleModalInviteMember()
+    } catch {
+      Toast({ message: 'Failed to invite member', type: 'error' })
+    } finally {
+      setIsInvitingMember(false)
+    }
+  }
+
+  useEffect(() => {
+    isInvitingMember && handleInviteMemberApi()
+  }, [isInvitingMember])
   return (
     <div className='bg-colorBoardBar h-boardBar flex items-center justify-between px-4 overflow-x-auto gap-5'>
       <div className='flex items-center gap-2'>
@@ -96,15 +126,41 @@ function BoardBar({ board }: { board: IBoard }) {
         ))}
       </div>
       <div className='flex items-center gap-4'>
-        <ExpandButton title='Invite' content={<>Invite</>} startContent={<PersonAddIcon />} variant='bordered' style='font-normal rounded-lg border-1'></ExpandButton>
-        <AvatarGroup max={3} total={10} className='*:min-h-10 *:cursor-pointer'>
-          <Avatar src='https://i.pravatar.cc/150?u=a042581f4e29026024d' />
-          <Avatar src='https://i.pravatar.cc/150?u=a04258a2462d826712d' />
-          <Avatar src='https://i.pravatar.cc/150?u=a042581f4e29026704d' />
-          <Avatar src='https://i.pravatar.cc/150?u=a04258114e29026708c' />
-          <Avatar src='https://i.pravatar.cc/150?u=a04258114e29026708c' />
-          <Avatar src='https://i.pravatar.cc/150?u=a04258114e29026708c' />
-        </AvatarGroup>
+        <Button onClick={handleToggleModalInviteMember} startContent={<PersonAddIcon />} variant='bordered'>
+          Invite
+        </Button>
+        <Modal isOpen={isOpenModalInviteMember} onOpenChange={handleToggleModalInviteMember} modalTitle='Invite Member'>
+          <div className='-mt-2 flex flex-col gap-4 py-2'>
+            <Input
+              onKeyUp={(e) => {
+                if (e.key === 'Enter') {
+                  handleInviteMember()
+                }
+              }}
+              value={emailInviteMember}
+              placeholder={'Enter your invite email'}
+              onChange={(e) => {
+                setEmailInviteMember(e.target.value)
+              }}
+              isRequired
+              type='email'
+            />
+          </div>
+          <div className='flex w-full justify-end'>
+            <Button isLoading={isInvitingMember} className='bg-primary2 text-white' onClick={handleInviteMember}>
+              Invite
+            </Button>
+          </div>
+        </Modal>
+        {board?.memberGmails?.length > 0 ? (
+          <AvatarGroup max={MAX_USER_SHOW} total={Number(board?.memberGmails?.length - MAX_USER_SHOW)} className='*:min-h-10 *:cursor-pointer'>
+            {board?.memberGmails?.map((item) => (
+              <Avatar key={item?.email} src={item?.picture} />
+            ))}
+          </AvatarGroup>
+        ) : (
+          ''
+        )}
       </div>
     </div>
   )

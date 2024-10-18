@@ -1,4 +1,4 @@
-import { IBoard, ICard, IColumn } from '@/types'
+import { ICard, IColumn } from '@/types'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Attachment as AttachmentIcon, Comment as CommentIcon, Group as GroupIcon } from '@mui/icons-material'
@@ -121,7 +121,7 @@ const CardContent = ({ card }: { card: ICard }) => {
                   }}
                   variant='bordered'
                   autoFocus
-                  onBlur={() => handleRenameCard()}
+                  onBlur={handleRenameCard}
                   defaultValue={card?.title}
                   value={valueTitleCard}
                   onChange={(e) => {
@@ -164,7 +164,6 @@ const CardContent = ({ card }: { card: ICard }) => {
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         modalTitle='Delete Card'
-        modalBody='Are you sure you want to delete this card?'
         modalFooter={
           <div className='flex items-center gap-2'>
             <Button isLoading={onDeletingCard} variant='light' color='danger' onClick={() => handleDeleteCard()} className='py-3 px-6'>
@@ -175,7 +174,9 @@ const CardContent = ({ card }: { card: ICard }) => {
             </Button>
           </div>
         }
-      />
+      >
+        Are you sure you want to delete this card?
+      </Modal>
     </div>
   )
 }

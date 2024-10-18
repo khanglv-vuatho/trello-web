@@ -211,7 +211,6 @@ function Header() {
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         modalTitle='Create new board'
-        modalBody={<ModalBodyCreateNewBoard handleChange={handleChange} titleBoard={titleBoard} />}
         modalFooter={
           <div className='flex items-center gap-2'>
             <Button variant='light' color='default' onClick={onOpenChange} className='py-3 px-6'>
@@ -222,7 +221,9 @@ function Header() {
             </Button>
           </div>
         }
-      />
+      >
+        <ModalBodyCreateNewBoard handleChange={handleChange} titleBoard={titleBoard} />
+      </Modal>
     </header>
   )
 }
