@@ -451,7 +451,6 @@ const Column = ({ column }: { column: IColumn }) => {
     if (valueTitleColumn === column.title || !valueTitleColumn) return setOnFixTitleColumn(!onFixTitleColumn)
 
     if (valueTitleColumn?.length <= 3 || valueTitleColumn?.length > 50) {
-      Toast({ message: 'Column name must be at least 4 and max 50 characters', type: 'error' })
       return setOnFixTitleColumn(!onFixTitleColumn)
     }
 

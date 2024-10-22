@@ -8,14 +8,13 @@ export function middleware(request: NextRequest) {
 
   // Public routes where login check is not required
   const publicRoutes = ['/login']
-
-  // If the route is public, skip the middleware
-  if (publicRoutes.includes(request.nextUrl.pathname)) {
+  // If token exists, user is authenticated, continue to the requested route
+  if (token) {
     return NextResponse.next()
   }
 
-  // If token exists, user is authenticated, continue to the requested route
-  if (token) {
+  // If the route is public, skip the middleware
+  if (publicRoutes.includes(request.nextUrl.pathname)) {
     return NextResponse.next()
   }
 

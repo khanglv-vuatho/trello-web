@@ -22,3 +22,12 @@ export const generatePlaceholderCard = (column: any) => {
     FE_PlaceholderCard: true,
   }
 }
+
+export const cleanMessage = (errorMessage: string) => {
+  // Check if the message contains "ValidationError" and clean it
+  if (errorMessage.includes('ValidationError')) {
+    const cleanMsg = errorMessage.split(':')[1].trim().replace(/"/g, '')
+    return cleanMsg
+  }
+  return errorMessage
+}

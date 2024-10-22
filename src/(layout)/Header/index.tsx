@@ -32,7 +32,6 @@ function Header() {
   const { storeUser } = useStoreUser()
 
   const userInfo = useStoreUser((state) => state.userInfo)
-
   const [titleBoard, setTitleBoard] = useState<string>('')
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
 
@@ -95,10 +94,6 @@ function Header() {
   }
 
   const handleCreateNewBoard = async () => {
-    if (titleBoard.length <= 3 || titleBoard.length > 50) {
-      Toast({ message: 'Board name and description must be at least 4 and max 50 characters', type: 'error' })
-    }
-
     try {
       const payload = { title: titleBoard, type: 'public', ownerId: userInfo?.email }
       const data: any = await instance.post('/v1/boards', payload)
@@ -127,13 +122,29 @@ function Header() {
 
   const token = getCookie('access_token')
   console.log({ token })
+
+  const handleGetDetailUser = async ({ payload }: { payload: any }) => {
+    try {
+      const dataUser: any = await instance.post(`/v1/users/login`, payload)
+
+      console.log({ dataUser })
+      storeUser(dataUser)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   const handleFetchingUser = async () => {
     try {
       const dataUser: any = await instance.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${token}`)
+
+      delete dataUser.token
+      const payload = { ...dataUser }
+      console.log({ payload })
+      await handleGetDetailUser({ payload })
       storeUser(dataUser)
     } catch (error) {
       if (error) {
-        Toast({ message: 'Login Failed123', type: 'error' })
         deleteCookie('access_token')
         router.push('/login')
       }

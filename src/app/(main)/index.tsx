@@ -19,20 +19,16 @@ type TListInfoBoards = {
   icon: JSX.Element
   boards: Boards[]
 }
-type TBoardsInfo = {
-  boards: any
-  recent: any
-}
 
 export const MainPage = () => {
   const [onFeching, setOnFeching] = useState<boolean>(false)
-  const [boardsInfo, setBoardsInfo] = useState<TBoardsInfo>()
+  const [boardsInfo, setBoardsInfo] = useState<Boards[]>([])
   const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false)
   const { userInfo } = useStoreUser()
+
   const handleGetMe = async () => {
     try {
-      const payload = { email: userInfo?.email, fullName: userInfo?.name }
-      const data: any = await instance.post('/v1/users', payload)
+      const data: any = await instance.get(`/v1/boards/get-all?email=${userInfo?.email}`)
       setBoardsInfo(data)
     } catch (error) {
       console.log(error)
@@ -46,6 +42,7 @@ export const MainPage = () => {
   }, [onFeching, userInfo])
 
   useEffect(() => {
+    if (userInfo === undefined) return
     setOnFeching(true)
   }, [userInfo])
 
@@ -53,12 +50,12 @@ export const MainPage = () => {
     {
       title: 'Starred boards',
       icon: <Star1 />,
-      boards: boardsInfo?.recent,
+      boards: boardsInfo.filter((item) => item.isStared),
     },
     {
       title: 'Recently viewed',
       icon: <Clock />,
-      boards: boardsInfo?.boards,
+      boards: boardsInfo.filter((item) => !item.isStared),
     },
   ]
 
@@ -87,7 +84,7 @@ export const MainPage = () => {
                           {item.icon}
                           <p>{item.title}</p>
                         </div>
-                        <p>{item?.boards?.length}/5</p>
+                        <p>{item?.boards?.length}</p>
                       </div>
                       {onFeching ? (
                         <Skeleton className='w-[200px] before:border-0 before:via-white/20 h-[100px] rounded-[4px] bg-white/10' />

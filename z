@@ -4,20 +4,20 @@ dragging card bug
 animation card rotate is dragging => done
 middleware login => done
 xoá description của board => done
+workspace with member => done
+show real member in board/id page => done
 
 //core
 update UI boardBar (update button)
 update layout root (header)
 loading for board/id page
 update UI name of board in board/id page
-invite member (show up modal invite member by email)
+invite member (show up modal invite member by email) => done
 notification invite member
-workspace with member
-filter board
-show real member in board/id page
 detail of card (show in drawer)
 crud detail of card
-profile
+click in user member => detail profile
+filter board 
 
 //optimize 
 split code to component
@@ -37,7 +37,4 @@ render stared
 reponsive
 update UI 
 check limit create board (thinking)
-
-
-
 

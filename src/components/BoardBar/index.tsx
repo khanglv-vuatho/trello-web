@@ -45,7 +45,6 @@ function BoardBar({ board }: { board: IBoard }) {
     if (titleBoard === board?.title || titleBoard === '') return setIsFixTitleBoard(false)
 
     if (titleBoard?.length <= 3 || titleBoard?.length > 50) {
-      Toast({ message: 'Board name must be at least 4 and max 50 characters', type: 'error' })
       return setIsFixTitleBoard(false)
     }
 
@@ -76,12 +75,12 @@ function BoardBar({ board }: { board: IBoard }) {
 
   const handleInviteMemberApi = async () => {
     try {
-      // await instance.post(`/v1/boards/${board?._id}/invite`, { email: emailInviteMember })
+      await instance.post(`/v1/boards/${board?._id}/members`, { memberGmails: [emailInviteMember] })
       Toast({ message: `Invite member ${emailInviteMember} successfully`, type: 'success' })
       setEmailInviteMember('')
       handleToggleModalInviteMember()
-    } catch {
-      Toast({ message: 'Failed to invite member', type: 'error' })
+    } catch (error) {
+      console.log({ error })
     } finally {
       setIsInvitingMember(false)
     }
