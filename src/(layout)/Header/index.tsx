@@ -120,8 +120,7 @@ function Header() {
     }
   }, [onSearching])
 
-  const token = getCookie('access_token')
-  console.log({ token })
+  const google_token = getCookie('google_token')
 
   const handleGetDetailUser = async ({ payload }: { payload: any }) => {
     try {
@@ -136,12 +135,9 @@ function Header() {
 
   const handleFetchingUser = async () => {
     try {
-      const dataUser: any = await instance.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${token}`)
+      const dataUser: any = await instance.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${google_token}`)
 
-      delete dataUser.token
-      const payload = { ...dataUser }
-      console.log({ payload })
-      await handleGetDetailUser({ payload })
+      await handleGetDetailUser({ payload: dataUser })
       storeUser(dataUser)
     } catch (error) {
       if (error) {

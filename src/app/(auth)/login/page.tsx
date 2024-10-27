@@ -18,7 +18,7 @@ const Login = () => {
     onSuccess: async (tokenResponse) => {
       if (tokenResponse) {
         setIsLoading(true)
-        setCookie('access_token', tokenResponse.access_token)
+        setCookie('google_token', tokenResponse.access_token)
         Toast({
           message: 'Login Successful',
           type: 'success',
