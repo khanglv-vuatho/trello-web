@@ -7,7 +7,6 @@ import AddIcon from '@mui/icons-material/Add'
 import { AddButton, CloseButton } from '../Button'
 import Toast from '@/components/Toast'
 import { useStoreBoard } from '@/store'
-import instance from '@/services/axiosConfig'
 import { IBoard } from '@/types'
 
 type TCreateColumn = { value: string; setValue: (value: string) => void }
@@ -29,10 +28,13 @@ const CreateColumn = ({ value, setValue }: TCreateColumn) => {
     if (value === '') return Toast({ message: 'Enter column title', type: 'error' })
     setOnSending(true)
   }
+
   const handleSendingColumn = async () => {
     if (value.length <= 3 || value.length > 50) {
       Toast({ message: 'Column name must be at least 4 and max 50 characters', type: 'error' })
-      return setIsCreateNewColumn(false)
+      setIsCreateNewColumn(false)
+      setOnSending(false)
+      return
     }
 
     try {
@@ -55,7 +57,7 @@ const CreateColumn = ({ value, setValue }: TCreateColumn) => {
   return (
     <div>
       {isCreateNewColumn ? (
-        <div className='flex flex-col gap-2 bg-white/10 p-2 rounded-lg w-[300px]'>
+        <div className='flex w-[300px] flex-col gap-2 rounded-lg bg-white/10 p-2'>
           <Input
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -73,7 +75,7 @@ const CreateColumn = ({ value, setValue }: TCreateColumn) => {
           </div>
         </div>
       ) : (
-        <Button onPress={handleToggleCreateNewColumn} startContent={<AddIcon />} className='bg-white/10 text-white px-5 py-3'>
+        <Button onPress={handleToggleCreateNewColumn} startContent={<AddIcon />} className='bg-white/10 px-5 py-3 text-white'>
           Add new column
         </Button>
       )}

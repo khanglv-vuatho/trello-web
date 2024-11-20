@@ -6,18 +6,33 @@ import { generatePlaceholderCard, mapOrder } from '@/utils'
 
 type TBoardState = {
   board?: IBoard
+  boardInfo?: IBoard[]
   storeBoard: (board: IBoard) => void
-  fetchBoard: (boardId: string) => Promise<IBoard>
+  fetchBoardDetail: (boardId: string) => Promise<IBoard>
   createNewColumn: (board: IBoard, title: string) => Promise<void>
   createNewCard: (column: IColumn, board: IBoard, title: string) => Promise<void>
   moveColumn: (column: IColumn, board: IBoard, title: string) => Promise<void>
+  starBoard: (boardId: string, isStared: boolean) => Promise<void>
+  fetchAllBoards: (email: string) => Promise<void>
+  deleteBoard: (boardId: string) => Promise<void>
 }
 
 export const useStoreBoard = create<TBoardState>((set, get) => ({
   storeBoard: (board) => {
     set({ board })
   },
-  fetchBoard: async (boardId) => {
+
+  fetchAllBoards: async (email) => {
+    try {
+      const data: any = await instance.get(`/v1/boards/get-all?email=${email}`)
+      set({ board: data })
+      return data
+    } catch (error) {
+      console.log(error)
+    }
+  },
+
+  fetchBoardDetail: async (boardId) => {
     try {
       const data: any = await instance.get(`/v1/boards/${boardId}`)
       const cloneData = { ...data }
@@ -39,6 +54,11 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
       console.log(error)
     }
   },
+
+  deleteBoard: async (boardId) => {
+    await instance.delete(`/v1/boards/${boardId}`)
+  },
+
   createNewColumn: async (board, title) => {
     try {
       const payload = {
@@ -59,6 +79,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
       console.log(error)
     }
   },
+
   createNewCard: async (column, board, title) => {
     const clonedColumn = { ...column }
 
@@ -76,6 +97,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     clonedColumn.cards.push(card)
     clonedColumn.cardOrderIds.push(card?._id)
   },
+
   moveColumn: async (column, board, title) => {
     const payload = {
       title,
@@ -92,12 +114,21 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
 
     set({ board: newBoard })
   },
+
+  starBoard: async (boardId, isStared) => {
+    await instance.put('/v1/boards/' + boardId, { isStared })
+    const board = get().board
+
+    if (!board) return
+    const newBoard = { ...board, isStared }
+  },
 }))
 
 type TUserState = {
   userInfo?: TUserInfo
   storeUser: (user: TUserInfo) => void
 }
+
 export const useStoreUser = create<TUserState>((set) => ({
   storeUser: (userInfo) => {
     set({ userInfo })

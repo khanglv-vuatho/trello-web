@@ -40,6 +40,7 @@ const Login = () => {
     setIsLoading(true)
     login()
   }
+
   return (
     <div className='flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-purple-700 via-indigo-800 to-blue-900 p-4'>
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className='relative w-full max-w-md'>

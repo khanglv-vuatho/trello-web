@@ -63,12 +63,9 @@ const CreateCard = ({ column, value, setValue }: TCreateCard) => {
           </div>
         ) : (
           <div className='flex items-center'>
-            <Button onPress={handleToggleCreateNewCard} startContent={<AddIcon className='text-[#091E42]' />} className='rounded-lg w-full justify-start p-2 hover:bg-[#091E4224] bg-transparent'>
+            <Button onPress={handleToggleCreateNewCard} startContent={<AddIcon className='text-[#091E42]' />} className='w-full justify-start rounded-lg bg-transparent p-2 hover:bg-[#091E4224]'>
               Add a card
             </Button>
-            <ExpandButton isIconOnly content={<>DragHandleIcon ...</>}>
-              <DragHandleIcon className='text-black' />
-            </ExpandButton>
           </div>
         )}
       </div>

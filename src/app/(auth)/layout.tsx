@@ -4,8 +4,8 @@ import type { Metadata } from 'next'
 import './auth.css'
 import { GoogleTagManager } from '@next/third-parties/google'
 export const metadata: Metadata = {
-  title: 'Login to Trello vika',
-  description: 'Login to Trello vika',
+  title: 'Login to NTTU Workspace',
+  description: 'Login to NTTU Workspace',
 }
 
 export default function LoginLayout({ children }: { children: React.ReactNode }) {

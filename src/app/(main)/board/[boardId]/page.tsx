@@ -8,11 +8,12 @@ import BoardContent from '@/components/BoardContent'
 import { useStoreBoard } from '@/store'
 const BoardDetails = ({ params }: { params: { boardId: string } }) => {
   const [onFetching, setOnFetching] = useState<boolean>(false)
-  const { fetchBoard } = useStoreBoard()
+  const { fetchBoardDetail } = useStoreBoard()
   const board: any = useStoreBoard((state) => state.board)
+
   const handleFetchingBoard = async () => {
     try {
-      await fetchBoard(params.boardId)
+      await fetchBoardDetail(params.boardId)
     } catch (error) {
       console.log(error)
     } finally {
@@ -30,7 +31,7 @@ const BoardDetails = ({ params }: { params: { boardId: string } }) => {
 
   if (!board || onFetching)
     return (
-      <div className='flex h-[100dvh] items-center gap-2 justify-center'>
+      <div className='flex h-[100dvh] items-center justify-center gap-2'>
         <CircularProgress aria-label='Loading...' />
         <p>Loading...</p>
       </div>
@@ -38,8 +39,8 @@ const BoardDetails = ({ params }: { params: { boardId: string } }) => {
 
   return (
     <>
-      <BoardBar board={board} />
-      <BoardContent board={board} />
+      <BoardBar />
+      <BoardContent />
     </>
   )
 }

@@ -1,29 +1,34 @@
 'use client'
 
+import { AddToDrive as AddToDriveIcon, Bolt as BoltIcon, Dashboard as DashboardIcon, FilterList as FilterListIcon, PersonAdd as PersonAddIcon, VpnLock as VpnLockIcon } from '@mui/icons-material'
 import { Avatar, AvatarGroup, Button, Input } from '@nextui-org/react'
-import { AddToDrive as AddToDriveIcon, Dashboard as DashboardIcon, VpnLock as VpnLockIcon, Bolt as BoltIcon, FilterList as FilterListIcon, PersonAdd as PersonAddIcon } from '@mui/icons-material'
 
 import ExpandButton from '@/components/ExpandButton'
-import { IBoard } from '@/types'
+import { NOTIFICATION_TYPES } from '@/constants'
+import instance from '@/services/axiosConfig'
+import { useStoreBoard } from '@/store'
 import { capitalizeFirstLetter } from '@/utils'
 import { memo, useEffect, useState } from 'react'
-import instance from '@/services/axiosConfig'
-import Toast from '../Toast'
-import { useStoreBoard } from '@/store'
 import Modal from '../Modal'
+import Toast from '../Toast'
 
-function BoardBar({ board }: { board: IBoard }) {
+function BoardBar() {
   const MAX_USER_SHOW = 3
 
-  const { storeBoard } = useStoreBoard()
+  const { storeBoard, board } = useStoreBoard()
 
   const [isFixTitleBoard, setIsFixTitleBoard] = useState<boolean>(false)
-  const [titleBoard, setTitleBoard] = useState<string>(board?.title)
+  const [titleBoard, setTitleBoard] = useState<string>(board?.title || '')
   const listBoardBar: { startContent: any; title: string; content: React.ReactNode }[] = [
     {
       startContent: <VpnLockIcon />,
-      title: capitalizeFirstLetter(board?.type),
-      content: <>Public/Private Workspace</>,
+      title: 'Workspace Visibility',
+      content: (
+        <div className='flex flex-col gap-2'>
+          <span className='text-sm'>Workspace Visibility</span>
+          <span className='text-xs text-gray-500'>Choose who can see your workspace</span>
+        </div>
+      ),
     },
     {
       startContent: <AddToDriveIcon />,
@@ -50,7 +55,7 @@ function BoardBar({ board }: { board: IBoard }) {
 
     const payload = { title: titleBoard }
 
-    storeBoard({ ...board, title: titleBoard })
+    storeBoard({ ...board!, title: titleBoard })
 
     try {
       await instance.put(`/v1/boards/${board?._id}`, payload)
@@ -70,6 +75,7 @@ function BoardBar({ board }: { board: IBoard }) {
   }
 
   const handleInviteMember = () => {
+    if (!emailInviteMember) return
     setIsInvitingMember(true)
   }
 
@@ -78,6 +84,8 @@ function BoardBar({ board }: { board: IBoard }) {
       await instance.post(`/v1/boards/${board?._id}/members`, { memberGmails: [emailInviteMember] })
       Toast({ message: `Invite member ${emailInviteMember} successfully`, type: 'success' })
       setEmailInviteMember('')
+
+      storeBoard({ ...board!, memberGmails: [...(board?.memberGmails || []), { email: emailInviteMember, type: NOTIFICATION_TYPES.PENDING }] })
       handleToggleModalInviteMember()
     } catch (error) {
       console.log({ error })
@@ -86,11 +94,16 @@ function BoardBar({ board }: { board: IBoard }) {
     }
   }
 
+  const handleShowAllMember = () => {
+    console.log('show all member')
+  }
+
   useEffect(() => {
     isInvitingMember && handleInviteMemberApi()
   }, [isInvitingMember])
+
   return (
-    <div className='bg-colorBoardBar h-boardBar flex items-center justify-between px-4 overflow-x-auto gap-5'>
+    <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto bg-colorBoardBar px-4'>
       <div className='flex items-center gap-2'>
         {isFixTitleBoard ? (
           <Input
@@ -113,11 +126,11 @@ function BoardBar({ board }: { board: IBoard }) {
           />
         ) : (
           <Button
-            className='flex items-center gap-2 font-medium text-primary px-4 min-h-10 rounded-[4px] bg-transparent hover:bg-white/40 w-[100px] min-w-[100px] max-w-[100px]'
+            className='flex min-h-10 w-[100px] min-w-[100px] max-w-[100px] items-center gap-2 rounded-[4px] bg-transparent px-4 font-medium text-primary hover:bg-white/40'
             startContent={<DashboardIcon />}
             onPress={() => setIsFixTitleBoard(!isFixTitleBoard)}
           >
-            {board.title}
+            {board?.title}
           </Button>
         )}
         {listBoardBar.map((item, index) => (
@@ -125,7 +138,7 @@ function BoardBar({ board }: { board: IBoard }) {
         ))}
       </div>
       <div className='flex items-center gap-4'>
-        <Button onClick={handleToggleModalInviteMember} startContent={<PersonAddIcon />} variant='bordered'>
+        <Button className='w-full px-4 py-2 text-white' onClick={handleToggleModalInviteMember} startContent={<PersonAddIcon />} variant='bordered'>
           Invite
         </Button>
         <Modal isOpen={isOpenModalInviteMember} onOpenChange={handleToggleModalInviteMember} modalTitle='Invite Member'>
@@ -146,15 +159,38 @@ function BoardBar({ board }: { board: IBoard }) {
             />
           </div>
           <div className='flex w-full justify-end'>
-            <Button isLoading={isInvitingMember} className='bg-primary2 text-white' onClick={handleInviteMember}>
+            <Button isLoading={isInvitingMember} className='bg-primary2 px-1 py-3 text-white' onClick={handleInviteMember}>
               Invite
             </Button>
           </div>
         </Modal>
-        {board?.memberGmails?.length > 0 ? (
-          <AvatarGroup max={MAX_USER_SHOW} total={Number(board?.memberGmails?.length - MAX_USER_SHOW)} className='*:min-h-10 *:cursor-pointer'>
+        {board?.memberGmails?.length && board?.memberGmails?.length > 0 ? (
+          <AvatarGroup
+            max={MAX_USER_SHOW}
+            total={Number(board?.memberGmails?.length - MAX_USER_SHOW)}
+            renderCount={(count) => (
+              <Avatar
+                onClick={handleShowAllMember}
+                key={count}
+                name={`+${count}`}
+                classNames={{
+                  base: 'ring-2 ring-white/30 hover:ring-orange-500',
+                }}
+              />
+            )}
+            className='*:min-h-10 *:cursor-pointer'
+          >
             {board?.memberGmails?.map((item) => (
-              <Avatar key={item?.email} src={item?.picture} />
+              <Avatar
+                onClick={() => {
+                  console.log(item)
+                }}
+                key={item?.email}
+                {...(item?.picture ? { src: item?.picture } : { name: item?.email?.charAt(0) })}
+                classNames={{
+                  base: 'ring-2 ring-white/30 hover:ring-orange-500',
+                }}
+              />
             ))}
           </AvatarGroup>
         ) : (

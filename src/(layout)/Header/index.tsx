@@ -3,30 +3,33 @@
 import { googleLogout } from '@react-oauth/google'
 import React, { useEffect, useRef, useState } from 'react'
 
-import { Apps as AppsIcon, HelpOutlineOutlined as HelpIcon, NotificationsNoneOutlined as NotificationsIcon } from '@mui/icons-material'
+import { Apps as AppsIcon, NotificationsNoneOutlined as NotificationsIcon } from '@mui/icons-material'
 import { Avatar, Badge, Button, Input, useDisclosure } from '@nextui-org/react'
-import { Add, ArrowDown2, SearchNormal1, Trello } from 'iconsax-react'
+import { Add, ArrowDown2, Logout, Message, SearchNormal1, User } from 'iconsax-react'
 
 import ExpandButton from '@/components/ExpandButton'
 import { LoadingSearch } from '@/components/Icons'
-import ImageFallback from '@/components/ImageFallback'
 import Modal from '@/components/Modal'
 import Toast from '@/components/Toast'
 import instance from '@/services/axiosConfig'
 import { useStoreUser } from '@/store'
+import { DotLottieReact } from '@lottiefiles/dotlottie-react'
+import { deleteCookie, getCookie } from 'cookies-next'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { deleteCookie, getCookie } from 'cookies-next'
-
-type TInitalState = { title: string; description: string }
+import { Notifications } from '@/types'
+import { NOTIFICATION_STATUS } from '@/constants'
+import Image from 'next/image'
 
 function Header() {
   const [onSearching, setOnSearching] = useState<boolean>(false)
   const [onSending, setOnSending] = useState<boolean>(false)
   const [onFetching, setOnFetching] = useState<boolean>(false)
+  const [onFetchingNotification, setOnFetchingNotification] = useState<boolean>(false)
 
   const [searchValue, setSearchValue] = useState<string>('')
-
+  const [notifications, setNotifications] = useState<Notifications[]>([])
+  console.log({ notifications })
   const router = useRouter()
 
   const { storeUser } = useStoreUser()
@@ -44,6 +47,57 @@ function Header() {
     { title: 'Templates', content: <>Templates</> },
   ]
 
+  const messages = [
+    {
+      name: 'Nhật Duy',
+      avatar: '/placeholder.svg?height=40&width=40',
+      lastMessage: 'tâm này khó rùi',
+      lastAuthor: 'me',
+      time: '2 phút',
+      unread: false,
+    },
+    {
+      name: 'Vu Thi Ngoc Nhu',
+      avatar: '/placeholder.svg?height=40&width=40',
+      lastMessage: '🤣🤣🤣',
+      lastAuthor: 'me',
+      time: '3 phút',
+      unread: false,
+    },
+    {
+      name: 'Nguyễn Hồng Anh',
+      avatar: '/placeholder.svg?height=40&width=40',
+      lastAuthor: 'other',
+      lastMessage: 'bạn sốt òi',
+      time: '6 phút',
+      unread: false,
+    },
+    {
+      name: 'Nguyễn Ngọc Sơn',
+      avatar: '/placeholder.svg?height=40&width=40',
+      lastMessage: 'Đã bày tỏ cảm xúc 😆 về tin ...',
+      lastAuthor: 'other',
+      time: '29 phút',
+      unread: true,
+    },
+    {
+      name: 'Khiết',
+      avatar: '/placeholder.svg?height=40&width=40',
+      lastMessage: 'Dạ cũng cũng kk',
+      lastAuthor: 'other',
+      time: '4 giờ',
+      unread: false,
+    },
+    {
+      name: 'Không có tay mơ 🎾',
+      avatar: '/placeholder.svg?height=40&width=40',
+      lastMessage: 'Dì: Sân ở ngoài nhen',
+      lastAuthor: 'other',
+      time: '6 giờ',
+      unread: true,
+    },
+  ]
+
   const listRightHeader: {
     id: number
     children: React.ReactNode
@@ -52,16 +106,72 @@ function Header() {
     {
       id: 1,
       children: (
-        <Badge content='7' shape='circle' color='danger' placement='top-right' size='sm' classNames={{ badge: '!size-5' }}>
+        <Badge content={notifications?.filter((n) => n.status === NOTIFICATION_STATUS.UNREAD).length} shape='circle' color='danger' placement='top-right' size='sm' classNames={{ badge: '!size-5' }}>
           <NotificationsIcon />
         </Badge>
       ),
-      content: <>Badge</>,
+      content: (
+        <div className='flex max-h-[300px] w-[340px] flex-col items-center overflow-auto py-2'>
+          {notifications?.length === 0 ? (
+            <div className='flex flex-col items-center text-center'>
+              <DotLottieReact className='w-80' src='https://lottie.host/27603ce5-73cf-4072-81df-1fba472f7e5c/8Th9oMgq8s.json' loop autoplay />
+              <h2 className='text-lg font-medium text-gray-900'>No notifications yet</h2>
+              <p className='mb-4 text-sm text-gray-500'>Your notifications will appear here</p>
+            </div>
+          ) : (
+            notifications?.map((notification) => (
+              <div key={notification._id} className='flex w-full cursor-pointer gap-2 rounded-lg bg-gray-50 p-3 transition-all duration-200 hover:bg-gray-100'>
+                <Avatar as={Link} href={`/profile/${notification._id}`} className='size-10 flex-shrink-0' src={notification.ownerId} />
+                <div className='flex-1 space-y-1'>
+                  <p className='text-sm'>
+                    <span className='font-semibold'>{notification.authorId}</span> <span>{notification.invitation?.boardTitle}</span>
+                  </p>
+                  <time className='text-xs text-blue-600'>{notification.createdAt}</time>
+                </div>
+                <Button variant='bordered' size='sm' className='shrink-0'>
+                  Accept
+                </Button>
+              </div>
+            ))
+          )}
+        </div>
+      ),
     },
     {
       id: 2,
-      children: <HelpIcon />,
-      content: <div className=''>HelpIcon</div>,
+      children: (
+        <Badge content='7' shape='circle' color='danger' placement='top-right' size='sm' classNames={{ badge: '!size-5' }}>
+          <Message />
+        </Badge>
+      ),
+      content: (
+        <div className='flex max-h-[300px] w-[340px] flex-col items-center overflow-auto py-2'>
+          {messages?.length === 0 ? (
+            <div className='flex flex-col items-center text-center'>
+              <DotLottieReact className='w-40' src='https://lottie.host/dcb44d07-dc8a-4829-b466-db327e8a060d/vcpZBuGW76.json' loop autoplay />
+              <h2 className='text-lg font-medium text-gray-900'>No messages yet</h2>
+              <p className='mb-4 text-sm text-gray-500'>Your conversations will appear here</p>
+            </div>
+          ) : (
+            messages?.map((message, index) => (
+              <div key={index} className={`flex w-full cursor-pointer items-center gap-2 rounded-lg p-3 transition-all duration-300 ease-in-out hover:bg-gray-100`}>
+                <Avatar src={message?.avatar} className='flex size-10 flex-shrink-0 border-2 border-white shadow-sm' />
+                <div className='min-w-0 flex-1'>
+                  <div className='flex items-start justify-between'>
+                    <h3 className='font-semibold text-gray-900'>{message?.name}</h3>
+                    <span className='text-xs text-gray-500'>{message?.time}</span>
+                  </div>
+                  <p className='truncate text-sm text-gray-600'>
+                    {message?.lastAuthor === 'me' ? 'Bạn: ' : ''}
+                    {message?.lastMessage}
+                  </p>
+                </div>
+                {message?.unread && <div className='size-2 rounded-full bg-blue-500' />}
+              </div>
+            ))
+          )}
+        </div>
+      ),
     },
   ]
 
@@ -150,35 +260,57 @@ function Header() {
     }
   }
 
-  useEffect(() => {
-    onFetching && handleFetchingUser()
-  }, [onFetching])
+  const handleConfirmCreateNewBoard = () => {
+    setOnSending(true)
+  }
+  const handleFetchingNotification = async () => {
+    try {
+      if (!userInfo) return
+      const dataNotification: any = await instance.get(`/v1/notifications?ownerId=${userInfo?.email}`)
+      setNotifications(dataNotification)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setOnFetchingNotification(false)
+    }
+  }
 
   useEffect(() => {
     setOnFetching(true)
   }, [])
 
   useEffect(() => {
+    !!userInfo && setOnFetchingNotification(true)
+  }, [userInfo])
+
+  useEffect(() => {
+    onFetching && handleFetchingUser()
+  }, [onFetching])
+
+  useEffect(() => {
+    onFetchingNotification && handleFetchingNotification()
+  }, [onFetchingNotification])
+
+  useEffect(() => {
     onSending && handleCreateNewBoard()
   }, [onSending])
 
   return (
-    <header className='flex items-center justify-between px-4 h-header bg-colorHeader text-primary overflow-x-auto gap-5'>
+    <header className='flex h-header items-center justify-between gap-5 overflow-x-auto bg-colorHeader px-4 text-primary'>
       <div className='flex items-center gap-4'>
         <div className='flex items-center gap-2'>
-          <div className='size-10 hover:bg-default/40 rounded-[3px] cursor-pointer flex items-center justify-center'>
+          <div className='flex size-10 cursor-pointer items-center justify-center rounded-[3px] hover:bg-default/40'>
             <AppsIcon />
           </div>
-          <Link href={'/'} className='flex items-center justify-center min-h-10 gap-1 px-2 hover:bg-default/40 rounded-[3px] cursor-pointer'>
-            <Trello size='24' color='#fff' variant='Bold' />
-            <p className='text-xl font-bold'>Trello</p>
+          <Link href={'/'} className='flex min-h-10 cursor-pointer items-center justify-center gap-1 rounded-[3px] px-2 hover:bg-default/40'>
+            <Image src='/logo.png' alt='logo' width={40} height={40} />
           </Link>
         </div>
-        <div className='flex items-center gap-1 mr-2'>
+        <div className='mr-2 flex items-center gap-1'>
           {listExpandButton.map((item) => (
             <ExpandButton title={item.title} key={item.title} content={item.content} endContent={<ArrowDown2 size={16} />} />
           ))}
-          <Button onPress={() => onOpen()} className='flex items-center gap-2 font-medium text-primary px-4 min-h-10 bg-colorBoardBar' startContent={<Add size={24} />}>
+          <Button onPress={() => onOpen()} className='flex min-h-10 items-center gap-2 bg-colorBoardBar px-4 font-medium text-primary' startContent={<Add size={24} />}>
             Create
           </Button>
         </div>
@@ -192,9 +324,9 @@ function Header() {
           startContent={<SearchNormal1 size={24} className='text-primary' />}
           endContent={
             onSearching && !!searchValue.length ? (
-              <LoadingSearch className='animate-spin absolute right-1.5 text-white size-5 ' />
+              <LoadingSearch className='absolute right-1.5 size-5 animate-spin text-white' />
             ) : (
-              !!searchValue.length && <Add size={24} className='rotate-45 text-primary cursor-pointer absolute right-1' onClick={_handleClear} />
+              !!searchValue.length && <Add size={24} className='absolute right-1 rotate-45 cursor-pointer text-primary' onClick={_handleClear} />
             )
           }
           classNames={{
@@ -211,7 +343,7 @@ function Header() {
           </ExpandButton>
         ))}
         <ExpandButton isIconOnly content={<ContentUser />}>
-          <Avatar src={userInfo?.picture} className='flex flex-shrink-0 max-w-8 max-h-8' />
+          <Avatar src={userInfo?.picture} className='flex !size-8 flex-shrink-0' />
         </ExpandButton>
       </div>
       <Modal
@@ -220,16 +352,16 @@ function Header() {
         modalTitle='Create new board'
         modalFooter={
           <div className='flex items-center gap-2'>
-            <Button variant='light' color='default' onClick={onOpenChange} className='py-3 px-6'>
+            <Button variant='light' color='default' onClick={onOpenChange} className='px-6 py-3'>
               Cancel
             </Button>
-            <Button isLoading={onSending} onClick={() => setOnSending(true)} className='bg-colorBoardContent text-white py-3 px-6'>
+            <Button isLoading={onSending} onClick={handleConfirmCreateNewBoard} className='bg-colorBoardContent px-6 py-3 text-white'>
               Create
             </Button>
           </div>
         }
       >
-        <ModalBodyCreateNewBoard handleChange={handleChange} titleBoard={titleBoard} />
+        <ModalBodyCreateNewBoard handleChange={handleChange} titleBoard={titleBoard} handleConfirmCreateNewBoard={handleConfirmCreateNewBoard} />
       </Modal>
     </header>
   )
@@ -238,16 +370,28 @@ function Header() {
 type TModalBodyCreateNewBoard = {
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   titleBoard: string
+  handleConfirmCreateNewBoard: () => void
 }
 
-const ModalBodyCreateNewBoard = ({ handleChange, titleBoard }: TModalBodyCreateNewBoard) => {
+const ModalBodyCreateNewBoard = ({ handleChange, titleBoard, handleConfirmCreateNewBoard }: TModalBodyCreateNewBoard) => {
   return (
     <div className='flex flex-col gap-4'>
       <div className='flex flex-col gap-2'>
         <label>
           Title <span className='text-red-700'>*</span>
         </label>
-        <Input value={titleBoard} placeholder={`Enter your board name`} onChange={handleChange} isRequired type='text' />
+        <Input
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleConfirmCreateNewBoard()
+            }
+          }}
+          value={titleBoard}
+          placeholder={`Enter your board name`}
+          onChange={handleChange}
+          isRequired
+          type='text'
+        />
       </div>
     </div>
   )
@@ -264,18 +408,28 @@ const ContentUser = () => {
 
     router.push('/login')
   }
+
   return (
-    <div className='min-w-[200px] flex flex-col gap-2 p-2'>
+    <div className='flex min-w-[200px] flex-col gap-2 p-2'>
       <div className='flex items-center gap-2'>
-        <ImageFallback src={userInfo?.picture as string} className='w-8 h-8 rounded-full' height={32} width={32} alt={userInfo?.given_name as string} />
+        <Avatar src={userInfo?.picture as string} className='flex !size-8 flex-shrink-0 rounded-full' alt={userInfo?.given_name as string} />
         <div className='flex flex-col'>
           <p>{userInfo?.given_name}</p>
           <p>{userInfo?.email}</p>
         </div>
       </div>
-      <Button onPress={handleLogout} className='bg-colorBoardBar text-white py-2 w-full'>
-        Đăng xuất
-      </Button>
+      {/* line */}
+      <div className='h-[1px] w-full bg-gray-200' />
+      <div className='flex flex-col gap-2'>
+        <Button as={Link} href={`/profile/${userInfo?.email}`} variant='light' startContent={<User size={20} />} className='flex w-full justify-start gap-2 py-2 text-sm'>
+          Detail Profile
+        </Button>
+        {/* line */}
+        <div className='h-[1px] w-full bg-gray-200' />
+        <Button startContent={<Logout size={20} />} variant='light' onPress={handleLogout} className='flex w-full justify-start gap-2 py-2 text-sm'>
+          Logout
+        </Button>
+      </div>
     </div>
   )
 }

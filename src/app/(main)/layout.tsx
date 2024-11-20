@@ -9,8 +9,8 @@ const HeaderDynamic = dynamic(() => import('../../(layout)/Header'), {
 })
 
 export const metadata: Metadata = {
-  title: 'Trello vika',
-  description: 'Trello web clone by vika',
+  title: 'NTTU Workspace',
+  description: 'NTTU Workspace',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

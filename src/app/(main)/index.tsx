@@ -1,9 +1,11 @@
 'use client'
 
 import Drawer from '@/components/Drawer'
+import Modal from '@/components/Modal'
+import Toast from '@/components/Toast'
 import instance from '@/services/axiosConfig'
-import { useStoreUser } from '@/store'
-import { Button, Skeleton } from '@nextui-org/react'
+import { useStoreBoard, useStoreUser } from '@/store'
+import { Button, Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger, Skeleton } from '@nextui-org/react'
 import { Clock, MoreCircle, Star1 } from 'iconsax-react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
@@ -14,6 +16,7 @@ type Boards = {
   description: string
   isStared: boolean
 }
+
 type TListInfoBoards = {
   title: string
   icon: JSX.Element
@@ -23,12 +26,13 @@ type TListInfoBoards = {
 export const MainPage = () => {
   const [onFeching, setOnFeching] = useState<boolean>(false)
   const [boardsInfo, setBoardsInfo] = useState<Boards[]>([])
-  const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false)
   const { userInfo } = useStoreUser()
+  const { fetchAllBoards } = useStoreBoard()
 
   const handleGetMe = async () => {
+    if (!userInfo) return
     try {
-      const data: any = await instance.get(`/v1/boards/get-all?email=${userInfo?.email}`)
+      const data: any = await fetchAllBoards(userInfo.email)
       setBoardsInfo(data)
     } catch (error) {
       console.log(error)
@@ -50,28 +54,19 @@ export const MainPage = () => {
     {
       title: 'Starred boards',
       icon: <Star1 />,
-      boards: boardsInfo.filter((item) => item.isStared),
+      boards: boardsInfo?.filter((item) => item?.isStared),
     },
     {
       title: 'Recently viewed',
       icon: <Clock />,
-      boards: boardsInfo.filter((item) => !item.isStared),
+      boards: boardsInfo?.filter((item) => !item?.isStared),
     },
   ]
 
-  const handleToggleDrawer = () => {
-    setIsOpenDrawer(!isOpenDrawer)
-  }
-
   return (
     <div className='bg-colorBoardContent text-white'>
-      <Drawer isOpen={isOpenDrawer} onClose={handleToggleDrawer}>
-        <div className='p-4'>123</div>
-      </Drawer>
-      <div className='ct-container py-10 h-boardContainer'>
+      <div className='ct-container h-boardContainer py-10'>
         <div className='grid grid-cols-4'>
-          <Button>Boards</Button>
-          <div onClick={handleToggleDrawer}>123</div>
           <div className='col-span-3'>
             <div className='flex flex-col gap-10'>
               {listInfoBoards?.length > 0 ? (
@@ -79,7 +74,7 @@ export const MainPage = () => {
                   if (!item.boards) return
                   return (
                     <div key={item.title} className='flex flex-col gap-4'>
-                      <div className='flex justify-between items-center'>
+                      <div className='flex items-center justify-between'>
                         <div className='flex items-center gap-2'>
                           {item.icon}
                           <p>{item.title}</p>
@@ -87,12 +82,10 @@ export const MainPage = () => {
                         <p>{item?.boards?.length}</p>
                       </div>
                       {onFeching ? (
-                        <Skeleton className='w-[200px] before:border-0 before:via-white/20 h-[100px] rounded-[4px] bg-white/10' />
+                        <Skeleton className='h-[100px] w-[200px] rounded-[4px] bg-white/10 before:border-0 before:via-white/20' />
                       ) : (
-                        <div className='flex gap-2 w-full overflow-auto pb-2'>
-                          {item?.boards?.map((board) => (
-                            <BoardItem key={item.title} board={board} />
-                          ))}
+                        <div className='flex min-h-[100px] w-full gap-2 overflow-auto pb-2'>
+                          {item?.boards?.map((board) => <BoardItem key={item.title} board={board} setBoardsInfo={setBoardsInfo} boardsInfo={boardsInfo} />)}
                         </div>
                       )}
                     </div>
@@ -109,50 +102,108 @@ export const MainPage = () => {
   )
 }
 
-const BoardItem = ({ board }: { board: Boards }) => {
-  const [isStared, setIsStared] = useState<boolean>(board.isStared)
+const BoardItem = ({ board, setBoardsInfo, boardsInfo }: { board: Boards; setBoardsInfo: (boards: Boards[]) => void; boardsInfo: Boards[] }) => {
+  const [isStared, setIsStared] = useState<boolean>(board?.isStared)
   const [onSending, setOnSending] = useState<boolean>(false)
+  const [isOpenPopover, setIsOpenPopover] = useState<boolean>(false)
+  const [isOpenModalDelete, setIsOpenModalDelete] = useState<boolean>(false)
+  const [onDeleting, setOnDeleting] = useState<boolean>(false)
+  const { starBoard, deleteBoard } = useStoreBoard()
+
   const _handleToggleStar = (e: any) => {
     e.preventDefault()
     setOnSending(true)
     setIsStared(!isStared)
   }
+
   const handleToggleStartApi = async () => {
     try {
-      await instance.put('/v1/boards/' + board._id, { isStared: !isStared })
+      await starBoard(board?._id, isStared)
+      setBoardsInfo(boardsInfo?.map((item) => (item._id === board?._id ? { ...item, isStared } : item)))
     } catch (error) {
       console.log(error)
     } finally {
       setOnSending(false)
     }
   }
+
+  const handleDeleteBoard = async () => {
+    try {
+      await deleteBoard(board?._id)
+      setBoardsInfo(boardsInfo?.filter((item) => item._id !== board?._id))
+      Toast({ message: 'Board deleted successfully', type: 'success' })
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setOnDeleting(false)
+      setIsOpenModalDelete(false)
+    }
+  }
+
+  const handleOpenModalDelete = () => {
+    setIsOpenPopover(false)
+    setIsOpenModalDelete(true)
+  }
+
   useEffect(() => {
     onSending && handleToggleStartApi()
   }, [onSending])
 
+  useEffect(() => {
+    onDeleting && handleDeleteBoard()
+  }, [onDeleting])
+
   return (
-    <Link href={`/board/${board._id}`} className='min-w-[200px] group flex flex-col justify-between p-2 rounded-md bg-white/10 h-[100px] relative overflow-hidden'>
-      <p className='line-clamp-1 max-w-[140px]'>{board.title}</p>
-      <p className='line-clamp-1 max-w-[140px]'>{board.description}</p>
-      <Button
-        as={'button'}
-        disableRipple
-        isDisabled={onSending}
-        onClick={_handleToggleStar}
-        className='p-0 bg-transparent absolute top-2 right-0 translate-x-[100%] duration-200 group-hover:translate-x-[10px]'
+    <div className='group relative flex h-[100px] min-w-[200px] flex-col justify-between overflow-hidden rounded-md bg-white/10 p-2'>
+      <Modal isOpen={isOpenModalDelete} onOpenChange={setIsOpenModalDelete} modalTitle='Delete board'>
+        <p>Are you sure you want to delete this board?</p>
+        <div className='flex justify-between gap-2'>
+          <Button isLoading={onDeleting} onPress={() => setOnDeleting(true)} variant='light' color='danger' className='w-full px-4 py-2'>
+            Delete
+          </Button>
+          <Button onPress={() => setIsOpenModalDelete(false)} className='w-full px-4 py-2' variant='bordered'>
+            Cancel
+          </Button>
+        </div>
+      </Modal>
+      <Link href={`/board/${board?._id}`} className='absolute inset-0 z-10'>
+        <span className='sr-only'>Go to board: {board?.title}</span>
+      </Link>
+      <p className='line-clamp-1 max-w-[140px]'>{board?.title}</p>
+      <p className='line-clamp-1 max-w-[140px]'>{board?.description}</p>
+
+      <Popover
+        classNames={{
+          content: 'p-0.5',
+        }}
+        placement='right'
+        className='z-20'
+        isOpen={isOpenPopover}
+        onOpenChange={setIsOpenPopover}
       >
-        {/* dots icon */}
-        <MoreCircle variant={isStared ? 'Bold' : 'Outline'} className={isStared ? 'text-yellow-500' : 'text-white'} />
-      </Button>
+        <PopoverTrigger>
+          <Button disableRipple className='absolute right-0 top-2 translate-x-[100%] bg-transparent p-0 duration-200 group-hover:translate-x-[10px]' onClick={(e) => e.preventDefault()}>
+            {/* dots icon */}
+            <MoreCircle className='text-white' />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent>
+          <Listbox aria-label='Actions'>
+            <ListboxItem key='delete' className='text-danger' color='danger' onClick={handleOpenModalDelete}>
+              Delete board
+            </ListboxItem>
+          </Listbox>
+        </PopoverContent>
+      </Popover>
       <Button
         as={'button'}
         disableRipple
         isDisabled={onSending}
         onClick={_handleToggleStar}
-        className='p-0 bg-transparent absolute bottom-2 right-0 translate-x-[100%] duration-200 group-hover:translate-x-[10px]'
+        className='absolute bottom-2 right-0 z-[200] translate-x-[100%] bg-transparent p-0 duration-200 group-hover:translate-x-[10px]'
       >
         <Star1 variant={isStared ? 'Bold' : 'Outline'} className={isStared ? 'text-yellow-500' : 'text-white'} />
       </Button>
-    </Link>
+    </div>
   )
 }

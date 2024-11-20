@@ -5,19 +5,33 @@ animation card rotate is dragging => done
 middleware login => done
 xoá description của board => done
 workspace with member => done
-show real member in board/id page => done
+isStared board => done
+delete board => done
+message UI => done
+notification UI => done
+detail profile UI => done
+update UI boardBar (update button)
+show real member in board/id page => done 
+invite member (show up modal invite member by email) => done
 
 //core
-update UI boardBar (update button)
+notification invite member
+comfirm accept invite member from email
+comfirm accept invite member from notification
+notification api
+chat with member
+chat with member api
+detail profile api
+click in user member => show all member of board in modal
+click in user member => detail profile in new page
+filter board
+detail of card (show in drawer)
 update layout root (header)
 loading for board/id page
 update UI name of board in board/id page
-invite member (show up modal invite member by email) => done
-notification invite member
-detail of card (show in drawer)
+
 crud detail of card
-click in user member => detail profile
-filter board 
+
 
 //optimize 
 split code to component

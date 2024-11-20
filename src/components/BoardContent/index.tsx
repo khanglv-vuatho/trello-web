@@ -30,23 +30,20 @@ import './BoardContent.css'
 import { ITEM_TYPE } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
-import { Card, CardAdd, Edit, Trash } from 'iconsax-react'
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, useDisclosure } from '@nextui-org/react'
+import { Trash } from 'iconsax-react'
 import Modal from '../Modal'
 import Toast from '../Toast'
 
-type TBoardContent = { board: IBoard }
-function BoardContent({ board }: TBoardContent) {
-  console.log({ board })
+function BoardContent() {
+  const { board, storeBoard } = useStoreBoard()
   const [orderedColumns, setOrderedColumns] = useState<any[]>([])
 
-  const [activeDragItemId, setActiveDragItemId] = useState<any>(null)
+  const [activeDragItemId, setActiveDragItemId] = useState<null | string>(null)
   const [activeItemDragStart, setActiveItemDragStart] = useState<any>({})
-  const [activeItemType, setActiveItemType] = useState<any>(null)
+  const [activeItemType, setActiveItemType] = useState<(typeof ITEM_TYPE)[keyof typeof ITEM_TYPE] | null>(null)
   const [activeDragItemData, setActiveDragItemData] = useState<any>(null)
   const [oldCloumnWhenDraggingCard, setOldCloumnWhenDraggingCard] = useState<any>(null)
-
-  const { storeBoard } = useStoreBoard()
 
   const mouseSensor = useSensor(PointerSensor, {
     // Require the mouse to move by 10 pixels before activating
@@ -208,7 +205,7 @@ function BoardContent({ board }: TBoardContent) {
   }
 
   const moveCardInTheSameColumn = async (dndOrderedCards: ICard[], dndOrderedCardsIds: string[], columnId: string) => {
-    const cloneBoard = { ...board }
+    const cloneBoard: any = { ...board }
 
     const columnToUpdate = cloneBoard.columns.find((column: IColumn) => column?._id === columnId)
 
@@ -344,7 +341,7 @@ function BoardContent({ board }: TBoardContent) {
         const dndOrderedColumns = arrayMove(orderedColumns, oldColumnIndex, newColumnIndex)
 
         //array index after dragend
-        moveColumn(dndOrderedColumns, board)
+        moveColumn(dndOrderedColumns, board as any)
         //update state
         setOrderedColumns(dndOrderedColumns)
       }
@@ -359,10 +356,10 @@ function BoardContent({ board }: TBoardContent) {
   }
 
   useEffect(() => {
-    setOrderedColumns(board?.columns)
+    setOrderedColumns(board?.columns || [])
   }, [board])
   return (
-    <div className='bg-colorBoardContent h-boardContent overflow-x-auto'>
+    <div className='h-boardContent overflow-x-auto bg-colorBoardContent'>
       <DndContext collisionDetection={collisionDetectionStrategy as any} onDragStart={_handleDragStart} onDragEnd={_handleDragEnd} sensors={sensors} onDragOver={_handleDragOver}>
         <ListColumn columns={orderedColumns} />
         <DragOverlay dropAnimation={dropAnimation}>
@@ -386,9 +383,7 @@ const ListColumn = ({ columns }: { columns: IColumn[] }) => {
   return (
     <SortableContext strategy={horizontalListSortingStrategy} items={columnsDndKit}>
       <div className='flex gap-4 p-2'>
-        {columns?.map((column) => (
-          <Column key={column._id} column={column} />
-        ))}
+        {columns?.map((column) => <Column key={column._id} column={column} />)}
         <CreateColumn value={titleColumn} setValue={setTitleColumn} />
       </div>
     </SortableContext>
@@ -406,17 +401,7 @@ const Column = ({ column }: { column: IColumn }) => {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-  const listExpandColumnButton = [
-    { title: 'Delete Column', icon: <Trash color='red' />, handleAction: () => onOpen() },
-    // { title: 'Add new card ', icon: <CardAdd />, handleAction: () => console.log('Add new card') },
-    // {
-    //   title: 'Rename column',
-    //   icon: <Edit />,
-    //   handleAction: () => {
-    //     setOnFixTitleColumn(!onFixTitleColumn)
-    //   },
-    // },
-  ]
+  const listExpandColumnButton = [{ title: 'Delete Column', icon: <Trash color='red' />, handleAction: () => onOpen() }]
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
@@ -481,8 +466,8 @@ const Column = ({ column }: { column: IColumn }) => {
 
   return (
     <>
-      <div ref={setNodeRef} {...attributes} {...listeners} style={dndKitColumnStyle} className='max-w-[300px] min-w-[300px] '>
-        <div className={`rounded-lg bg-[#f1f2f4] w-full h-[fit-content]`}>
+      <div ref={setNodeRef} {...attributes} {...listeners} style={dndKitColumnStyle} className='min-w-[300px] max-w-[300px]'>
+        <div className={`h-[fit-content] w-full rounded-lg bg-[#f1f2f4]`}>
           <div className='flex items-center justify-between p-2'>
             {onFixTitleColumn ? (
               <Input
@@ -501,13 +486,13 @@ const Column = ({ column }: { column: IColumn }) => {
                 className='w-full'
               />
             ) : (
-              <h3 className='pl-3 py-2 w-full font-semibold select-none' onDoubleClick={() => setOnFixTitleColumn(!onFixTitleColumn)}>
+              <h3 className='w-full select-none py-2 pl-3 font-semibold' onDoubleClick={() => setOnFixTitleColumn(!onFixTitleColumn)}>
                 {column?.title}
               </h3>
             )}
             <Dropdown isOpen={isDropdownOpen} onClose={() => setIsDropdownOpen(false)}>
               <DropdownTrigger>
-                <div onClick={() => setIsDropdownOpen(!isDropdownOpen)} className='p-2 hover:bg-white/60 rounded-full'>
+                <div onClick={() => setIsDropdownOpen(!isDropdownOpen)} className='rounded-full p-2 hover:bg-white/60'>
                   <MoreHorizIcon className='text-black' />
                 </div>
               </DropdownTrigger>
@@ -530,10 +515,10 @@ const Column = ({ column }: { column: IColumn }) => {
         modalTitle='Delete Column'
         modalFooter={
           <div className='flex items-center gap-2'>
-            <Button variant='light' color='danger' onClick={handleDeleteColumn} className='py-3 px-6'>
+            <Button variant='light' color='danger' onClick={handleDeleteColumn} className='px-6 py-3'>
               Delete
             </Button>
-            <Button onClick={onOpenChange} className='bg-colorBoardContent text-white py-3 px-6'>
+            <Button onClick={onOpenChange} className='bg-colorBoardContent px-6 py-3 text-white'>
               Cancel
             </Button>
           </div>
@@ -547,11 +532,12 @@ const Column = ({ column }: { column: IColumn }) => {
 
 const ListCard = ({ cards }: { cards: ICard[] }) => {
   const dndKitCards = cards.map((item) => item._id)
-
   return (
     <SortableContext strategy={verticalListSortingStrategy} items={dndKitCards}>
       <div className='card'>
-        <div className='flex flex-col gap-2 px-2'>{cards?.length ? cards.map((card, index) => <CardContent key={index} card={card} />) : <></>}</div>
+        <div style={{ gap: cards.some((card) => card?.FE_PlaceholderCard) && cards.length < 2 ? '0' : '0.5rem' }} className='flex flex-col px-2'>
+          {cards?.length ? cards.map((card, index) => <CardContent key={index} card={card} />) : <></>}
+        </div>
       </div>
     </SortableContext>
   )

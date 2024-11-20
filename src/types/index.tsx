@@ -1,3 +1,5 @@
+import { NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
+
 export type ICard = {
   _id: string
   boardId: string
@@ -33,13 +35,15 @@ export type IBoard = {
   slug: string
   createAt: Date
   memberGmails: IMember[]
+  isStared: boolean
 }
 
 type IMember = {
-  _id: string
+  _id?: string
+  picture?: string
+  name?: string
   email: string
-  picture: string
-  name: string
+  type: (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES]
 }
 
 export type TUserInfo = {
@@ -51,4 +55,22 @@ export type TUserInfo = {
   family_name: string
   picture: string
   locale: string
+  notification: string[]
+}
+
+type Invitation = {
+  boardId: string
+  boardTitle: string
+  status: 'pending' | 'accepted' | 'declined'
+}
+
+export type Notifications = {
+  _id: string
+  ownerId: string
+  authorId: string
+  createdAt: string
+  status: (typeof NOTIFICATION_STATUS)[keyof typeof NOTIFICATION_STATUS]
+  type: 'invite'
+  title: string
+  invitation?: Invitation
 }

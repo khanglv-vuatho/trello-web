@@ -31,3 +31,7 @@ export const cleanMessage = (errorMessage: string) => {
   }
   return errorMessage
 }
+
+export const decodeEmail = (encodedEmail: string) => {
+  return decodeURIComponent(encodedEmail)
+}
