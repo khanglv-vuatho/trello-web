@@ -133,3 +133,14 @@ export const useStoreUser = create<TUserState>((set) => ({
     set({ userInfo })
   },
 }))
+
+type TWorkspaceState = {
+  workspace?: IBoard[]
+  storeWorkspace: (workspace: IBoard[]) => void
+}
+
+export const useStoreWorkspace = create<TWorkspaceState>((set) => ({
+  storeWorkspace: (workspace) => {
+    set({ workspace })
+  },
+}))

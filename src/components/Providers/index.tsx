@@ -3,8 +3,7 @@
 import { NextUIProvider } from '@nextui-org/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { ToastContainer } from 'react-toastify'
-import { GoogleOAuthProvider } from '@react-oauth/google'
-
+import { AppProgressBar as ProgressBar } from 'next-nprogress-bar'
 import 'react-toastify/dist/ReactToastify.css'
 
 function Providers({ children }: { children: React.ReactNode }) {
@@ -12,7 +11,7 @@ function Providers({ children }: { children: React.ReactNode }) {
     <NextUIProvider>
       <NextThemesProvider attribute='class' defaultTheme='light'>
         {children}
-
+        <ProgressBar height='4px' color='#fff' options={{ showSpinner: true }} shallowRouting />
         <ToastContainer />
       </NextThemesProvider>
     </NextUIProvider>

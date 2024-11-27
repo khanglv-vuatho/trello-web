@@ -55,7 +55,6 @@ export type TUserInfo = {
   family_name: string
   picture: string
   locale: string
-  notification: string[]
 }
 
 type Invitation = {

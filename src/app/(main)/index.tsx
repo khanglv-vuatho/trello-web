@@ -1,7 +1,7 @@
 'use client'
 
 import BoardItem from '@/components/BoardItem'
-import { useStoreBoard, useStoreUser } from '@/store'
+import { useStoreBoard, useStoreUser, useStoreWorkspace } from '@/store'
 import { TBoards } from '@/types'
 import { Skeleton } from '@nextui-org/react'
 import { Clock, Folder, Star1 } from 'iconsax-react'
@@ -17,13 +17,15 @@ export const MainPage = () => {
   const [onFeching, setOnFeching] = useState<boolean>(false)
   const [boardsInfo, setBoardsInfo] = useState<TBoards[]>([])
   const { userInfo } = useStoreUser()
-  const { fetchAllBoards, board } = useStoreBoard()
-  console.log({ board })
+  const { fetchAllBoards } = useStoreBoard()
+  const { storeWorkspace } = useStoreWorkspace()
+
   const handleGetMe = async () => {
     if (!userInfo) return
     try {
       const data: any = await fetchAllBoards(userInfo.email)
       setBoardsInfo(data?.boards)
+      storeWorkspace(data?.workspace)
     } catch (error) {
       console.log(error)
     } finally {

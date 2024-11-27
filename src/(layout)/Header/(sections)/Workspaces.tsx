@@ -1,13 +1,14 @@
 'use client'
 
+import { OverViewItem } from '@/components/OverViewItem'
 import PopoverCustom from '@/components/PopoverCustom'
-import { OverViewItem, WrapperItem } from '@/components/OverViewItem'
+import { useStoreWorkspace } from '@/store'
 import { Button } from '@nextui-org/react'
-import { ArrowDown2, Star1 } from 'iconsax-react'
-import Image from 'next/image'
-import React from 'react'
+import { ArrowDown2 } from 'iconsax-react'
 
 const Workspaces = () => {
+  const { workspace } = useStoreWorkspace()
+
   return (
     <PopoverCustom
       placement='bottom-start'
@@ -18,9 +19,9 @@ const Workspaces = () => {
       }
     >
       <div className='flex max-h-[300px] w-[300px] flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-2'>
-        {Array.from({ length: 10 }).map((_, index) => (
-          <OverViewItem href={`/workspaces/${index + 1}`} key={index}>
-            Workspace {index + 1}
+        {workspace?.map((item, index) => (
+          <OverViewItem href={`/board/${item?._id}`} key={index} hiddenStar>
+            {item?.title}
           </OverViewItem>
         ))}
       </div>

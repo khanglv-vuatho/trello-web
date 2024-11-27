@@ -9,12 +9,14 @@ isStared board => done
 delete board => done
 message UI => done
 notification UI => done
-detail profile UI => done
 update UI boardBar (update button)
 show real member in board/id page => done 
 invite member (show up modal invite member by email) => done
 recent, starred, workspace UI => done
 comfirm accept invite member from notification => done
+detail profile UI => done
+404 page => done
+progress bar => done
 
 //bug
 when drag card to other board, the card is not update (check state of board (card))

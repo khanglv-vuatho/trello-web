@@ -17,47 +17,21 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { Messages, Notifications, Recent, Starred, Workspaces } from './(sections)'
+import { ContentUser, Messages, Notifications, Recent, Starred, Workspaces } from './(sections)'
+import { InputSearch } from '@/components/InputSearch'
 
 function Header() {
-  const [onSearching, setOnSearching] = useState<boolean>(false)
-  const [onSending, setOnSending] = useState<boolean>(false)
-  const [onFetching, setOnFetching] = useState<boolean>(false)
+  const google_token = getCookie('google_token')
+  const { storeUser } = useStoreUser()
 
-  const [searchValue, setSearchValue] = useState<string>('')
   const router = useRouter()
 
-  const { storeUser } = useStoreUser()
+  const [onSending, setOnSending] = useState<boolean>(false)
+  const [onFetching, setOnFetching] = useState<boolean>(false)
 
   const userInfo = useStoreUser((state) => state.userInfo)
   const [titleBoard, setTitleBoard] = useState<string>('')
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
-
-  const inputRef = useRef<any>(null)
-
-  const _handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOnSearching(true)
-    setSearchValue(e.target.value)
-  }
-
-  const _handleSearching = async () => {
-    try {
-      // const { data } = instance.post("/home/search", {
-      //   value: searchValue,
-      // })
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setOnSearching(false)
-    }
-  }
-
-  const _handleClear = () => {
-    setSearchValue('')
-    inputRef.current.focus()
-  }
-
-  const searchTimer = useRef<any>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitleBoard(e.target.value)
@@ -79,24 +53,10 @@ function Header() {
     }
   }
 
-  useEffect(() => {
-    if (onSearching) {
-      searchTimer.current = setTimeout(() => {
-        _handleSearching()
-      }, 500)
-    }
-    return () => {
-      clearTimeout(searchTimer.current)
-    }
-  }, [onSearching])
-
-  const google_token = getCookie('google_token')
-
   const handleGetDetailUser = async ({ payload }: { payload: any }) => {
     try {
       const dataUser: any = await instance.post(`/v1/users/login`, payload)
-
-      storeUser(dataUser)
+      storeUser(dataUser.boards)
     } catch (error) {
       console.log(error)
     }
@@ -106,7 +66,6 @@ function Header() {
     try {
       const dataUser: any = await instance.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${google_token}`)
       await handleGetDetailUser({ payload: dataUser })
-      storeUser(dataUser)
     } catch (error) {
       if (error) {
         deleteCookie('access_token')
@@ -152,27 +111,7 @@ function Header() {
         </div>
       </div>
       <div className='flex items-center gap-4'>
-        <Input
-          ref={inputRef}
-          placeholder='Search'
-          autoComplete='off'
-          variant='bordered'
-          startContent={<SearchNormal1 size={24} className='text-primary' />}
-          endContent={
-            onSearching && !!searchValue.length ? (
-              <LoadingSearch className='absolute right-1.5 size-5 animate-spin text-white' />
-            ) : (
-              !!searchValue.length && <Add size={24} className='absolute right-1 rotate-45 cursor-pointer text-primary' onClick={_handleClear} />
-            )
-          }
-          classNames={{
-            inputWrapper: 'max-h-10 border-primary data-[hover=true]:border-primary group-data-[focus=true]:border-primary',
-            input: 'text-primary placeholder:text-primary data-[has-start-content=true]:pr-4',
-          }}
-          className='min-w-[120px]'
-          value={searchValue}
-          onChange={_handleChange}
-        />
+        <InputSearch />
 
         <div className='flex items-center gap-4'>
           <Notifications />
@@ -228,43 +167,6 @@ const ModalBodyCreateNewBoard = ({ handleChange, titleBoard, handleConfirmCreate
           isRequired
           type='text'
         />
-      </div>
-    </div>
-  )
-}
-
-const ContentUser = () => {
-  const router = useRouter()
-
-  const userInfo = useStoreUser((state) => state.userInfo)
-
-  const handleLogout = () => {
-    deleteCookie('access_token')
-    googleLogout()
-
-    router.push('/login')
-  }
-
-  return (
-    <div className='flex min-w-[200px] flex-col gap-2 p-2'>
-      <div className='flex items-center gap-2'>
-        <Avatar src={userInfo?.picture as string} className='flex !size-8 flex-shrink-0 rounded-full' alt={userInfo?.given_name as string} />
-        <div className='flex flex-col'>
-          <p>{userInfo?.given_name}</p>
-          <p>{userInfo?.email}</p>
-        </div>
-      </div>
-      {/* line */}
-      <div className='h-[1px] w-full bg-gray-200' />
-      <div className='flex flex-col gap-2'>
-        <Button as={Link} href={`/profile/${userInfo?.email}`} variant='light' startContent={<User size={20} />} className='flex w-full justify-start gap-2 py-2 text-sm'>
-          Detail Profile
-        </Button>
-        {/* line */}
-        <div className='h-[1px] w-full bg-gray-200' />
-        <Button startContent={<Logout size={20} />} variant='light' onPress={handleLogout} className='flex w-full justify-start gap-2 py-2 text-sm'>
-          Logout
-        </Button>
       </div>
     </div>
   )

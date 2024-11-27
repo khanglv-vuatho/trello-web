@@ -4,8 +4,12 @@ import PopoverCustom from '@/components/PopoverCustom'
 import { OverViewItem, WrapperItem } from '@/components/OverViewItem'
 import { Button } from '@nextui-org/react'
 import { ArrowDown2 } from 'iconsax-react'
+import { useStoreBoard } from '@/store'
+import { IBoard } from '@/types'
 
 const Recent = () => {
+  const { board } = useStoreBoard()
+  const recentBoards = (board as any)?.boards?.filter((item: IBoard) => !item?.isStared)
   return (
     <PopoverCustom
       placement='bottom-start'
@@ -16,9 +20,9 @@ const Recent = () => {
       }
     >
       <div className='flex max-h-[300px] w-[300px] flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-2'>
-        {Array.from({ length: 10 }).map((_, index) => (
-          <OverViewItem href={`/workspaces/${index + 1}`} key={index}>
-            Workspace {index + 1}
+        {recentBoards?.map((item: IBoard, index: number) => (
+          <OverViewItem href={`/board/${item?._id}`} key={index} isStared={item?.isStared}>
+            {item?.title}
           </OverViewItem>
         ))}
       </div>

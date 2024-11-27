@@ -32,6 +32,14 @@ export const cleanMessage = (errorMessage: string) => {
   return errorMessage
 }
 
+export const normalizeKeyword = (keyword: string) => {
+  return keyword
+    .normalize('NFD')
+    .toLowerCase()
+    .replace(/[\u0300-\u036f\s]/g, '')
+    .replace('đ', 'd')
+}
+
 export const decodeEmail = (encodedEmail: string) => {
   return decodeURIComponent(encodedEmail)
 }
