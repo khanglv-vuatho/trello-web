@@ -6,7 +6,6 @@ import { generatePlaceholderCard, mapOrder } from '@/utils'
 
 type TBoardState = {
   board?: IBoard
-  boardInfo?: IBoard[]
   storeBoard: (board: IBoard) => void
   fetchBoardDetail: (boardId: string, email: string) => Promise<IBoard>
   createNewColumn: (board: IBoard, title: string) => Promise<void>

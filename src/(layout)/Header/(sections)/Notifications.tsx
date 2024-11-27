@@ -3,7 +3,7 @@
 import PopoverCustom from '@/components/PopoverCustom'
 import { NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
 import instance from '@/services/axiosConfig'
-import { useStoreUser } from '@/store'
+import { useStoreBoard, useStoreUser } from '@/store'
 import { TNotifications } from '@/types'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { NotificationsNoneOutlined } from '@mui/icons-material'
@@ -12,7 +12,8 @@ import { useEffect, useState } from 'react'
 
 const Notifications = () => {
   const userInfo = useStoreUser((state) => state.userInfo)
-
+  const board = useStoreBoard((state) => state.board)
+  console.log({ board })
   const [notifications, setNotifications] = useState<TNotifications[]>([])
   const [onFetchingNotification, setOnFetchingNotification] = useState<boolean>(false)
 
@@ -39,11 +40,10 @@ const Notifications = () => {
 
   const handleAcceptNotification = async (notification: TNotifications) => {
     try {
-      await instance.put(`/v1/notifications/${notification?._id}`, { status: NOTIFICATION_TYPES.ACCEPTED })
-      console.log({ notification })
+      await instance.put(`/v1/notifications/${notification?._id}`, { status: NOTIFICATION_TYPES.ACCEPTED, email: userInfo?.email, boardId: notification?.invitation?.boardId })
       const newListNotifications = notifications.map((n) => {
         if (n?._id === notification?._id) {
-          return { ...n, invitation: { ...n.invitation, status: NOTIFICATION_TYPES.ACCEPTED } }
+          return { ...n, status: NOTIFICATION_STATUS.READ, invitation: { ...n.invitation, status: NOTIFICATION_TYPES.ACCEPTED } }
         }
         return n
       })

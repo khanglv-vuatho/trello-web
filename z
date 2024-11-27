@@ -13,12 +13,18 @@ detail profile UI => done
 update UI boardBar (update button)
 show real member in board/id page => done 
 invite member (show up modal invite member by email) => done
+recent, starred, workspace UI => done
+comfirm accept invite member from notification => done
 
 //bug
 when drag card to other board, the card is not update (check state of board (card))
 
 //core
-recent, starred, workspace
+comfirm accept invite member from notification and add workspace 
+
+stared board (state)
+
+recent, starred, workspace api
 click in user member => show all member of board in modal
 search boards
 dont have permission to view board => show toast => render UI (thinking)
@@ -26,7 +32,6 @@ add workspace when accept invite member
 public/ private board
 notification invite member
 comfirm accept invite member from email
-comfirm accept invite member from notification
 notification api
 chat with member
 chat with member api

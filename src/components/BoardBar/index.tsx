@@ -30,7 +30,7 @@ function BoardBar() {
       description: 'All team members can access',
     },
   ]
-  console.log({ isPrivateBoard })
+
   const listBoardBar: { startContent: any; title: string; content: React.ReactNode }[] = [
     {
       startContent: <VpnLockIcon />,

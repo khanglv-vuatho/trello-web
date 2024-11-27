@@ -75,3 +75,10 @@ export type TNotifications = {
   title: string
   invitation?: Invitation
 }
+
+export type TBoards = {
+  _id: string
+  title: string
+  description: string
+  isStared: boolean
+}
