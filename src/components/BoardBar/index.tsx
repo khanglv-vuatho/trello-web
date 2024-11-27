@@ -4,13 +4,12 @@ import { AddToDrive as AddToDriveIcon, Bolt as BoltIcon, Dashboard as DashboardI
 import { Avatar, AvatarGroup, Button, Input } from '@nextui-org/react'
 
 import ExpandButton from '@/components/ExpandButton'
-import { NOTIFICATION_TYPES } from '@/constants'
+import Modal from '@/components/Modal'
+import Toast from '@/components/Toast'
+import { BOARD_TYPE, NOTIFICATION_TYPES } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
-import { capitalizeFirstLetter } from '@/utils'
 import { memo, useEffect, useState } from 'react'
-import Modal from '../Modal'
-import Toast from '../Toast'
 
 function BoardBar() {
   const MAX_USER_SHOW = 3
@@ -18,15 +17,41 @@ function BoardBar() {
   const { storeBoard, board } = useStoreBoard()
 
   const [isFixTitleBoard, setIsFixTitleBoard] = useState<boolean>(false)
+  const [isPrivateBoard, setIsPrivateBoard] = useState<string>(board?.type || BOARD_TYPE.PUBLIC)
   const [titleBoard, setTitleBoard] = useState<string>(board?.title || '')
+
+  const listTypeBoard = [
+    {
+      type: BOARD_TYPE.PUBLIC,
+      description: 'Anyone with the link can access',
+    },
+    {
+      type: BOARD_TYPE.PRIVATE,
+      description: 'All team members can access',
+    },
+  ]
+  console.log({ isPrivateBoard })
   const listBoardBar: { startContent: any; title: string; content: React.ReactNode }[] = [
     {
       startContent: <VpnLockIcon />,
       title: 'Workspace Visibility',
       content: (
-        <div className='flex flex-col gap-2'>
+        <div className='flex flex-col gap-2 bg-gradient-to-br from-blue-600 to-indigo-800'>
           <span className='text-sm'>Workspace Visibility</span>
           <span className='text-xs text-gray-500'>Choose who can see your workspace</span>
+          <div className='flex w-full flex-col gap-2'>
+            {listTypeBoard.map((item) => (
+              <div
+                key={item.type}
+                className={`w-full rounded-lg border px-4 py-2 ${isPrivateBoard === item.type ? 'border-white/50' : 'border-white/10'}`}
+                onClick={() => setIsPrivateBoard(item.type)}
+              >
+                {/* uppercase the first letter */}
+                <p>{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</p>
+                <p>{item.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       ),
     },

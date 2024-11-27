@@ -1,14 +1,12 @@
 'use client'
 
-import Drawer from '@/components/Drawer'
 import Modal from '@/components/Modal'
 import Toast from '@/components/Toast'
-import instance from '@/services/axiosConfig'
 import { useStoreBoard, useStoreUser } from '@/store'
 import { Button, Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger, Skeleton } from '@nextui-org/react'
 import { Clock, MoreCircle, Star1 } from 'iconsax-react'
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type Boards = {
   _id: string

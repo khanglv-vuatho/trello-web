@@ -1,4 +1,4 @@
-import { NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
+import { BOARD_TYPE, NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
 
 export type ICard = {
   _id: string
@@ -25,7 +25,7 @@ export type IBoard = {
   _id: string
   title: string
   description: string
-  type: 'public' | 'private'
+  type: (typeof BOARD_TYPE)[keyof typeof BOARD_TYPE]
   ownerIds: string[]
   memberIds: string[]
   columnOrderIds: string[]
@@ -64,10 +64,11 @@ type Invitation = {
   status: 'pending' | 'accepted' | 'declined'
 }
 
-export type Notifications = {
+export type TNotifications = {
   _id: string
   ownerId: string
   authorId: string
+  actionId: string
   createdAt: string
   status: (typeof NOTIFICATION_STATUS)[keyof typeof NOTIFICATION_STATUS]
   type: 'invite'

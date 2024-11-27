@@ -1,12 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Providers from '@/components/Providers'
-import dynamic from 'next/dynamic'
 import { GoogleTagManager } from '@next/third-parties/google'
-
-const HeaderDynamic = dynamic(() => import('../../(layout)/Header'), {
-  ssr: false,
-})
+import Header from '@/(layout)/Header'
 
 export const metadata: Metadata = {
   title: 'NTTU Workspace',
@@ -19,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <GoogleTagManager gtmId='G-06FGH3XJJZ' />
       <body>
         <Providers>
-          <HeaderDynamic />
+          <Header />
           <>{children}</>
         </Providers>
       </body>

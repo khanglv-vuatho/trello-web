@@ -14,7 +14,16 @@ update UI boardBar (update button)
 show real member in board/id page => done 
 invite member (show up modal invite member by email) => done
 
+//bug
+when drag card to other board, the card is not update (check state of board (card))
+
 //core
+recent, starred, workspace
+click in user member => show all member of board in modal
+search boards
+dont have permission to view board => show toast => render UI (thinking)
+add workspace when accept invite member
+public/ private board
 notification invite member
 comfirm accept invite member from email
 comfirm accept invite member from notification
@@ -22,7 +31,6 @@ notification api
 chat with member
 chat with member api
 detail profile api
-click in user member => show all member of board in modal
 click in user member => detail profile in new page
 filter board
 detail of card (show in drawer)
@@ -34,6 +42,8 @@ crud detail of card
 
 
 //optimize 
+check notification is read
+check member is exits => stop call api
 split code to component
 check code to solid
 optimize toast to valid form

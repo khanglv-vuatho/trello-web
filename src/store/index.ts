@@ -8,7 +8,7 @@ type TBoardState = {
   board?: IBoard
   boardInfo?: IBoard[]
   storeBoard: (board: IBoard) => void
-  fetchBoardDetail: (boardId: string) => Promise<IBoard>
+  fetchBoardDetail: (boardId: string, email: string) => Promise<IBoard>
   createNewColumn: (board: IBoard, title: string) => Promise<void>
   createNewCard: (column: IColumn, board: IBoard, title: string) => Promise<void>
   moveColumn: (column: IColumn, board: IBoard, title: string) => Promise<void>
@@ -32,9 +32,9 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     }
   },
 
-  fetchBoardDetail: async (boardId) => {
+  fetchBoardDetail: async (boardId, email) => {
     try {
-      const data: any = await instance.get(`/v1/boards/${boardId}`)
+      const data: any = await instance.get(`/v1/boards/${boardId}?email=${email}`)
       const cloneData = { ...data }
 
       cloneData.columns = mapOrder(cloneData?.columns, cloneData?.columnOrderIds, '_id')

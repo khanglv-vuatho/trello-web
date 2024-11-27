@@ -5,15 +5,17 @@ import { useEffect, useState } from 'react'
 
 import BoardBar from '@/components/BoardBar'
 import BoardContent from '@/components/BoardContent'
-import { useStoreBoard } from '@/store'
+import { useStoreBoard, useStoreUser } from '@/store'
+
 const BoardDetails = ({ params }: { params: { boardId: string } }) => {
   const [onFetching, setOnFetching] = useState<boolean>(false)
   const { fetchBoardDetail } = useStoreBoard()
   const board: any = useStoreBoard((state) => state.board)
+  const email = useStoreUser((state) => state?.userInfo?.email) || ''
 
   const handleFetchingBoard = async () => {
     try {
-      await fetchBoardDetail(params.boardId)
+      await fetchBoardDetail(params.boardId, email)
     } catch (error) {
       console.log(error)
     } finally {
@@ -26,8 +28,9 @@ const BoardDetails = ({ params }: { params: { boardId: string } }) => {
   }, [onFetching])
 
   useEffect(() => {
+    if (!email) return
     setOnFetching(true)
-  }, [])
+  }, [email])
 
   if (!board || onFetching)
     return (

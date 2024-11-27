@@ -1,8 +1,8 @@
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import type { Metadata } from 'next'
 
-import './auth.css'
 import { GoogleTagManager } from '@next/third-parties/google'
+import './auth.css'
 export const metadata: Metadata = {
   title: 'Login to NTTU Workspace',
   description: 'Login to NTTU Workspace',
