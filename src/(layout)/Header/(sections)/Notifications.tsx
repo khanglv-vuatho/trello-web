@@ -53,10 +53,9 @@ const Notifications = () => {
     }
   }
 
-  console.log({ notifications })
   useEffect(() => {
-    !!userInfo && setOnFetchingNotification(true)
-  }, [userInfo])
+    !!userInfo?.email && setOnFetchingNotification(true)
+  }, [userInfo?.email])
 
   useEffect(() => {
     onFetchingNotification && handleFetchingNotification()

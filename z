@@ -17,27 +17,28 @@ comfirm accept invite member from notification => done
 detail profile UI => done
 404 page => done
 progress bar => done
+detail profile api => done
+recent, starred, workspace api => done
+notification api => done
+stared board (state) => done
+notification invite member => done
+add workspace when accept invite member => done
+delete board => done
 
 //bug
 when drag card to other board, the card is not update (check state of board (card))
 
 //core
+public/ private board
+
 comfirm accept invite member from notification and add workspace 
 
-stared board (state)
-
-recent, starred, workspace api
 click in user member => show all member of board in modal
+click in user member => show all member of board in modal api
 search boards
 dont have permission to view board => show toast => render UI (thinking)
-add workspace when accept invite member
-public/ private board
-notification invite member
-comfirm accept invite member from email
-notification api
-chat with member
-chat with member api
-detail profile api
+comfirm accept invite member from email (when user dont login store link and redirect to login page)
+
 click in user member => detail profile in new page
 filter board
 detail of card (show in drawer)
@@ -47,6 +48,9 @@ update UI name of board in board/id page
 
 crud detail of card
 
+// chat
+chat with member
+chat with member api
 
 //optimize 
 check notification is read
@@ -61,10 +65,6 @@ light/dark mode
 
 
 dragging card close create card
-delete board
-check limit create board
-recent
-render stared
 reponsive
 update UI 
 check limit create board (thinking)

@@ -3,8 +3,8 @@ const nextConfig = {
   reactStrictMode: false,
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'trungquandev.com' },
       { protocol: 'https', hostname: '*.googleusercontent.com' },
+      { protocol: 'https', hostname: 'trello-worker.khangluong2002.workers.dev' },
     ],
   },
 }

@@ -1,13 +1,12 @@
 'use client'
 
-import { Add as AddIcon, DragHandle as DragHandleIcon, MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
+import { useStoreBoard } from '@/store'
+import { IColumn } from '@/types'
+import { Add as AddIcon } from '@mui/icons-material'
 import { Button, Input } from '@nextui-org/react'
-import ExpandButton from '../ExpandButton'
 import { ChangeEvent, useState } from 'react'
 import { AddButton, CloseButton } from '../Button'
 import Toast from '../Toast'
-import { useStoreBoard } from '@/store'
-import { IBoard, IColumn } from '@/types'
 
 type TCreateCard = { column: IColumn; value: string; setValue: (value: string) => void }
 const CreateCard = ({ column, value, setValue }: TCreateCard) => {

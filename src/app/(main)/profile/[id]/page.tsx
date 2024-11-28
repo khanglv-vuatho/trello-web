@@ -5,7 +5,7 @@ import Toast from '@/components/Toast'
 import WrapperLayout from '@/components/WrapperLayout'
 import instance from '@/services/axiosConfig'
 import { useStoreUser } from '@/store'
-import { decodeEmail } from '@/utils'
+import { decodeEmail, objectToFormData } from '@/utils'
 import { Button, Input } from '@nextui-org/react'
 import { Camera } from 'iconsax-react'
 import { useEffect, useRef, useState } from 'react'
@@ -13,18 +13,34 @@ import { useEffect, useRef, useState } from 'react'
 const ProfilePage = ({ params }: { params: { id: string } }) => {
   const email = decodeEmail(params?.id)
   const { userInfo, storeUser } = useStoreUser()
+
   const [displayName, setDisplayName] = useState(userInfo?.name || '')
   const [onSubmit, setOnSubmit] = useState(false)
+  const [file, setFile] = useState<File | null>(null)
+  const [imageUI, setImageUI] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleChangeAvatar = (event: any) => {
+    const file = event.target.files[0]
+    if (file) {
+      setFile(file)
+      const objectUrl = URL.createObjectURL(file)
+      setImageUI(objectUrl)
+    }
+
+    event.target.value = ''
+  }
+
   const handleSubmit = async () => {
     try {
-      if (!displayName || displayName === userInfo?.name) return
-
-      await instance.put(`/v1/users/${email}`, {
+      if (!displayName || (displayName === userInfo?.name && file === null)) return
+      const payload = {
         name: displayName,
-        // avatar: userInfo?.picture,
-      })
-      storeUser({ ...userInfo, name: displayName || '' } as any)
+        avatar: file,
+      }
+      await instance.put(`/v1/users/${email}`, objectToFormData(payload))
+      storeUser({ ...userInfo, name: displayName || '', picture: imageUI || null } as any)
+      setFile(null)
       Toast({
         type: 'success',
         message: 'Update profile successfully',
@@ -37,14 +53,22 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
   }
 
   useEffect(() => {
-    if (onSubmit) {
-      handleSubmit()
-    }
+    onSubmit && handleSubmit()
   }, [onSubmit])
 
   useEffect(() => {
     setDisplayName(userInfo?.name || '')
+    setImageUI(userInfo?.picture || null)
   }, [userInfo?.name])
+
+  // Cleanup object URL when component unmounts or imageUI changes
+  useEffect(() => {
+    return () => {
+      if (imageUI && imageUI !== userInfo?.picture) {
+        URL.revokeObjectURL(imageUI)
+      }
+    }
+  }, [imageUI])
 
   return (
     <WrapperLayout>
@@ -53,8 +77,8 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
           <div className='mx-auto flex w-full flex-col gap-6'>
             <h1 className='text-2xl font-bold'>Edit Profile</h1>
             <div className='relative mx-auto size-[200px] overflow-hidden rounded-full'>
-              <input type='file' className='hidden' ref={fileInputRef} />
-              <ImageFallback src={userInfo?.picture || ''} alt='avatar' className='size-full object-cover' width={500} height={500} />
+              <input accept='image/*' onChange={handleChangeAvatar} type='file' className='hidden' ref={fileInputRef} />
+              <ImageFallback src={imageUI || ''} alt='avatar' className='size-full object-cover' width={500} height={500} />
               <div onClick={() => fileInputRef.current?.click()} className='absolute bottom-0 left-0 right-0 z-40 flex items-center justify-center rounded-full bg-gray-200 py-2'>
                 <Camera size={24} className='text-white' />
               </div>
