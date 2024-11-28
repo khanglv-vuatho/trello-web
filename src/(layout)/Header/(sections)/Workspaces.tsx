@@ -20,7 +20,7 @@ const Workspaces = () => {
     >
       <div className='flex max-h-[300px] w-[300px] flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-2'>
         {workspace?.map((item, index) => (
-          <OverViewItem href={`/board/${item?._id}`} key={index} hiddenStar>
+          <OverViewItem href={`/board/${item?._id}`} key={index} hiddenStar item={item}>
             {item?.title}
           </OverViewItem>
         ))}

@@ -8,8 +8,8 @@ import { useStoreBoard } from '@/store'
 import { IBoard } from '@/types'
 
 const Recent = () => {
-  const { board } = useStoreBoard()
-  const recentBoards = (board as any)?.boards?.filter((item: IBoard) => !item?.isStared)
+  const { boardsRecent } = useStoreBoard()
+
   return (
     <PopoverCustom
       placement='bottom-start'
@@ -20,8 +20,8 @@ const Recent = () => {
       }
     >
       <div className='flex max-h-[300px] w-[300px] flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-2'>
-        {recentBoards?.map((item: IBoard, index: number) => (
-          <OverViewItem href={`/board/${item?._id}`} key={index} isStared={item?.isStared}>
+        {boardsRecent?.map((item: IBoard, index: number) => (
+          <OverViewItem href={`/board/${item?._id}`} key={index} isStared={item?.isStared} item={item}>
             {item?.title}
           </OverViewItem>
         ))}

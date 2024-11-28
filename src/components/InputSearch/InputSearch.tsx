@@ -1,11 +1,10 @@
-import { Add } from 'iconsax-react'
-import { Input } from '@nextui-org/react'
-import { SearchNormal1 } from 'iconsax-react'
-import React, { useCallback, useRef, useState, useEffect } from 'react'
-import { LoadingSearch } from '../Icons'
 import instance from '@/services/axiosConfig'
-import { normalizeKeyword } from '@/utils'
 import { useStoreUser } from '@/store'
+import { normalizeKeyword } from '@/utils'
+import { Input } from '@nextui-org/react'
+import { Add, SearchNormal1 } from 'iconsax-react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { LoadingSearch } from '../Icons'
 
 const InputSearch = () => {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -13,7 +12,6 @@ const InputSearch = () => {
   const [searchValue, setSearchValue] = useState('')
   const [onSearching, setOnSearching] = useState(false)
   const [debouncedValue, setDebouncedValue] = useState(searchValue)
-
   const _handleClear = () => {
     setSearchValue('')
     inputRef?.current?.focus()
@@ -57,30 +55,27 @@ const InputSearch = () => {
   }
 
   return (
-    <div className='relative'>
-      <Input
-        ref={inputRef}
-        placeholder='Search'
-        autoComplete='off'
-        variant='bordered'
-        startContent={<SearchNormal1 size={24} className='text-primary' />}
-        endContent={
-          onSearching && !!searchValue.length ? (
-            <LoadingSearch className='absolute right-1.5 size-5 animate-spin text-white' />
-          ) : (
-            !!searchValue.length && <Add size={24} className='absolute right-1 rotate-45 cursor-pointer text-primary' onClick={_handleClear} />
-          )
-        }
-        classNames={{
-          inputWrapper: 'max-h-10 border-primary data-[hover=true]:border-primary group-data-[focus=true]:border-primary',
-          input: 'text-primary placeholder:text-primary data-[has-start-content=true]:pr-4',
-        }}
-        className='min-w-[120px]'
-        value={searchValue}
-        onChange={_handleChange}
-      />
-      <div className='h-full absolute left-0 top-0 w-full bg-red-500'>123</div>
-    </div>
+    <Input
+      ref={inputRef}
+      placeholder='Search'
+      autoComplete='off'
+      variant='bordered'
+      startContent={<SearchNormal1 size={24} className='text-primary' />}
+      endContent={
+        onSearching && !!searchValue.length ? (
+          <LoadingSearch className='absolute right-1.5 size-5 animate-spin text-white' />
+        ) : (
+          !!searchValue.length && <Add size={24} className='absolute right-1 rotate-45 cursor-pointer text-primary' onClick={_handleClear} />
+        )
+      }
+      classNames={{
+        inputWrapper: 'max-h-10 border-primary data-[hover=true]:border-primary group-data-[focus=true]:border-primary',
+        input: 'text-primary placeholder:text-primary data-[has-start-content=true]:pr-4',
+      }}
+      className='min-w-[120px]'
+      value={searchValue}
+      onChange={_handleChange}
+    />
   )
 }
 

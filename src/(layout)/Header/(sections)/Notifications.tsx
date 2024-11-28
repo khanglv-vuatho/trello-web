@@ -8,7 +8,7 @@ import { TNotifications } from '@/types'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { NotificationsNoneOutlined } from '@mui/icons-material'
 import { Avatar, Badge, Button } from '@nextui-org/react'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 
 const Notifications = () => {
   const userInfo = useStoreUser((state) => state.userInfo)
@@ -67,7 +67,15 @@ const Notifications = () => {
       noData={notifications?.length === 0}
       popoverTrigger={
         <Button isIconOnly variant='light' className='flex !size-10 flex-shrink-0 text-white hover:bg-white/10'>
-          <Badge content={notifications?.filter((n) => n.status === NOTIFICATION_STATUS.UNREAD).length} shape='circle' color='danger' placement='top-right' size='sm' classNames={{ badge: '!size-5' }}>
+          <Badge
+            isInvisible={notifications?.filter((n) => n.status === NOTIFICATION_STATUS.UNREAD).length === 0}
+            content={notifications?.filter((n) => n.status === NOTIFICATION_STATUS.UNREAD).length}
+            shape='circle'
+            color='danger'
+            placement='top-right'
+            size='sm'
+            classNames={{ badge: '!size-5' }}
+          >
             <NotificationsNoneOutlined />
           </Badge>
         </Button>
@@ -119,4 +127,4 @@ const Notifications = () => {
   )
 }
 
-export default Notifications
+export default memo(Notifications)

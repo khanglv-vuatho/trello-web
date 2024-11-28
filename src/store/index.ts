@@ -6,7 +6,11 @@ import { generatePlaceholderCard, mapOrder } from '@/utils'
 
 type TBoardState = {
   board?: IBoard
+  boardsRecent?: IBoard[]
+  boardsStar?: IBoard[]
   storeBoard: (board: IBoard) => void
+  storeBoardRecent: (board: IBoard[]) => void
+  storeBoardStar: (board: IBoard[]) => void
   fetchBoardDetail: (boardId: string, email: string) => Promise<IBoard>
   createNewColumn: (board: IBoard, title: string) => Promise<void>
   createNewCard: (column: IColumn, board: IBoard, title: string) => Promise<void>
@@ -14,6 +18,7 @@ type TBoardState = {
   starBoard: (boardId: string, isStared: boolean) => Promise<void>
   fetchAllBoards: (email: string) => Promise<void>
   deleteBoard: (boardId: string) => Promise<void>
+  updateRecentBoardAndStar: (board: IBoard) => Promise<void>
 }
 
 export const useStoreBoard = create<TBoardState>((set, get) => ({
@@ -21,6 +26,45 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     set({ board })
   },
 
+  storeBoardRecent: (boardsRecent) => {
+    set({ boardsRecent })
+  },
+
+  storeBoardStar: (boardsStar) => {
+    set({ boardsStar })
+  },
+
+  updateRecentBoardAndStar: async (board) => {
+    const { boardsRecent, boardsStar } = get()
+
+    if (!board) return
+
+    if (board.isStared) {
+      // Remove from starred and add to recent
+      const updatedBoardsStar = boardsStar?.filter((item) => item._id !== board._id) || []
+      const updatedBoardsRecent = [...(boardsRecent || []), board]
+
+      set({
+        boardsStar: updatedBoardsStar,
+        boardsRecent: updatedBoardsRecent.filter(
+          (item, index, self) => self.findIndex((b) => b._id === item._id) === index, // Ensure no duplicates
+        ),
+      })
+    } else {
+      // Add to starred and remove from recent
+      const updatedBoardsStar = [...(boardsStar || []), board]
+      const updatedBoardsRecent = boardsRecent?.filter((item) => item._id !== board._id) || []
+
+      set({
+        boardsStar: updatedBoardsStar,
+        boardsRecent: updatedBoardsRecent,
+      })
+    }
+
+    // Toggle board's `isStared` status
+    board.isStared = !board.isStared
+    await get().starBoard(board?._id, board?.isStared)
+  },
   fetchAllBoards: async (email) => {
     try {
       const data: any = await instance.get(`/v1/boards/get-all?email=${email}`)
@@ -116,10 +160,6 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
 
   starBoard: async (boardId, isStared) => {
     await instance.put('/v1/boards/' + boardId, { isStared })
-    const board = get().board
-
-    if (!board) return
-    const newBoard = { ...board, isStared }
   },
 }))
 

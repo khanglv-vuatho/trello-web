@@ -8,8 +8,8 @@ import { Button } from '@nextui-org/react'
 import { ArrowDown2 } from 'iconsax-react'
 
 const Starred = () => {
-  const { board } = useStoreBoard()
-  const starredBoards = (board as any)?.boards?.filter((item: IBoard) => item?.isStared)
+  const { boardsStar } = useStoreBoard()
+
   return (
     <PopoverCustom
       placement='bottom-start'
@@ -19,9 +19,9 @@ const Starred = () => {
         </Button>
       }
     >
-      <div className='flex max-h-[300px] w-[300px] flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-2'>
-        {starredBoards?.map((item: IBoard, index: number) => (
-          <OverViewItem href={`/board/${item?._id}`} key={index} isStared={item?.isStared}>
+      <div className='flex max-h-[300px] min-w-[300px] max-w-[300px] flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-2'>
+        {boardsStar?.map((item: IBoard, index: number) => (
+          <OverViewItem href={`/board/${item?._id}`} key={index} isStared={item?.isStared} item={item}>
             {item?.title}
           </OverViewItem>
         ))}

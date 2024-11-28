@@ -2,7 +2,7 @@
 
 import BoardItem from '@/components/BoardItem'
 import { useStoreBoard, useStoreUser, useStoreWorkspace } from '@/store'
-import { TBoards } from '@/types'
+import { IBoard, TBoards } from '@/types'
 import { Skeleton } from '@nextui-org/react'
 import { Clock, Folder, Star1 } from 'iconsax-react'
 import { useEffect, useState } from 'react'
@@ -15,17 +15,17 @@ type TListInfoBoards = {
 
 export const MainPage = () => {
   const [onFeching, setOnFeching] = useState<boolean>(false)
-  const [boardsInfo, setBoardsInfo] = useState<TBoards[]>([])
   const { userInfo } = useStoreUser()
-  const { fetchAllBoards } = useStoreBoard()
-  const { storeWorkspace } = useStoreWorkspace()
+  const { fetchAllBoards, storeBoardRecent, storeBoardStar, boardsRecent, boardsStar } = useStoreBoard()
+  const { storeWorkspace, workspace } = useStoreWorkspace()
 
   const handleGetMe = async () => {
     if (!userInfo) return
     try {
       const data: any = await fetchAllBoards(userInfo.email)
-      setBoardsInfo(data?.boards)
       storeWorkspace(data?.workspace)
+      storeBoardRecent(data?.boards?.filter((item: IBoard) => !item?.isStared))
+      storeBoardStar(data?.boards?.filter((item: IBoard) => item?.isStared))
     } catch (error) {
       console.log(error)
     } finally {
@@ -46,12 +46,17 @@ export const MainPage = () => {
     {
       title: 'Starred boards',
       icon: <Star1 />,
-      boards: boardsInfo?.filter((item) => item?.isStared),
+      boards: boardsStar || [],
     },
     {
       title: 'Recently viewed',
       icon: <Clock />,
-      boards: boardsInfo?.filter((item) => !item?.isStared),
+      boards: boardsRecent || [],
+    },
+    {
+      title: 'Workspace',
+      icon: <Folder />,
+      boards: workspace || [],
     },
   ]
 
@@ -74,11 +79,15 @@ export const MainPage = () => {
                         <p>{item?.boards?.length}</p>
                       </div>
                       {onFeching ? (
-                        <Skeleton className='h-[100px] w-[200px] rounded-[4px] bg-white/10 before:border-0 before:via-white/20' />
-                      ) : (
                         <div className='flex min-h-[100px] w-full gap-2 overflow-auto pb-2'>
-                          {item?.boards?.map((board) => <BoardItem key={item.title} board={board} setBoardsInfo={setBoardsInfo} boardsInfo={boardsInfo} />)}
+                          {Array(3)
+                            .fill(0)
+                            .map((_, index) => (
+                              <Skeleton key={index} className='h-[100px] min-w-[200px] rounded-[4px] bg-white/10 before:border-0 before:via-white/20' />
+                            ))}
                         </div>
+                      ) : (
+                        <div className='flex min-h-[100px] w-full gap-2 overflow-auto pb-2'>{item?.boards?.map((board) => <BoardItem key={item.title} board={board} />)}</div>
                       )}
                     </div>
                   )

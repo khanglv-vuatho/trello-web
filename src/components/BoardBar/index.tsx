@@ -3,7 +3,7 @@
 import { AddToDrive as AddToDriveIcon, Bolt as BoltIcon, Dashboard as DashboardIcon, FilterList as FilterListIcon, PersonAdd as PersonAddIcon, VpnLock as VpnLockIcon } from '@mui/icons-material'
 import { Avatar, AvatarGroup, Button, Input } from '@nextui-org/react'
 
-import ExpandButton from '@/components/ExpandButton'
+import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import Modal from '@/components/Modal'
 import Toast from '@/components/Toast'
 import { BOARD_TYPE, NOTIFICATION_TYPES } from '@/constants'
@@ -158,9 +158,10 @@ function BoardBar() {
             {board?.title}
           </Button>
         )}
-        {listBoardBar.map((item, index) => (
+        {/* {listBoardBar.map((item, index) => (
           <ExpandButton key={index} title={item.title} content={item.content} startContent={item.startContent} style='font-normal'></ExpandButton>
-        ))}
+        ))} */}
+        <SelectTypeOfWorkspace />
       </div>
       <div className='flex items-center gap-4'>
         <Button className='w-full px-4 py-2 text-white' onClick={handleToggleModalInviteMember} startContent={<PersonAddIcon />} variant='bordered'>

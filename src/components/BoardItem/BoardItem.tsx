@@ -1,32 +1,30 @@
 'use client'
 
 import { useStoreBoard } from '@/store'
-import { TBoards } from '@/types'
-import React, { useEffect, useState } from 'react'
-import Toast from '../Toast'
-import Modal from '../Modal'
+import { IBoard, TBoards } from '@/types'
 import { Button, Listbox, ListboxItem, Popover, PopoverContent, PopoverTrigger } from '@nextui-org/react'
-import Link from 'next/link'
 import { MoreCircle, Star1 } from 'iconsax-react'
+import Link from 'next/link'
+import { memo, useEffect, useState } from 'react'
+import Modal from '../Modal'
+import Toast from '../Toast'
 
-const BoardItem = ({ board, setBoardsInfo, boardsInfo }: { board: TBoards; setBoardsInfo: (boards: TBoards[]) => void; boardsInfo: TBoards[] }) => {
-  const [isStared, setIsStared] = useState<boolean>(board?.isStared)
+const BoardItem = ({ board }: { board: TBoards }) => {
   const [onSending, setOnSending] = useState<boolean>(false)
   const [isOpenPopover, setIsOpenPopover] = useState<boolean>(false)
   const [isOpenModalDelete, setIsOpenModalDelete] = useState<boolean>(false)
   const [onDeleting, setOnDeleting] = useState<boolean>(false)
-  const { starBoard, deleteBoard } = useStoreBoard()
+  const { deleteBoard, updateRecentBoardAndStar } = useStoreBoard()
 
   const _handleToggleStar = (e: any) => {
     e.preventDefault()
     setOnSending(true)
-    setIsStared(!isStared)
   }
 
   const handleToggleStartApi = async () => {
     try {
-      await starBoard(board?._id, isStared)
-      setBoardsInfo(boardsInfo?.map((item) => (item._id === board?._id ? { ...item, isStared } : item)))
+      // await starBoard(board?._id, !board?.isStared)
+      await updateRecentBoardAndStar(board as IBoard)
     } catch (error) {
       console.log(error)
     } finally {
@@ -37,7 +35,7 @@ const BoardItem = ({ board, setBoardsInfo, boardsInfo }: { board: TBoards; setBo
   const handleDeleteBoard = async () => {
     try {
       await deleteBoard(board?._id)
-      setBoardsInfo(boardsInfo?.filter((item) => item._id !== board?._id))
+      //khang
       Toast({ message: 'Board deleted successfully', type: 'success' })
     } catch (error) {
       console.log(error)
@@ -73,9 +71,7 @@ const BoardItem = ({ board, setBoardsInfo, boardsInfo }: { board: TBoards; setBo
           </Button>
         </div>
       </Modal>
-      <Link href={`/board/${board?._id}`} className='absolute inset-0 z-10'>
-        <span className='sr-only'>Go to board: {board?.title}</span>
-      </Link>
+      <Link href={`/board/${board?._id}`} className='absolute inset-0 z-10' />
       <p className='line-clamp-1 max-w-[140px]'>{board?.title}</p>
       <p className='line-clamp-1 max-w-[140px]'>{board?.description}</p>
 
@@ -109,10 +105,10 @@ const BoardItem = ({ board, setBoardsInfo, boardsInfo }: { board: TBoards; setBo
         onClick={_handleToggleStar}
         className='absolute bottom-2 right-0 z-[200] translate-x-[100%] bg-transparent p-0 duration-200 group-hover:translate-x-[10px]'
       >
-        <Star1 variant={isStared ? 'Bold' : 'Outline'} className={isStared ? 'text-yellow-500' : 'text-white'} />
+        <Star1 variant={board?.isStared ? 'Bold' : 'Outline'} className={board?.isStared ? 'text-yellow-500' : 'text-white'} />
       </Button>
     </div>
   )
 }
 
-export default BoardItem
+export default memo(BoardItem)

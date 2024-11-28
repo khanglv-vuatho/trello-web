@@ -110,7 +110,7 @@ function Header() {
           </Button>
         </div>
       </div>
-      <div className='flex items-center gap-4'>
+      <div className='relative flex items-center gap-4'>
         <InputSearch />
 
         <div className='flex items-center gap-4'>
