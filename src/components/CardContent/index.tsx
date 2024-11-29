@@ -107,11 +107,11 @@ const CardContent = ({ card }: { card: ICard }) => {
 
   return (
     <div ref={setNodeRef} {...listeners} {...attributes}>
-      <CardNextUI className={`cursor-pointer rounded-lg group`} style={dndKitCardStyle}>
+      <CardNextUI className={`group cursor-pointer rounded-lg`} style={dndKitCardStyle}>
         <CardBody className={`p-0 ${card?.FE_PlaceholderCard ? 'hidden' : 'block'}`}>
-          <div className='flex items-center justify-between pr-1 w-full'>
+          <div className='flex w-full items-center justify-between pr-1'>
             <div className='w-[90%]'>
-              {card?.cover && <ImageFallback alt={card?.cover} className='object-contain max-h-[200px] w-full' src={card?.cover} width={270} height={400} />}
+              {card?.cover && <ImageFallback alt={card?.cover} className='max-h-[200px] w-full object-contain' src={card?.cover} width={270} height={400} />}
               {onFixTitleCard ? (
                 <Input
                   onKeyUp={(e) => {
@@ -130,24 +130,24 @@ const CardContent = ({ card }: { card: ICard }) => {
                   className='w-full'
                 />
               ) : (
-                <p className='p-2 select-none' onDoubleClick={() => setOnFixTitleCard(!onFixTitleCard)}>
+                <p className='select-none p-2' onDoubleClick={() => setOnFixTitleCard(!onFixTitleCard)}>
                   {card?.title}
                 </p>
               )}
               {shouldShowCardAction() && (
                 <div className='flex items-center gap-2 p-2'>
                   {!!card?.memberIds?.length && (
-                    <Button variant='light' startContent={<GroupIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
+                    <Button variant='light' startContent={<GroupIcon className='size-5' />} className='flex items-center gap-2 rounded-sm text-colorHeader'>
                       {card?.memberIds?.length}
                     </Button>
                   )}
                   {!!card?.comments?.length && (
-                    <Button variant='light' startContent={<CommentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
+                    <Button variant='light' startContent={<CommentIcon className='size-5' />} className='flex items-center gap-2 rounded-sm text-colorHeader'>
                       {card?.comments?.length}
                     </Button>
                   )}
                   {!!card?.attachments?.length && (
-                    <Button variant='light' startContent={<AttachmentIcon className='size-5' />} className='flex gap-2 items-center text-colorHeader rounded-sm'>
+                    <Button variant='light' startContent={<AttachmentIcon className='size-5' />} className='flex items-center gap-2 rounded-sm text-colorHeader'>
                       {card?.attachments?.length}
                     </Button>
                   )}
@@ -155,7 +155,7 @@ const CardContent = ({ card }: { card: ICard }) => {
               )}
             </div>
             <div onClick={() => onOpen()}>
-              <Trash className='hidden group-hover:block hover:text-red-500 duration-150' size={20} />
+              <Trash className='hidden duration-150 hover:text-red-500 group-hover:block' size={20} />
             </div>
           </div>
         </CardBody>
@@ -166,10 +166,10 @@ const CardContent = ({ card }: { card: ICard }) => {
         modalTitle='Delete Card'
         modalFooter={
           <div className='flex items-center gap-2'>
-            <Button isLoading={onDeletingCard} variant='light' color='danger' onClick={() => handleDeleteCard()} className='py-3 px-6'>
+            <Button isLoading={onDeletingCard} variant='light' color='danger' onClick={() => handleDeleteCard()} className='px-6 py-3'>
               Delete
             </Button>
-            <Button onClick={onOpenChange} className='bg-colorBoardContent text-white py-3 px-6'>
+            <Button onClick={onOpenChange} className='bg-colorBoardContent px-6 py-3 text-white'>
               Cancel
             </Button>
           </div>

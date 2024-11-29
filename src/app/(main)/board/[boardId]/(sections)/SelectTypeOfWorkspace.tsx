@@ -20,7 +20,7 @@ const SelectTypeOfWorkspace = () => {
   return (
     <PopoverCustom
       popoverTrigger={
-        <Button startContent={<VpnLockIcon />} isIconOnly variant='light' className='flex !size-10 flex-shrink-0 text-white hover:bg-white/10'>
+        <Button startContent={<VpnLockIcon />} isIconOnly variant='light' className='!h-10 flex flex-shrink-0 text-white hover:bg-white/10'>
           Workspace Visibility
         </Button>
       }

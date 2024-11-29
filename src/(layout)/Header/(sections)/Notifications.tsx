@@ -1,21 +1,21 @@
 'use client'
 
+import { NoItemOverView } from '@/components/OverViewItem'
 import PopoverCustom from '@/components/PopoverCustom'
 import { NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
 import instance from '@/services/axiosConfig'
-import { useStoreBoard, useStoreUser } from '@/store'
+import { useStoreUser } from '@/store'
 import { TNotifications } from '@/types'
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { NotificationsNoneOutlined } from '@mui/icons-material'
 import { Avatar, Badge, Button } from '@nextui-org/react'
 import { memo, useEffect, useState } from 'react'
 
 const Notifications = () => {
   const userInfo = useStoreUser((state) => state.userInfo)
-  const board = useStoreBoard((state) => state.board)
-  console.log({ board })
   const [notifications, setNotifications] = useState<TNotifications[]>([])
   const [onFetchingNotification, setOnFetchingNotification] = useState<boolean>(false)
+
+  const noData = notifications?.length === 0
 
   const handleFetchingNotification = async () => {
     try {
@@ -63,7 +63,7 @@ const Notifications = () => {
 
   return (
     <PopoverCustom
-      noData={notifications?.length === 0}
+      noData={noData}
       popoverTrigger={
         <Button isIconOnly variant='light' className='flex !size-10 flex-shrink-0 text-white hover:bg-white/10'>
           <Badge
@@ -81,12 +81,8 @@ const Notifications = () => {
       }
     >
       <div className='flex max-h-[300px] w-[340px] flex-col items-center gap-2 overflow-auto py-2'>
-        {notifications?.length === 0 ? (
-          <div className='flex flex-col items-center text-center'>
-            <DotLottieReact className='w-80' src='https://lottie.host/27603ce5-73cf-4072-81df-1fba472f7e5c/8Th9oMgq8s.json' loop autoplay />
-            <h2 className='text-lg font-medium text-gray-900'>No notifications yet</h2>
-            <p className='mb-4 text-sm text-gray-500'>Your notifications will appear here</p>
-          </div>
+        {noData ? (
+          <NoItemOverView title='No notifications yet' description='Your notifications will appear here' />
         ) : (
           notifications.map((notification) => (
             <div

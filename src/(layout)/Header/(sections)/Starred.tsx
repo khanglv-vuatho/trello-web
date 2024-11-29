@@ -1,6 +1,6 @@
 'use client'
 
-import { OverViewItem } from '@/components/OverViewItem'
+import { NoItemOverView, OverViewItem } from '@/components/OverViewItem'
 import PopoverCustom from '@/components/PopoverCustom'
 import { useStoreBoard } from '@/store'
 import { IBoard } from '@/types'
@@ -10,8 +10,10 @@ import { ArrowDown2 } from 'iconsax-react'
 const Starred = () => {
   const { boardsStar } = useStoreBoard()
 
+  const noData = boardsStar?.length === 0
   return (
     <PopoverCustom
+      noData={noData}
       placement='bottom-start'
       popoverTrigger={
         <Button endContent={<ArrowDown2 size={16} />} variant='light' className='flex !min-h-10 flex-shrink-0 bg-transparent text-white hover:bg-white/10'>
@@ -20,11 +22,15 @@ const Starred = () => {
       }
     >
       <div className='flex max-h-[300px] min-w-[300px] max-w-[300px] flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-2'>
-        {boardsStar?.map((item: IBoard, index: number) => (
-          <OverViewItem href={`/board/${item?._id}`} key={index} isStared={item?.isStared} item={item}>
-            {item?.title}
-          </OverViewItem>
-        ))}
+        {noData ? (
+          <NoItemOverView title='No starred boards' description='Your starred boards will appear here' />
+        ) : (
+          boardsStar?.map((item: IBoard, index: number) => (
+            <OverViewItem href={`/board/${item?._id}`} key={index} isStared={item?.isStared} item={item}>
+              {item?.title}
+            </OverViewItem>
+          ))
+        )}
       </div>
     </PopoverCustom>
   )

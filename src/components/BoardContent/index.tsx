@@ -250,7 +250,6 @@ function BoardContent() {
     } catch (error) {
       console.log(error)
     }
-    console.log({ cloneBoard })
   }
 
   const _handleDragStart = (e: any) => {

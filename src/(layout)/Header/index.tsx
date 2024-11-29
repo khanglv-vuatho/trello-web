@@ -1,13 +1,11 @@
 'use client'
 
-import { googleLogout } from '@react-oauth/google'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
-import { Avatar, Button, Input, useDisclosure } from '@nextui-org/react'
-import { Add, Logout, SearchNormal1, User } from 'iconsax-react'
+import { Avatar, Button, useDisclosure } from '@nextui-org/react'
+import { Add } from 'iconsax-react'
 
 import ExpandButton from '@/components/ExpandButton'
-import { LoadingSearch } from '@/components/Icons'
 import Modal from '@/components/Modal'
 import Toast from '@/components/Toast'
 import instance from '@/services/axiosConfig'
@@ -17,8 +15,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { ContentUser, Messages, Notifications, Recent, Starred, Workspaces } from './(sections)'
 import { InputSearch } from '@/components/InputSearch'
+import { ContentUser, Messages, Notifications, Recent, Starred, Workspaces } from './(sections)'
+import ModalBodyCreateNewBoard from './(sections)/ModalBodyCreateNewBoard'
 
 function Header() {
   const google_token = getCookie('google_token')
@@ -130,7 +129,7 @@ function Header() {
             <Button variant='light' color='default' onClick={onOpenChange} className='px-6 py-3'>
               Cancel
             </Button>
-            <Button isLoading={onSending} onClick={handleConfirmCreateNewBoard} className='bg-colorBoardContent px-6 py-3 text-white'>
+            <Button isLoading={onSending} onClick={handleConfirmCreateNewBoard} className='bg-white/10 px-6 py-3 text-white'>
               Create
             </Button>
           </div>
@@ -139,36 +138,6 @@ function Header() {
         <ModalBodyCreateNewBoard handleChange={handleChange} titleBoard={titleBoard} handleConfirmCreateNewBoard={handleConfirmCreateNewBoard} />
       </Modal>
     </header>
-  )
-}
-
-type TModalBodyCreateNewBoard = {
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  titleBoard: string
-  handleConfirmCreateNewBoard: () => void
-}
-
-const ModalBodyCreateNewBoard = ({ handleChange, titleBoard, handleConfirmCreateNewBoard }: TModalBodyCreateNewBoard) => {
-  return (
-    <div className='flex flex-col gap-4'>
-      <div className='flex flex-col gap-2'>
-        <label>
-          Title <span className='text-red-700'>*</span>
-        </label>
-        <Input
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleConfirmCreateNewBoard()
-            }
-          }}
-          value={titleBoard}
-          placeholder={`Enter your board name`}
-          onChange={handleChange}
-          isRequired
-          type='text'
-        />
-      </div>
-    </div>
   )
 }
 

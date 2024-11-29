@@ -38,7 +38,7 @@ export type IBoard = {
   isStared: boolean
 }
 
-type IMember = {
+export type IMember = {
   _id?: string
   picture?: string
   name?: string

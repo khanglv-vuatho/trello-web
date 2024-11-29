@@ -9,8 +9,7 @@ import { useStoreBoard, useStoreUser } from '@/store'
 
 const BoardDetails = ({ params }: { params: { boardId: string } }) => {
   const [onFetching, setOnFetching] = useState<boolean>(false)
-  const { fetchBoardDetail } = useStoreBoard()
-  const board: any = useStoreBoard((state) => state.board)
+  const { fetchBoardDetail,board } = useStoreBoard()
   const email = useStoreUser((state) => state?.userInfo?.email) || ''
 
   const handleFetchingBoard = async () => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { OverViewItem } from '@/components/OverViewItem'
+import { NoItemOverView, OverViewItem } from '@/components/OverViewItem'
 import PopoverCustom from '@/components/PopoverCustom'
 import { useStoreWorkspace } from '@/store'
 import { Button } from '@nextui-org/react'
@@ -19,11 +19,15 @@ const Workspaces = () => {
       }
     >
       <div className='flex max-h-[300px] w-[300px] flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-2'>
-        {workspace?.map((item, index) => (
-          <OverViewItem href={`/board/${item?._id}`} key={index} hiddenStar item={item}>
-            {item?.title}
-          </OverViewItem>
-        ))}
+        {workspace?.length === 0 ? (
+          <NoItemOverView title='No workspaces' description='Your workspaces will appear here' />
+        ) : (
+          workspace?.map((item, index) => (
+            <OverViewItem href={`/board/${item?._id}`} key={index} hiddenStar item={item}>
+              {item?.title}
+            </OverViewItem>
+          ))
+        )}
       </div>
     </PopoverCustom>
   )

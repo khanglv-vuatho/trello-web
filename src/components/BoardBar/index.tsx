@@ -3,13 +3,14 @@
 import { AddToDrive as AddToDriveIcon, Bolt as BoltIcon, Dashboard as DashboardIcon, FilterList as FilterListIcon, PersonAdd as PersonAddIcon, VpnLock as VpnLockIcon } from '@mui/icons-material'
 import { Avatar, AvatarGroup, Button, Input } from '@nextui-org/react'
 
-import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import Modal from '@/components/Modal'
 import Toast from '@/components/Toast'
 import { BOARD_TYPE, NOTIFICATION_TYPES } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
 import { memo, useEffect, useState } from 'react'
+import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
+import MemberGroup from '../MemberGroup'
 
 function BoardBar() {
   const MAX_USER_SHOW = 3
@@ -19,6 +20,10 @@ function BoardBar() {
   const [isFixTitleBoard, setIsFixTitleBoard] = useState<boolean>(false)
   const [isPrivateBoard, setIsPrivateBoard] = useState<string>(board?.type || BOARD_TYPE.PUBLIC)
   const [titleBoard, setTitleBoard] = useState<string>(board?.title || '')
+
+  const [isOpenModalInviteMember, setIsOpenModalInviteMember] = useState(false)
+  const [isInvitingMember, setIsInvitingMember] = useState(false)
+  const [emailInviteMember, setEmailInviteMember] = useState('')
 
   const listTypeBoard = [
     {
@@ -92,9 +97,6 @@ function BoardBar() {
     }
   }
 
-  const [isOpenModalInviteMember, setIsOpenModalInviteMember] = useState(false)
-  const [isInvitingMember, setIsInvitingMember] = useState(false)
-  const [emailInviteMember, setEmailInviteMember] = useState('')
   const handleToggleModalInviteMember = () => {
     setIsOpenModalInviteMember(!isOpenModalInviteMember)
   }
@@ -128,7 +130,7 @@ function BoardBar() {
   }, [isInvitingMember])
 
   return (
-    <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto bg-colorBoardBar px-4'>
+    <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto bg-white/10 px-4'>
       <div className='flex items-center gap-2'>
         {isFixTitleBoard ? (
           <Input
@@ -137,6 +139,7 @@ function BoardBar() {
                 handleRenameTitleBoard()
               }
             }}
+            maxLength={30}
             variant='bordered'
             autoFocus
             onBlur={() => handleRenameTitleBoard()}
@@ -147,11 +150,11 @@ function BoardBar() {
             classNames={{
               inputWrapper: 'border-white/80 data-[hover=true]:white/80 group-data-[focus=true]:border-white/80',
             }}
-            className='w-[100px] min-w-[100px] max-w-[100px] border-white/80 text-white'
+            className='w-full max-w-[250px] border-white/80 text-white'
           />
         ) : (
           <Button
-            className='flex min-h-10 w-[100px] min-w-[100px] max-w-[100px] items-center gap-2 rounded-[4px] bg-transparent px-4 font-medium text-primary hover:bg-white/40'
+            className='flex min-h-10 w-full max-w-[250px] items-center gap-2 rounded-[4px] bg-transparent px-4 font-medium text-primary hover:bg-white/40'
             startContent={<DashboardIcon />}
             onPress={() => setIsFixTitleBoard(!isFixTitleBoard)}
           >
@@ -163,7 +166,7 @@ function BoardBar() {
         ))} */}
         <SelectTypeOfWorkspace />
       </div>
-      <div className='flex items-center gap-4'>
+      <div className='flex items-center gap-10'>
         <Button className='w-full px-4 py-2 text-white' onClick={handleToggleModalInviteMember} startContent={<PersonAddIcon />} variant='bordered'>
           Invite
         </Button>
@@ -190,38 +193,7 @@ function BoardBar() {
             </Button>
           </div>
         </Modal>
-        {board?.memberGmails?.length && board?.memberGmails?.length > 0 ? (
-          <AvatarGroup
-            max={MAX_USER_SHOW}
-            total={Number(board?.memberGmails?.length - MAX_USER_SHOW)}
-            renderCount={(count) => (
-              <Avatar
-                onClick={handleShowAllMember}
-                key={count}
-                name={`+${count}`}
-                classNames={{
-                  base: 'ring-2 ring-white/30 hover:ring-orange-500',
-                }}
-              />
-            )}
-            className='*:min-h-10 *:cursor-pointer'
-          >
-            {board?.memberGmails?.map((item) => (
-              <Avatar
-                onClick={() => {
-                  console.log(item)
-                }}
-                key={item?.email}
-                {...(item?.picture ? { src: item?.picture } : { name: item?.email?.charAt(0) })}
-                classNames={{
-                  base: 'ring-2 ring-white/30 hover:ring-orange-500',
-                }}
-              />
-            ))}
-          </AvatarGroup>
-        ) : (
-          ''
-        )}
+        {board?.memberGmails?.length && board?.memberGmails?.length > 0 && <MemberGroup />}
       </div>
     </div>
   )
