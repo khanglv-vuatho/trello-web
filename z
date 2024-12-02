@@ -32,6 +32,7 @@ rename card has bug when drag card
 //core
 public/ private board
 comfirm accept invite member from notification and add workspace 
+delete member from board
 
 click in user member => show all member of board in modal
 click in user member => show all member of board in modal api

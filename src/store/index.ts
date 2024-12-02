@@ -18,6 +18,7 @@ type TBoardState = {
   starBoard: (boardId: string, isStared: boolean) => Promise<void>
   fetchAllBoards: (email: string) => Promise<void>
   deleteBoard: (boardId: string) => Promise<void>
+  deleteMemberBoard: (boardId: string, email: string) => Promise<void>
   updateRecentBoardAndStar: (board: IBoard) => Promise<void>
 }
 
@@ -157,6 +158,13 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     set({ board: newBoard })
   },
 
+  deleteMemberBoard: async (boardId, email) => {
+    await instance.delete(`/v1/boards/${boardId}/members`, { data: { email } })
+    const { board } = get()
+    console.log({ board })
+    if (!board) return
+    set({ board: { ...board, memberGmails: board.memberGmails?.filter((member) => member.email !== email) } })
+  },
   starBoard: async (boardId, isStared) => {
     await instance.put('/v1/boards/' + boardId, { isStared })
   },

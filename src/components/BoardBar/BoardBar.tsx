@@ -6,7 +6,7 @@ import { Button, Input } from '@nextui-org/react'
 import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import Modal from '@/components/Modal'
 import Toast from '@/components/Toast'
-import { BOARD_TYPE, NOTIFICATION_TYPES } from '@/constants'
+import { BOARD_TYPE, MEMBER_STATUS, NOTIFICATION_TYPES } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
 import { memo, useEffect, useState } from 'react'
@@ -33,46 +33,6 @@ function BoardBar() {
     },
   ]
 
-  const listBoardBar: { startContent: any; title: string; content: React.ReactNode }[] = [
-    {
-      startContent: <VpnLockIcon />,
-      title: 'Workspace Visibility',
-      content: (
-        <div className='flex flex-col gap-2 bg-gradient-to-br from-blue-600 to-indigo-800'>
-          <span className='text-sm'>Workspace Visibility</span>
-          <span className='text-xs text-gray-500'>Choose who can see your workspace</span>
-          <div className='flex w-full flex-col gap-2'>
-            {listTypeBoard.map((item) => (
-              <div
-                key={item.type}
-                className={`w-full rounded-lg border px-4 py-2 ${isPrivateBoard === item.type ? 'border-white/50' : 'border-white/10'}`}
-                onClick={() => setIsPrivateBoard(item.type)}
-              >
-                {/* uppercase the first letter */}
-                <p>{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</p>
-                <p>{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ),
-    },
-    {
-      startContent: <AddToDriveIcon />,
-      title: 'Add To Google Drive',
-      content: <>AddToDriveIcon</>,
-    },
-    {
-      startContent: <BoltIcon />,
-      title: 'Automation',
-      content: <>Automation</>,
-    },
-    {
-      startContent: <FilterListIcon />,
-      title: 'Filters',
-      content: <>Filters</>,
-    },
-  ]
   const handleRenameTitleBoard = async () => {
     if (titleBoard === board?.title || titleBoard === '') return setIsFixTitleBoard(false)
 
@@ -109,7 +69,7 @@ function BoardBar() {
       Toast({ message: `Invite member ${emailInviteMember} successfully`, type: 'success' })
       setEmailInviteMember('')
 
-      storeBoard({ ...board!, memberGmails: [...(board?.memberGmails || []), { email: emailInviteMember, type: NOTIFICATION_TYPES.PENDING }] })
+      storeBoard({ ...board!, memberGmails: [...(board?.memberGmails || []), { email: emailInviteMember, status: MEMBER_STATUS.PENDING }] })
       handleToggleModalInviteMember()
     } catch (error) {
       console.log({ error })
