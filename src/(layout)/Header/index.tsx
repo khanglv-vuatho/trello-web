@@ -129,7 +129,7 @@ function Header() {
             <Button variant='light' color='default' onClick={onOpenChange} className='px-6 py-3'>
               Cancel
             </Button>
-            <Button isLoading={onSending} onClick={handleConfirmCreateNewBoard} className='bg-white/10 px-6 py-3 text-white'>
+            <Button isLoading={onSending} onClick={handleConfirmCreateNewBoard} className='bg-colorBoardBar px-6 py-3 text-white'>
               Create
             </Button>
           </div>

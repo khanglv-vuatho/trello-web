@@ -1,22 +1,19 @@
 'use client'
 
 import { AddToDrive as AddToDriveIcon, Bolt as BoltIcon, Dashboard as DashboardIcon, FilterList as FilterListIcon, PersonAdd as PersonAddIcon, VpnLock as VpnLockIcon } from '@mui/icons-material'
-import { Avatar, AvatarGroup, Button, Input } from '@nextui-org/react'
+import { Button, Input } from '@nextui-org/react'
 
+import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import Modal from '@/components/Modal'
 import Toast from '@/components/Toast'
 import { BOARD_TYPE, NOTIFICATION_TYPES } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
 import { memo, useEffect, useState } from 'react'
-import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import MemberGroup from '../MemberGroup'
 
 function BoardBar() {
-  const MAX_USER_SHOW = 3
-
   const { storeBoard, board } = useStoreBoard()
-
   const [isFixTitleBoard, setIsFixTitleBoard] = useState<boolean>(false)
   const [isPrivateBoard, setIsPrivateBoard] = useState<string>(board?.type || BOARD_TYPE.PUBLIC)
   const [titleBoard, setTitleBoard] = useState<string>(board?.title || '')
@@ -130,7 +127,7 @@ function BoardBar() {
   }, [isInvitingMember])
 
   return (
-    <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto bg-white/10 px-4'>
+    <div className='bg-op flex h-boardBar items-center justify-between gap-5 overflow-x-auto bg-colorBoardContent px-4'>
       <div className='flex items-center gap-2'>
         {isFixTitleBoard ? (
           <Input
@@ -193,7 +190,7 @@ function BoardBar() {
             </Button>
           </div>
         </Modal>
-        {board?.memberGmails?.length && board?.memberGmails?.length > 0 && <MemberGroup />}
+        {board?.memberGmails?.length && board?.memberGmails?.length > 0 ? <MemberGroup /> : null}
       </div>
     </div>
   )

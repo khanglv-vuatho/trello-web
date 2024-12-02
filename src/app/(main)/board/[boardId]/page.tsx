@@ -3,13 +3,13 @@
 import { CircularProgress } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
 
-import BoardBar from '@/components/BoardBar'
-import BoardContent from '@/components/BoardContent'
+import BoardBar from '@/components/BoardBar/BoardBar'
 import { useStoreBoard, useStoreUser } from '@/store'
+import BoardContent from '@/components/BoardContent'
 
 const BoardDetails = ({ params }: { params: { boardId: string } }) => {
   const [onFetching, setOnFetching] = useState<boolean>(false)
-  const { fetchBoardDetail,board } = useStoreBoard()
+  const { fetchBoardDetail, board } = useStoreBoard()
   const email = useStoreUser((state) => state?.userInfo?.email) || ''
 
   const handleFetchingBoard = async () => {

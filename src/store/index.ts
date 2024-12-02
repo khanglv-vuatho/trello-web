@@ -125,16 +125,15 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
 
   createNewCard: async (column, board, title) => {
     const clonedColumn = { ...column }
-
-    const newBoard = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
-
-    set({ board: newBoard })
-
     const payload = {
       title,
       boardId: board?._id,
       columnId: column?._id,
     }
+
+    const newBoard = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
+    set({ board: newBoard })
+
     const card: any = await instance.post('/v1/cards', payload)
 
     clonedColumn.cards.push(card)

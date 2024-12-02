@@ -1,7 +1,7 @@
 'use client'
 
 import { useStoreBoard } from '@/store'
-import { IColumn } from '@/types'
+import { IBoard, IColumn } from '@/types'
 import { Add as AddIcon } from '@mui/icons-material'
 import { Button, Input } from '@nextui-org/react'
 import { ChangeEvent, useState } from 'react'
@@ -9,11 +9,11 @@ import { AddButton, CloseButton } from '../Button'
 import Toast from '../Toast'
 
 type TCreateCard = { column: IColumn; value: string; setValue: (value: string) => void }
-const CreateCard = ({ column, value, setValue }: TCreateCard) => {
-  const [isCreateNewCard, setIsCreateNewCard] = useState<boolean>(false)
 
-  const { createNewCard } = useStoreBoard()
-  const board: any = useStoreBoard((state) => state.board)
+const CreateCard = ({ column, value, setValue }: TCreateCard) => {
+  const { createNewCard, board } = useStoreBoard()
+
+  const [isCreateNewCard, setIsCreateNewCard] = useState<boolean>(false)
 
   const handleToggleCreateNewCard = () => setIsCreateNewCard(!isCreateNewCard)
 
@@ -29,7 +29,8 @@ const CreateCard = ({ column, value, setValue }: TCreateCard) => {
     if (value === '') {
       Toast({ message: 'Enter card title', type: 'error' })
     } else {
-      await createNewCard(column, board, value)
+      console.log({ column })
+      await createNewCard(column, board as IBoard, value)
       setValue('')
       setIsCreateNewCard(false)
       Toast({ message: 'Add Card Successful', type: 'success' })

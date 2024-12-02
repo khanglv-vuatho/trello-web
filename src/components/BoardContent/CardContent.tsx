@@ -3,23 +3,22 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Attachment as AttachmentIcon, Comment as CommentIcon, Group as GroupIcon } from '@mui/icons-material'
 import { Button, CardBody, Card as CardNextUI, Input, useDisclosure } from '@nextui-org/react'
-import ImageFallback from '../ImageFallback'
+import ImageFallback from '@/components/ImageFallback'
 import { Trash } from 'iconsax-react'
 import Modal from '@/components/Modal'
 import instance from '@/services/axiosConfig'
-import Toast from '../Toast'
+import Toast from '@/components/Toast'
 import { useEffect, useState } from 'react'
 import { useStoreBoard } from '@/store'
+import { generatePlaceholderCard } from '@/utils'
 
 const CardContent = ({ card }: { card: ICard }) => {
+  const { storeBoard, board } = useStoreBoard()
   const [onDeletingCard, setOnDeletingCard] = useState(false)
 
   const [onFixTitleCard, setOnFixTitleCard] = useState<boolean>(false)
 
   const [valueTitleCard, setValueTitleCard] = useState<string>(card?.title)
-  const { storeBoard } = useStoreBoard()
-
-  const board = useStoreBoard((state) => state.board)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card._id,
@@ -40,6 +39,7 @@ const CardContent = ({ card }: { card: ICard }) => {
   const handleDeleteCard = () => {
     setOnDeletingCard(true)
   }
+
   const deleteCard = async () => {
     const payload = { cardId: card._id, columnId: card.columnId }
 
@@ -53,6 +53,10 @@ const CardContent = ({ card }: { card: ICard }) => {
         const cardIndex = column.cards.findIndex((item: ICard) => item._id === card._id)
         column.cards.splice(cardIndex, 1)
         column.cardOrderIds.splice(cardIndex, 1)
+
+        if (!column?.cards?.length) {
+          column.cards = [generatePlaceholderCard(column)]
+        }
 
         await instance.delete('/v1/cards/delete', { data: payload })
         Toast({ message: 'Card deleted successfully', type: 'success' })
