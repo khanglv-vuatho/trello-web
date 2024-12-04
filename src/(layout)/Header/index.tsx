@@ -38,7 +38,7 @@ function Header() {
 
   const handleCreateNewBoard = async () => {
     try {
-      const payload = { title: titleBoard, type: 'public', ownerId: userInfo?.email }
+      const payload = { title: titleBoard, type: 'private', ownerId: userInfo?.email }
       const data: any = await instance.post('/v1/boards', payload)
 
       Toast({ message: 'Create Board Successful', type: 'success' })

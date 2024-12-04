@@ -2,18 +2,22 @@
 
 import { NoItemOverView, OverViewItem } from '@/components/OverViewItem'
 import PopoverCustom from '@/components/PopoverCustom'
-import { useStoreWorkspace } from '@/store'
+import { useStoreBoard } from '@/store'
 import { Button } from '@nextui-org/react'
 import { ArrowDown2 } from 'iconsax-react'
+import { useState } from 'react'
 
 const Workspaces = () => {
-  const { workspace } = useStoreWorkspace()
+  const { workspace } = useStoreBoard()
+  const [isOpen, setIsOpen] = useState<boolean>(false)
 
   return (
     <PopoverCustom
+      isOpen={isOpen}
+      onOpenChange={setIsOpen}
       placement='bottom-start'
       popoverTrigger={
-        <Button endContent={<ArrowDown2 size={16} />} variant='light' className='flex !min-h-10 flex-shrink-0 bg-transparent text-white hover:bg-white/10'>
+        <Button onClick={() => setIsOpen(true)} endContent={<ArrowDown2 size={16} />} variant='light' className='flex !min-h-10 flex-shrink-0 bg-transparent text-white hover:bg-white/10'>
           Workspaces
         </Button>
       }
@@ -23,7 +27,7 @@ const Workspaces = () => {
           <NoItemOverView title='No workspaces' description='Your workspaces will appear here' />
         ) : (
           workspace?.map((item, index) => (
-            <OverViewItem href={`/board/${item?._id}`} key={index} hiddenStar item={item}>
+            <OverViewItem onClick={() => setIsOpen(false)} href={`/board/${item?._id}`} key={index} hiddenStar item={item}>
               {item?.title}
             </OverViewItem>
           ))

@@ -115,7 +115,7 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
                 }}
               />
 
-              <Button isLoading={onSubmit} onClick={() => setOnSubmit(true)} className='ml-auto mt-4 min-h-10 w-full bg-white text-indigo-600 hover:bg-indigo-100'>
+              <Button isLoading={onSubmit} onClick={() => setOnSubmit(true)} className='ml-auto mt-4 min-h-10 w-full bg-white text-white hover:bg-indigo-100'>
                 Save
               </Button>
             </div>

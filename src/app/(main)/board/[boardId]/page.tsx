@@ -6,17 +6,23 @@ import { useEffect, useState } from 'react'
 import BoardBar from '@/components/BoardBar/BoardBar'
 import { useStoreBoard, useStoreUser } from '@/store'
 import BoardContent from '@/components/BoardContent'
+import { useRouter } from 'next/navigation'
 
 const BoardDetails = ({ params }: { params: { boardId: string } }) => {
   const [onFetching, setOnFetching] = useState<boolean>(false)
-  const { fetchBoardDetail, board } = useStoreBoard()
+  const { fetchBoardDetail, board, fetchAllBoards, boardsRecent, boardsStar } = useStoreBoard()
   const email = useStoreUser((state) => state?.userInfo?.email) || ''
+  const router = useRouter()
 
   const handleFetchingBoard = async () => {
     try {
       await fetchBoardDetail(params.boardId, email)
+      if (boardsRecent !== undefined && boardsStar !== undefined) return
+
+      await fetchAllBoards(email)
     } catch (error) {
       console.log(error)
+      router.push('/board-not-found')
     } finally {
       setOnFetching(false)
     }

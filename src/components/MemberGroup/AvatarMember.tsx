@@ -8,19 +8,27 @@ import { useStoreBoard } from '@/store'
 
 type TAvatarMember = {
   item: IMember
+  onClick: () => void
 }
 
-const AvatarMember = ({ item }: TAvatarMember) => {
+const AvatarMember = ({ item, onClick }: TAvatarMember) => {
   const { board } = useStoreBoard()
-  console.log({ board })
+
+  const [isHover, setIsHover] = useState(false)
+
   return (
     <PopoverCustom
+      isOpen={isHover}
+      onOpenChange={() => setIsHover(false)}
       popoverTrigger={
         <Avatar
           {...(item?.picture ? { src: item?.picture } : { name: item?.email?.charAt(0) })}
           classNames={{
-            base: 'ring-2 ring-white/30 hover:ring-orange-500',
+            base: `ring-2 ring-white/30 ${isHover ? 'ring-orange-500' : ''}`,
           }}
+          onMouseEnter={() => setIsHover(true)}
+          onMouseLeave={() => setIsHover(false)}
+          onClick={onClick}
         />
       }
     >

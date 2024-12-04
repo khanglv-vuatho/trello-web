@@ -8,6 +8,7 @@ import { IMember } from '@/types'
 import { Avatar, Button, Input } from '@nextui-org/react'
 import { Trash } from 'iconsax-react'
 import { useState } from 'react'
+import Toast from '@/components/Toast'
 
 type TModalMember = {
   isOpen: boolean
@@ -26,6 +27,10 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
     try {
       if (!board?._id) return
       await deleteMemberBoard(board?._id, member?.email)
+      Toast({
+        message: `Delete member ${member?.name ? member?.name : member?.email} success`,
+        type: 'success',
+      })
       console.log({ member })
     } catch (error) {
       console.log(error)

@@ -28,11 +28,13 @@ delete board => done
 //bug
 when drag card to other board, the card is not update (check state of board (card))
 rename card has bug when drag card
+delete member from board => done
 
 //core
+role of member
 public/ private board
 comfirm accept invite member from notification and add workspace 
-delete member from board
+delete workspace
 
 click in user member => show all member of board in modal
 click in user member => show all member of board in modal api

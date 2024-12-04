@@ -13,9 +13,10 @@ type OverViewItemProps = {
   isStared?: boolean
   hiddenStar?: boolean
   item: IBoard
+  onClick?: () => void
 }
 
-const OverViewItem = ({ href, children, className, isStared, hiddenStar, item }: OverViewItemProps) => {
+const OverViewItem = ({ href, children, className, isStared, hiddenStar, item, onClick }: OverViewItemProps) => {
   const { updateRecentBoardAndStar } = useStoreBoard()
 
   const handleToggleStar = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -26,7 +27,7 @@ const OverViewItem = ({ href, children, className, isStared, hiddenStar, item }:
   }
 
   return (
-    <WrapperItem href={href} className={cn('group z-20 justify-between', className)}>
+    <WrapperItem href={href} className={cn('group z-20 justify-between', className)} onClick={() => onClick?.()}>
       <div className='flex items-center gap-2'>
         <div className='size-10'>
           <Avatar alt='workspace' radius='sm' name={(children as string)?.charAt?.(0)} className='size-full object-cover text-lg' />

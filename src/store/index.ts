@@ -8,6 +8,8 @@ type TBoardState = {
   board?: IBoard
   boardsRecent?: IBoard[]
   boardsStar?: IBoard[]
+  workspace?: IBoard[]
+  storeWorkspace: (workspace: IBoard[]) => void
   storeBoard: (board: IBoard) => void
   storeBoardRecent: (board: IBoard[]) => void
   storeBoardStar: (board: IBoard[]) => void
@@ -66,10 +68,18 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     board.isStared = !board.isStared
     await get().starBoard(board?._id, board?.isStared)
   },
+
+  storeWorkspace: (workspace) => {
+    set({ workspace })
+  },
+
   fetchAllBoards: async (email) => {
     try {
       const data: any = await instance.get(`/v1/boards/get-all?email=${email}`)
-      set({ board: data })
+      get().storeWorkspace(data?.workspace)
+      get().storeBoardRecent(data?.boards?.filter((item: IBoard) => !item?.isStared))
+      get().storeBoardStar(data?.boards?.filter((item: IBoard) => item?.isStared))
+
       return data
     } catch (error) {
       console.log(error)
@@ -178,16 +188,5 @@ type TUserState = {
 export const useStoreUser = create<TUserState>((set) => ({
   storeUser: (userInfo) => {
     set({ userInfo })
-  },
-}))
-
-type TWorkspaceState = {
-  workspace?: IBoard[]
-  storeWorkspace: (workspace: IBoard[]) => void
-}
-
-export const useStoreWorkspace = create<TWorkspaceState>((set) => ({
-  storeWorkspace: (workspace) => {
-    set({ workspace })
   },
 }))

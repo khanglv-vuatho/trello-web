@@ -87,7 +87,7 @@ function BoardBar() {
   }, [isInvitingMember])
 
   return (
-    <div className='bg-op flex h-boardBar items-center justify-between gap-5 overflow-x-auto bg-colorBoardContent px-4'>
+    <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto overflow-y-hidden bg-colorBoardContent px-4'>
       <div className='flex items-center gap-2'>
         {isFixTitleBoard ? (
           <Input
