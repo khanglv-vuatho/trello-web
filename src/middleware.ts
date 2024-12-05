@@ -2,9 +2,14 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+function getCookie(request: NextRequest, cookieName: string) {
+  const cookie = request.cookies.get(cookieName)
+  return cookie ? cookie.value : null
+}
+
 export function middleware(request: NextRequest) {
-  // Get the token from cookies
-  const token = request.cookies.get('google_token')?.value
+  // get token from cookie
+  const token = getCookie(request, 'google_token')
 
   // Public routes where login check is not required
   const publicRoutes = ['/login']

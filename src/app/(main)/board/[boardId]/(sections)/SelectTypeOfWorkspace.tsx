@@ -10,8 +10,6 @@ import ItemTypeBoard from './ItemTypeBoard'
 const SelectTypeOfWorkspace = () => {
   const { board } = useStoreBoard()
 
-  console.log({ board })
-
   const [typeBoard, setTypeBoard] = useState<string>(board?.type || BOARD_TYPE.PRIVATE)
   const listTypeBoard = [
     {

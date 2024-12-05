@@ -8,10 +8,16 @@ import { useStoreBoard } from '@/store'
 import { IBoard } from '@/types'
 import { useState } from 'react'
 const Recent = () => {
-  const { boardsRecent } = useStoreBoard()
+  const { boardsRecent, storeBoardRecent } = useStoreBoard()
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
   const noData = boardsRecent?.length === 0
+
+  const handleClickItemRecent = (item: IBoard) => {
+    const newBoardsRecent = boardsRecent?.filter((board) => board?._id !== item?._id) || []
+    storeBoardRecent([item, ...newBoardsRecent])
+    setIsOpen(false)
+  }
 
   return (
     <PopoverCustom
@@ -30,7 +36,7 @@ const Recent = () => {
           <NoItemOverView title='No recent boards' description='Your recent boards will appear here' />
         ) : (
           boardsRecent?.map((item: IBoard, index: number) => (
-            <OverViewItem onClick={() => setIsOpen(false)} href={`/board/${item?._id}`} key={index} isStared={item?.isStared} item={item}>
+            <OverViewItem onClick={() => handleClickItemRecent(item)} href={`/board/${item?._id}`} key={index} isStared={item?.isStared} item={item}>
               {item?.title}
             </OverViewItem>
           ))

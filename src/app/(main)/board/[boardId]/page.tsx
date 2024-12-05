@@ -4,22 +4,22 @@ import { CircularProgress } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
 
 import BoardBar from '@/components/BoardBar/BoardBar'
-import { useStoreBoard, useStoreUser } from '@/store'
 import BoardContent from '@/components/BoardContent'
+import { useStoreBoard, useStoreRoleOfBoard, useStoreUser } from '@/store'
 import { useRouter } from 'next/navigation'
 
 const BoardDetails = ({ params }: { params: { boardId: string } }) => {
   const [onFetching, setOnFetching] = useState<boolean>(false)
-  const { fetchBoardDetail, board, fetchAllBoards, boardsRecent, boardsStar } = useStoreBoard()
+  const { fetchBoardDetail, board } = useStoreBoard()
+  const { storeRoleOfBoard, role } = useStoreRoleOfBoard()
   const email = useStoreUser((state) => state?.userInfo?.email) || ''
   const router = useRouter()
 
   const handleFetchingBoard = async () => {
     try {
-      await fetchBoardDetail(params.boardId, email)
-      if (boardsRecent !== undefined && boardsStar !== undefined) return
-
-      await fetchAllBoards(email)
+      console.log('dasdasdas')
+      const data = await fetchBoardDetail(params.boardId, email)
+      storeRoleOfBoard(data?.memberGmails?.find((item) => item?.email === email)?.role || '')
     } catch (error) {
       console.log(error)
       router.push('/board-not-found')

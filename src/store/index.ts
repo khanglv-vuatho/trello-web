@@ -6,6 +6,7 @@ import { generatePlaceholderCard, mapOrder } from '@/utils'
 
 type TBoardState = {
   board?: IBoard
+  allBoards?: IBoard[]
   boardsRecent?: IBoard[]
   boardsStar?: IBoard[]
   workspace?: IBoard[]
@@ -18,7 +19,8 @@ type TBoardState = {
   createNewCard: (column: IColumn, board: IBoard, title: string) => Promise<void>
   moveColumn: (column: IColumn, board: IBoard, title: string) => Promise<void>
   starBoard: (boardId: string, isStared: boolean) => Promise<void>
-  fetchAllBoards: (email: string) => Promise<void>
+  fetchAllBoards: () => Promise<void>
+  storeAllBoards: (boards: IBoard[]) => void
   deleteBoard: (boardId: string) => Promise<void>
   deleteMemberBoard: (boardId: string, email: string) => Promise<void>
   updateRecentBoardAndStar: (board: IBoard) => Promise<void>
@@ -27,6 +29,10 @@ type TBoardState = {
 export const useStoreBoard = create<TBoardState>((set, get) => ({
   storeBoard: (board) => {
     set({ board })
+  },
+
+  storeAllBoards: (allBoards: IBoard[]) => {
+    set({ allBoards })
   },
 
   storeBoardRecent: (boardsRecent) => {
@@ -73,12 +79,13 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     set({ workspace })
   },
 
-  fetchAllBoards: async (email) => {
+  fetchAllBoards: async () => {
     try {
-      const data: any = await instance.get(`/v1/boards/get-all?email=${email}`)
+      const data: any = await instance.get(`/v1/boards/get-all`)
       get().storeWorkspace(data?.workspace)
       get().storeBoardRecent(data?.boards?.filter((item: IBoard) => !item?.isStared))
       get().storeBoardStar(data?.boards?.filter((item: IBoard) => item?.isStared))
+      get().storeAllBoards(data?.boards)
 
       return data
     } catch (error) {
@@ -105,6 +112,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
       set({ board: { ...cloneData } })
       return cloneData
     } catch (error) {
+      window.location.href = '/board-not-found'
       console.log(error)
     }
   },
@@ -141,14 +149,16 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
       boardId: board?._id,
       columnId: column?._id,
     }
-
-    const newBoard = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
-    set({ board: newBoard })
-
     const card: any = await instance.post('/v1/cards', payload)
 
     clonedColumn.cards.push(card)
+
     clonedColumn.cardOrderIds.push(card?._id)
+    const newBoard: any = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
+    newBoard.cards.push(card)
+    set({ board: newBoard })
+
+    console.log({ newBoard })
   },
 
   moveColumn: async (column, board, title) => {
@@ -188,5 +198,27 @@ type TUserState = {
 export const useStoreUser = create<TUserState>((set) => ({
   storeUser: (userInfo) => {
     set({ userInfo })
+  },
+}))
+
+type TRoleOfBoard = {
+  role?: string
+  storeRoleOfBoard: (role: string) => void
+}
+
+export const useStoreRoleOfBoard = create<TRoleOfBoard>((set) => ({
+  storeRoleOfBoard: (role) => {
+    set({ role })
+  },
+}))
+
+type TStatusOpenModal = {
+  status?: boolean
+  storeStatusOpenModal: (status: boolean) => void
+}
+
+export const useStoreStatusOpenModal = create<TStatusOpenModal>((set) => ({
+  storeStatusOpenModal: (status) => {
+    set({ status })
   },
 }))

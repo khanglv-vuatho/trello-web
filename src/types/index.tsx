@@ -1,4 +1,4 @@
-import { BOARD_TYPE, MEMBER_STATUS, NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
+import { BOARD_MEMBER_ROLE, BOARD_TYPE, MEMBER_STATUS, NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
 
 export type ICard = {
   _id: string
@@ -44,6 +44,7 @@ export type IMember = {
   name?: string
   email: string
   status?: (typeof MEMBER_STATUS)[keyof typeof MEMBER_STATUS]
+  role?: (typeof BOARD_MEMBER_ROLE)[keyof typeof BOARD_MEMBER_ROLE]
 }
 
 export type TUserInfo = {

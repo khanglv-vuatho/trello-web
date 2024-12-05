@@ -25,3 +25,8 @@ export const MEMBER_STATUS = createEnum({
   PENDING: 'pending',
   ACCEPTED: 'accepted',
 })
+
+export const BOARD_MEMBER_ROLE = createEnum({
+  MEMBER: 'member',
+  OWNER: 'owner',
+})

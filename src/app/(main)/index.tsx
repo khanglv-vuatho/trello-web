@@ -14,30 +14,7 @@ type TListInfoBoards = {
 }
 
 export const MainPage = () => {
-  const [onFeching, setOnFeching] = useState<boolean>(false)
-  const { userInfo } = useStoreUser()
-  const { fetchAllBoards, boardsRecent, boardsStar, workspace } = useStoreBoard()
-
-  const handleFetchAllBoards = async () => {
-    if (!userInfo) return
-    try {
-      if (boardsRecent !== undefined && boardsStar !== undefined) return
-      await fetchAllBoards(userInfo.email)
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setOnFeching(false)
-    }
-  }
-
-  useEffect(() => {
-    onFeching && !!userInfo && handleFetchAllBoards()
-  }, [onFeching, userInfo])
-
-  useEffect(() => {
-    if (userInfo === undefined) return
-    setOnFeching(true)
-  }, [userInfo])
+  const { boardsRecent, boardsStar, workspace } = useStoreBoard()
 
   const listInfoBoards: TListInfoBoards[] = [
     {
@@ -75,7 +52,7 @@ export const MainPage = () => {
                         </div>
                         <p>{item?.boards?.length}</p>
                       </div>
-                      {onFeching ? (
+                      {/* {onFeching ? (
                         <div className='flex min-h-[100px] w-full gap-2 overflow-auto pb-2'>
                           {Array(3)
                             .fill(0)
@@ -87,7 +64,10 @@ export const MainPage = () => {
                         <div className='flex min-h-[100px] w-full gap-2 overflow-auto pb-2'>
                           {item?.boards?.map((board) => <BoardItem key={item.title} board={board} hiddenAction={item.title === 'Workspace'} />)}
                         </div>
-                      )}
+                      )} */}
+                      <div className='flex min-h-[100px] w-full gap-2 overflow-auto pb-2'>
+                        {item?.boards?.map((board) => <BoardItem key={item.title} board={board} hiddenAction={item.title === 'Workspace'} />)}
+                      </div>
                     </div>
                   )
                 })

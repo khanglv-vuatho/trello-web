@@ -13,7 +13,11 @@ const ContentUser = () => {
   const userInfo = useStoreUser((state) => state.userInfo)
 
   const handleLogout = () => {
-    deleteCookie('access_token')
+    // delete token from localStorage
+    localStorage.removeItem('access_token')
+    // delete token from cookie
+    deleteCookie('google_token')
+    // logout from google
     googleLogout()
 
     router.push('/login')

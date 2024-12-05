@@ -8,7 +8,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
 import { IColumn } from '@/types'
-import { useStoreBoard } from '@/store'
+import { useStoreBoard, useStoreStatusOpenModal } from '@/store'
 import { Trash } from 'iconsax-react'
 import instance from '@/services/axiosConfig'
 
@@ -20,10 +20,10 @@ const Column = ({ column }: { column: IColumn }) => {
   const [orderedCards, setOrderedCards] = useState<any[]>([])
   const [cardTitle, setCardTitle] = useState<string>('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  console.log({ column })
   const [onFixTitleColumn, setOnFixTitleColumn] = useState<boolean>(false)
   const [valueTitleColumn, setValueTitleColumn] = useState<string>(column.title)
   const { storeBoard, board } = useStoreBoard()
+  const { status } = useStoreStatusOpenModal()
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   const listExpandColumnButton = [{ title: 'Delete Column', icon: <Trash color='red' />, handleAction: () => onOpen() }]
@@ -94,7 +94,7 @@ const Column = ({ column }: { column: IColumn }) => {
 
   return (
     <>
-      <div ref={setNodeRef} {...attributes} {...listeners} style={dndKitColumnStyle} className='min-w-[300px] max-w-[300px]'>
+      <div ref={setNodeRef} {...listeners} {...attributes} style={dndKitColumnStyle} className='min-w-[300px] max-w-[300px]'>
         <div className={`h-[fit-content] w-full rounded-lg bg-[#f1f2f4]`}>
           <div className='flex items-center justify-between p-2'>
             {onFixTitleColumn ? (

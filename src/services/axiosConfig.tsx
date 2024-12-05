@@ -1,7 +1,7 @@
 import Toast from '@/components/Toast'
 import { cleanMessage } from '@/utils'
 import axios, { AxiosResponse } from 'axios'
-import { getCookie } from 'cookies-next'
+import { getCookie, setCookie } from 'cookies-next'
 const apiConfig = {
   baseUrl: `${process.env.NEXT_PUBLIC_API_URL}`,
 }
@@ -14,11 +14,14 @@ const instance = axios.create({
 const urlExceptAuthorization = ['Authenticate']
 
 const authorization = async () => {
-  const token = localStorage.getItem('access_token')
+  // get token from localStorage
+  const tokenLocal = localStorage?.getItem?.('access_token') || ''
   // get token from cookie
   const tokenCookie = getCookie('access_token')
-  console.log({ tokenCookie })
-  if (token || tokenCookie) {
+
+  const token = tokenLocal || tokenCookie
+  console.log({ token, tokenLocal, tokenCookie })
+  if (token) {
     return { Authorization: 'Bearer ' + token }
   } else {
     return {}
@@ -72,6 +75,12 @@ instance.interceptors.response.use(
           message: cleanMessage(error?.response?.data?.message) || 'Something went wrong, please try again',
           type: 'error',
         })
+
+        if (error?.response?.data?.message?.includes('token')) {
+          localStorage.removeItem('access_token')
+          setCookie('access_token', '')
+          window.location.href = '/login'
+        }
       } else if (error?.request) {
         console.log('====== Timeout =====')
       } else {

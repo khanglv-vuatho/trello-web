@@ -29,7 +29,6 @@ const CreateCard = ({ column, value, setValue }: TCreateCard) => {
     if (value === '') {
       Toast({ message: 'Enter card title', type: 'error' })
     } else {
-      console.log({ column })
       await createNewCard(column, board as IBoard, value)
       setValue('')
       setIsCreateNewCard(false)

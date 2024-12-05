@@ -5,6 +5,8 @@ import React, { useState } from 'react'
 import { IMember } from '@/types'
 import PopoverCustom from '../PopoverCustom'
 import { useStoreBoard } from '@/store'
+import { uppercaseFirstLetter } from '@/utils'
+import { useRouter } from 'next/navigation'
 
 type TAvatarMember = {
   item: IMember
@@ -12,8 +14,7 @@ type TAvatarMember = {
 }
 
 const AvatarMember = ({ item, onClick }: TAvatarMember) => {
-  const { board } = useStoreBoard()
-
+  const router = useRouter()
   const [isHover, setIsHover] = useState(false)
 
   return (
@@ -39,13 +40,14 @@ const AvatarMember = ({ item, onClick }: TAvatarMember) => {
         <div className='flex items-center gap-2 px-2 text-white'>
           <div className='!size-10 rounded-full'>
             <Avatar
+              onClick={() => router.push(`/profile/${item?.email}`)}
               className='size-full text-base data-[focus-visible=true]:-translate-x-0 data-[hover=true]:-translate-x-0 rtl:data-[focus-visible=true]:translate-x-0 rtl:data-[hover=true]:translate-x-0'
               {...(item?.picture ? { src: item?.picture } : { name: item?.email?.charAt(0) })}
             />
           </div>
           <div className='flex flex-col'>
             <p>{item?.email}</p>
-            <p className='text-xs text-white/60'>{board?.ownerId === item?.email ? 'Owner' : 'Member'}</p>
+            <p className='text-xs text-white/60'>{uppercaseFirstLetter(item?.role || '')}</p>
           </div>
         </div>
       </div>

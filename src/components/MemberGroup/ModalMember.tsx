@@ -9,6 +9,8 @@ import { Avatar, Button, Input } from '@nextui-org/react'
 import { Trash } from 'iconsax-react'
 import { useState } from 'react'
 import Toast from '@/components/Toast'
+import { uppercaseFirstLetter } from '@/utils'
+import { useRouter } from 'next/navigation'
 
 type TModalMember = {
   isOpen: boolean
@@ -20,6 +22,7 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
   const { board, deleteMemberBoard } = useStoreBoard()
   const { userInfo } = useStoreUser()
   const [searchQuery, setSearchQuery] = useState('')
+  const router = useRouter()
 
   const filteredData = memberGmails?.filter((item) => item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) || item?.email?.toLowerCase()?.includes(searchQuery?.toLowerCase()))
 
@@ -31,7 +34,6 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
         message: `Delete member ${member?.name ? member?.name : member?.email} success`,
         type: 'success',
       })
-      console.log({ member })
     } catch (error) {
       console.log(error)
     }
@@ -46,7 +48,7 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
             <div key={item?.name} className='flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md'>
               <div className='flex items-center gap-4'>
                 <div className='relative'>
-                  <div className='size-10'>
+                  <div className='size-10' onClick={() => router.push(`/profile/${item?.email}`)}>
                     {item?.status === MEMBER_STATUS.PENDING ? (
                       <Avatar className='size-full rounded-full' name={item?.name?.charAt(0) || ''} />
                     ) : (
@@ -55,22 +57,19 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
                   </div>
                   <span className={`absolute bottom-0 right-0 size-3 rounded-full border-2 border-white ${item?.status === MEMBER_STATUS.ACCEPTED ? 'bg-green-500' : 'bg-yellow-500'}`} />
                 </div>
-                <div className='flex flex-col gap-1'>
+                <div className='flex flex-col'>
                   <p className='font-semibold text-gray-900'>{item?.name}</p>
                   <p className='text-sm text-gray-500'>{item?.email}</p>
+                  <p className='text-xs text-gray-500'>{uppercaseFirstLetter(item?.role || '')}</p>
                 </div>
               </div>
               <div className='flex items-center gap-3'>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    item?.status === MEMBER_STATUS.ACCEPTED ? 'bg-green-100 text-green-700' : item?.status === MEMBER_STATUS.PENDING ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {item?.status === MEMBER_STATUS.PENDING ? 'Pending' : 'Accepted'}
+                <span className={`rounded-full px-3 py-1 text-xs font-medium ${item?.status === MEMBER_STATUS.ACCEPTED ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                  {uppercaseFirstLetter(item?.status === MEMBER_STATUS.PENDING ? MEMBER_STATUS.PENDING : MEMBER_STATUS.ACCEPTED)}
                 </span>
                 {board?.ownerId === userInfo?.email && (
                   <Button isIconOnly color='danger' variant='light' radius='full' size='sm' className='!size-10' onClick={() => handleDeleteMember(item)}>
-                    <Trash className='text-red-500' />
+                    <Trash className='hover:text-red-500' />
                   </Button>
                 )}
               </div>

@@ -6,7 +6,7 @@ import { Button, Input } from '@nextui-org/react'
 import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import Modal from '@/components/Modal'
 import Toast from '@/components/Toast'
-import { BOARD_TYPE, MEMBER_STATUS, NOTIFICATION_TYPES } from '@/constants'
+import { BOARD_MEMBER_ROLE, BOARD_TYPE, MEMBER_STATUS, NOTIFICATION_TYPES } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
 import { memo, useEffect, useState } from 'react'
@@ -21,17 +21,6 @@ function BoardBar() {
   const [isOpenModalInviteMember, setIsOpenModalInviteMember] = useState(false)
   const [isInvitingMember, setIsInvitingMember] = useState(false)
   const [emailInviteMember, setEmailInviteMember] = useState('')
-
-  const listTypeBoard = [
-    {
-      type: BOARD_TYPE.PUBLIC,
-      description: 'Anyone with the link can access',
-    },
-    {
-      type: BOARD_TYPE.PRIVATE,
-      description: 'All team members can access',
-    },
-  ]
 
   const handleRenameTitleBoard = async () => {
     if (titleBoard === board?.title || titleBoard === '') return setIsFixTitleBoard(false)
@@ -65,21 +54,28 @@ function BoardBar() {
 
   const handleInviteMemberApi = async () => {
     try {
+      if (board?.memberGmails?.find((member) => member.email === emailInviteMember)) {
+        return Toast({ message: `Member ${emailInviteMember} already exists`, type: 'error' })
+      }
+      if (emailInviteMember === board?.ownerId) {
+        return Toast({ message: `You cannot invite yourself`, type: 'error' })
+      }
+
       await instance.post(`/v1/boards/${board?._id}/members`, { memberGmails: [emailInviteMember] })
       Toast({ message: `Invite member ${emailInviteMember} successfully`, type: 'success' })
       setEmailInviteMember('')
 
-      storeBoard({ ...board!, memberGmails: [...(board?.memberGmails || []), { email: emailInviteMember, status: MEMBER_STATUS.PENDING }] })
+      storeBoard({
+        ...board!,
+        memberGmails: [...(board?.memberGmails || []), { email: emailInviteMember, status: MEMBER_STATUS.PENDING, role: BOARD_MEMBER_ROLE.MEMBER }],
+      })
+
       handleToggleModalInviteMember()
     } catch (error) {
       console.log({ error })
     } finally {
       setIsInvitingMember(false)
     }
-  }
-
-  const handleShowAllMember = () => {
-    console.log('show all member')
   }
 
   useEffect(() => {

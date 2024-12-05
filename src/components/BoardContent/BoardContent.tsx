@@ -176,7 +176,11 @@ function BoardContent() {
       }
 
       console.log({ board, nextColumns })
+      const cloneBoard = { ...board } as IBoard
+      cloneBoard.columns = nextColumns
+      storeBoard(cloneBoard)
 
+      console.log({ cloneBoard })
       return [...nextColumns]
     })
   }
