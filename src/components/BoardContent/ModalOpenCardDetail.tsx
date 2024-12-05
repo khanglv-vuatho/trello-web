@@ -11,8 +11,6 @@ type ModalOpenCardDetailProps = {
 
 const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard, card }: ModalOpenCardDetailProps) => {
   const { board } = useStoreBoard()
-  const currentColumn = board?.columns.find((column) => column._id === card?.columnId)
-  console.log({ currentColumn })
   if (!card) return null
   return (
     <Modal size='4xl' isOpen={isOpenModalDetailCard} onOpenChange={() => setIsOpenModalDetailCard(false)} modalTitle={card?.title} modalFooter={<>123</>}>

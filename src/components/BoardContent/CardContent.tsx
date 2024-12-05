@@ -94,8 +94,6 @@ const CardContent = ({ card }: { card: ICard }) => {
       if (columnIndex !== -1) {
         const column = updatedBoard.columns[columnIndex]
         const cardIndex = column.cards.findIndex((item: ICard) => item._id === card._id)
-        console.log({ valueTitleCard })
-        console.log({ titleOld: column.cards[cardIndex].title })
         column.cards[cardIndex].title = valueTitleCard
       }
       storeBoard(updatedBoard)

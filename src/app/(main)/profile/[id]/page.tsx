@@ -24,7 +24,6 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
 
   const [onFetchingDetailUser, setOnFetchingDetailUser] = useState(false)
   const [storeAnotherUser, setStoreAnotherUser] = useState<any>(null)
-  console.log({ storeAnotherUser })
   const isOwner = userInfo?.email === email
 
   const handleChangeAvatar = (event: any) => {

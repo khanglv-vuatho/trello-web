@@ -20,7 +20,6 @@ const authorization = async () => {
   const tokenCookie = getCookie('access_token')
 
   const token = tokenLocal || tokenCookie
-  console.log({ token, tokenLocal, tokenCookie })
   if (token) {
     return { Authorization: 'Bearer ' + token }
   } else {

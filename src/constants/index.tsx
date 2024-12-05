@@ -30,3 +30,10 @@ export const BOARD_MEMBER_ROLE = createEnum({
   MEMBER: 'member',
   OWNER: 'owner',
 })
+
+export const SOCKET_EVENTS = createEnum({
+  UPDATE_BOARD: 'updateBoard',
+  UPDATE_COLUMN: 'updateColumn',
+  UPDATE_CARD: 'updateCard',
+  UPDATE_MEMBER: 'updateMember',
+})

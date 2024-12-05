@@ -7,7 +7,6 @@ type ItemTypeBoardProps = {
 }
 
 const ItemTypeBoard = ({ item, typeBoard, setTypeBoard }: ItemTypeBoardProps) => {
-  console.log({ item, typeBoard })
   return (
     <div className={`w-full rounded-lg border px-4 py-2 ${typeBoard == item.type ? 'border-white/50' : 'border-white/10'}`} onClick={() => setTypeBoard(item.type)}>
       {/* uppercase the first letter */}

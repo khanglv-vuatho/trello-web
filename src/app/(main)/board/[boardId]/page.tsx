@@ -17,7 +17,6 @@ const BoardDetails = ({ params }: { params: { boardId: string } }) => {
 
   const handleFetchingBoard = async () => {
     try {
-      console.log('dasdasdas')
       const data = await fetchBoardDetail(params.boardId, email)
       storeRoleOfBoard(data?.memberGmails?.find((item) => item?.email === email)?.role || '')
     } catch (error) {

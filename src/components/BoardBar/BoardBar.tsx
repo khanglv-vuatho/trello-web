@@ -1,18 +1,20 @@
 'use client'
 
-import { AddToDrive as AddToDriveIcon, Bolt as BoltIcon, Dashboard as DashboardIcon, FilterList as FilterListIcon, PersonAdd as PersonAddIcon, VpnLock as VpnLockIcon } from '@mui/icons-material'
+import { Dashboard as DashboardIcon, PersonAdd as PersonAddIcon } from '@mui/icons-material'
 import { Button, Input } from '@nextui-org/react'
 
 import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import Modal from '@/components/Modal'
+import { useSocket } from '@/components/Providers/SocketProvider'
 import Toast from '@/components/Toast'
-import { BOARD_MEMBER_ROLE, BOARD_TYPE, MEMBER_STATUS, NOTIFICATION_TYPES } from '@/constants'
+import { BOARD_MEMBER_ROLE, BOARD_TYPE, MEMBER_STATUS } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
 import { memo, useEffect, useState } from 'react'
 import MemberGroup from '../MemberGroup'
 
 function BoardBar() {
+  const socket: any = useSocket()
   const { storeBoard, board } = useStoreBoard()
   const [isFixTitleBoard, setIsFixTitleBoard] = useState<boolean>(false)
   const [isPrivateBoard, setIsPrivateBoard] = useState<string>(board?.type || BOARD_TYPE.PUBLIC)
@@ -81,6 +83,14 @@ function BoardBar() {
   useEffect(() => {
     isInvitingMember && handleInviteMemberApi()
   }, [isInvitingMember])
+
+  useEffect(() => {
+    if (!socket) return
+    socket.on('test', (data: string) => {
+      console.log({ data })
+    })
+    socket.emit('test', { message: 'Hello from client' })
+  }, [socket])
 
   return (
     <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto overflow-y-hidden bg-colorBoardContent px-4'>

@@ -7,6 +7,7 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { SocketProvider } from './SocketProvider'
 
 function Providers({ children }: { children: React.ReactNode }) {
   const [onFetching, setOnFetching] = useState(false)
@@ -18,7 +19,6 @@ function Providers({ children }: { children: React.ReactNode }) {
     try {
       if (boardsRecent !== undefined && boardsStar !== undefined) return
       await fetchAllBoards()
-      console.log('fetchAllBoards')
     } catch (error) {
       console.error(error)
     } finally {
@@ -39,7 +39,7 @@ function Providers({ children }: { children: React.ReactNode }) {
   return (
     <NextUIProvider>
       <NextThemesProvider attribute='class' defaultTheme='light'>
-        {children}
+        <SocketProvider token={accessToken}>{children}</SocketProvider>
         <ProgressBar height='4px' color='#fff' options={{ showSpinner: true }} shallowRouting />
         <ToastContainer />
       </NextThemesProvider>

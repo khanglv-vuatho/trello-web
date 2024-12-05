@@ -175,12 +175,10 @@ function BoardContent() {
         moveCardToDifferentColumn(activeDraggingCardId, oldCloumnWhenDraggingCard._id, nextOverColumn._id, nextColumns)
       }
 
-      console.log({ board, nextColumns })
       const cloneBoard = { ...board } as IBoard
       cloneBoard.columns = nextColumns
       storeBoard(cloneBoard)
 
-      console.log({ cloneBoard })
       return [...nextColumns]
     })
   }
@@ -232,7 +230,6 @@ function BoardContent() {
     if (prevCardOrderIds[0]?.includes('placeholder-card')) prevCardOrderIds = []
 
     let nextCardOrderIds: any = dndOrderedColumns.find((c) => c._id === nextColumnId)?.cardOrderIds || []
-    console.log({ cloneBoard, dndOrderedColumns, dndOrderedColumnsIds, nextCardOrderIds, prevCardOrderIds, currentCardId, prevColumnId, nextColumnId })
 
     const payload = {
       currentCardId,
@@ -244,7 +241,6 @@ function BoardContent() {
 
     try {
       const data = await instance.put('/v1/boards/supports/moving_card', payload)
-      console.log({ data })
     } catch (error) {
       console.log(error)
     }
@@ -310,8 +306,6 @@ function BoardContent() {
       } else {
         const oldCardIndex = oldCloumnWhenDraggingCard?.cards?.findIndex((card: ICard) => card._id === activeDragItemId)
         const newCardIndex = overColumn?.cards?.findIndex((card: ICard) => card._id === overCardId)
-
-        console.log({ oldCardIndex, newCardIndex })
         const dndOrderedCards: any = arrayMove(oldCloumnWhenDraggingCard?.cards, oldCardIndex, newCardIndex)
         const dndOrderedCardsIds = dndOrderedCards.map((item: any) => item._id)
 
