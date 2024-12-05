@@ -4,17 +4,17 @@ import { NoItemOverView } from '@/components/OverViewItem'
 import PopoverCustom from '@/components/PopoverCustom'
 import { NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
 import instance from '@/services/axiosConfig'
-import { useStoreUser } from '@/store'
+import { useStoreBoard, useStoreUser } from '@/store'
 import { TNotifications } from '@/types'
 import { NotificationsNoneOutlined } from '@mui/icons-material'
 import { Avatar, Badge, Button } from '@nextui-org/react'
 import { memo, useEffect, useState } from 'react'
 
 const Notifications = () => {
-  const userInfo = useStoreUser((state) => state.userInfo)
+  const { userInfo } = useStoreUser()
+  const { workspace, storeWorkspace } = useStoreBoard()
   const [notifications, setNotifications] = useState<TNotifications[]>([])
   const [onFetchingNotification, setOnFetchingNotification] = useState<boolean>(false)
-
   const noData = notifications?.length === 0
 
   const handleFetchingNotification = async () => {
@@ -47,6 +47,12 @@ const Notifications = () => {
         }
         return n
       })
+
+      const newWorkspace = {
+        _id: notification?.invitation?.boardId,
+        title: notification?.invitation?.boardTitle,
+      }
+      storeWorkspace([...(workspace || []), newWorkspace] as any)
       setNotifications(newListNotifications as TNotifications[])
     } catch (error) {
       console.log(error)

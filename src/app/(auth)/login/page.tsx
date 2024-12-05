@@ -18,13 +18,19 @@ const Login = () => {
     onSuccess: async (tokenResponse) => {
       if (tokenResponse) {
         setIsLoading(true)
+        // set token to localStorage
+        localStorage.setItem('google_token', tokenResponse.access_token)
+        // set token to cookie
         setCookie('google_token', tokenResponse.access_token)
         Toast({
           message: 'Login Successful',
           type: 'success',
         })
-
-        router.push('/')
+        if (localStorage.getItem('accept-invitation-link')) {
+          router.push(localStorage.getItem('accept-invitation-link') || '/')
+        } else {
+          router.push('/')
+        }
       }
     },
     onError: () => {

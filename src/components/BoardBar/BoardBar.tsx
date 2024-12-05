@@ -1,22 +1,21 @@
 'use client'
 
-import { AddToDrive as AddToDriveIcon, Bolt as BoltIcon, Dashboard as DashboardIcon, FilterList as FilterListIcon, PersonAdd as PersonAddIcon, VpnLock as VpnLockIcon } from '@mui/icons-material'
-import { Avatar, AvatarGroup, Button, Input } from '@nextui-org/react'
+import { Dashboard as DashboardIcon, PersonAdd as PersonAddIcon } from '@mui/icons-material'
+import { Button, Input } from '@nextui-org/react'
 
+import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import Modal from '@/components/Modal'
+import { useSocket } from '@/components/Providers/SocketProvider'
 import Toast from '@/components/Toast'
-import { BOARD_TYPE, NOTIFICATION_TYPES } from '@/constants'
+import { BOARD_MEMBER_ROLE, BOARD_TYPE, MEMBER_STATUS } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
 import { memo, useEffect, useState } from 'react'
-import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import MemberGroup from '../MemberGroup'
 
 function BoardBar() {
-  const MAX_USER_SHOW = 3
-
+  const socket: any = useSocket()
   const { storeBoard, board } = useStoreBoard()
-
   const [isFixTitleBoard, setIsFixTitleBoard] = useState<boolean>(false)
   const [isPrivateBoard, setIsPrivateBoard] = useState<string>(board?.type || BOARD_TYPE.PUBLIC)
   const [titleBoard, setTitleBoard] = useState<string>(board?.title || '')
@@ -25,57 +24,6 @@ function BoardBar() {
   const [isInvitingMember, setIsInvitingMember] = useState(false)
   const [emailInviteMember, setEmailInviteMember] = useState('')
 
-  const listTypeBoard = [
-    {
-      type: BOARD_TYPE.PUBLIC,
-      description: 'Anyone with the link can access',
-    },
-    {
-      type: BOARD_TYPE.PRIVATE,
-      description: 'All team members can access',
-    },
-  ]
-
-  const listBoardBar: { startContent: any; title: string; content: React.ReactNode }[] = [
-    {
-      startContent: <VpnLockIcon />,
-      title: 'Workspace Visibility',
-      content: (
-        <div className='flex flex-col gap-2 bg-gradient-to-br from-blue-600 to-indigo-800'>
-          <span className='text-sm'>Workspace Visibility</span>
-          <span className='text-xs text-gray-500'>Choose who can see your workspace</span>
-          <div className='flex w-full flex-col gap-2'>
-            {listTypeBoard.map((item) => (
-              <div
-                key={item.type}
-                className={`w-full rounded-lg border px-4 py-2 ${isPrivateBoard === item.type ? 'border-white/50' : 'border-white/10'}`}
-                onClick={() => setIsPrivateBoard(item.type)}
-              >
-                {/* uppercase the first letter */}
-                <p>{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</p>
-                <p>{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ),
-    },
-    {
-      startContent: <AddToDriveIcon />,
-      title: 'Add To Google Drive',
-      content: <>AddToDriveIcon</>,
-    },
-    {
-      startContent: <BoltIcon />,
-      title: 'Automation',
-      content: <>Automation</>,
-    },
-    {
-      startContent: <FilterListIcon />,
-      title: 'Filters',
-      content: <>Filters</>,
-    },
-  ]
   const handleRenameTitleBoard = async () => {
     if (titleBoard === board?.title || titleBoard === '') return setIsFixTitleBoard(false)
 
@@ -108,11 +56,22 @@ function BoardBar() {
 
   const handleInviteMemberApi = async () => {
     try {
+      if (board?.memberGmails?.find((member) => member.email === emailInviteMember)) {
+        return Toast({ message: `Member ${emailInviteMember} already exists`, type: 'error' })
+      }
+      if (emailInviteMember === board?.ownerId) {
+        return Toast({ message: `You cannot invite yourself`, type: 'error' })
+      }
+
       await instance.post(`/v1/boards/${board?._id}/members`, { memberGmails: [emailInviteMember] })
       Toast({ message: `Invite member ${emailInviteMember} successfully`, type: 'success' })
       setEmailInviteMember('')
 
-      storeBoard({ ...board!, memberGmails: [...(board?.memberGmails || []), { email: emailInviteMember, type: NOTIFICATION_TYPES.PENDING }] })
+      storeBoard({
+        ...board!,
+        memberGmails: [...(board?.memberGmails || []), { email: emailInviteMember, status: MEMBER_STATUS.PENDING, role: BOARD_MEMBER_ROLE.MEMBER }],
+      })
+
       handleToggleModalInviteMember()
     } catch (error) {
       console.log({ error })
@@ -121,16 +80,20 @@ function BoardBar() {
     }
   }
 
-  const handleShowAllMember = () => {
-    console.log('show all member')
-  }
-
   useEffect(() => {
     isInvitingMember && handleInviteMemberApi()
   }, [isInvitingMember])
 
+  useEffect(() => {
+    if (!socket) return
+    socket.on('test', (data: string) => {
+      console.log({ data })
+    })
+    socket.emit('test', { message: 'Hello from client' })
+  }, [socket])
+
   return (
-    <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto bg-white/10 px-4'>
+    <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto overflow-y-hidden bg-colorBoardContent px-4'>
       <div className='flex items-center gap-2'>
         {isFixTitleBoard ? (
           <Input
@@ -193,7 +156,7 @@ function BoardBar() {
             </Button>
           </div>
         </Modal>
-        {board?.memberGmails?.length && board?.memberGmails?.length > 0 && <MemberGroup />}
+        {board?.memberGmails?.length && board?.memberGmails?.length > 0 ? <MemberGroup /> : null}
       </div>
     </div>
   )

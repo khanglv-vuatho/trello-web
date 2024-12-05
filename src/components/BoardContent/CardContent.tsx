@@ -3,23 +3,26 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Attachment as AttachmentIcon, Comment as CommentIcon, Group as GroupIcon } from '@mui/icons-material'
 import { Button, CardBody, Card as CardNextUI, Input, useDisclosure } from '@nextui-org/react'
-import ImageFallback from '../ImageFallback'
+import ImageFallback from '@/components/ImageFallback'
 import { Trash } from 'iconsax-react'
 import Modal from '@/components/Modal'
 import instance from '@/services/axiosConfig'
-import Toast from '../Toast'
+import Toast from '@/components/Toast'
 import { useEffect, useState } from 'react'
 import { useStoreBoard } from '@/store'
+import { generatePlaceholderCard } from '@/utils'
+import { useStoreStatusOpenModal } from '@/store'
+import ModalDeleteCard from './ModalDeleteCard'
+import ModalOpenCardDetail from './ModalOpenCardDetail'
 
 const CardContent = ({ card }: { card: ICard }) => {
+  const { storeBoard, board } = useStoreBoard()
+  const { status, storeStatusOpenModal } = useStoreStatusOpenModal()
   const [onDeletingCard, setOnDeletingCard] = useState(false)
 
   const [onFixTitleCard, setOnFixTitleCard] = useState<boolean>(false)
-
+  const [isOpenModalDetailCard, setIsOpenModalDetailCard] = useState<boolean>(false)
   const [valueTitleCard, setValueTitleCard] = useState<string>(card?.title)
-  const { storeBoard } = useStoreBoard()
-
-  const board = useStoreBoard((state) => state.board)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card._id,
@@ -40,6 +43,7 @@ const CardContent = ({ card }: { card: ICard }) => {
   const handleDeleteCard = () => {
     setOnDeletingCard(true)
   }
+
   const deleteCard = async () => {
     const payload = { cardId: card._id, columnId: card.columnId }
 
@@ -53,6 +57,10 @@ const CardContent = ({ card }: { card: ICard }) => {
         const cardIndex = column.cards.findIndex((item: ICard) => item._id === card._id)
         column.cards.splice(cardIndex, 1)
         column.cardOrderIds.splice(cardIndex, 1)
+
+        if (!column?.cards?.length) {
+          column.cards = [generatePlaceholderCard(column)]
+        }
 
         await instance.delete('/v1/cards/delete', { data: payload })
         Toast({ message: 'Card deleted successfully', type: 'success' })
@@ -86,8 +94,6 @@ const CardContent = ({ card }: { card: ICard }) => {
       if (columnIndex !== -1) {
         const column = updatedBoard.columns[columnIndex]
         const cardIndex = column.cards.findIndex((item: ICard) => item._id === card._id)
-        console.log({ valueTitleCard })
-        console.log({ titleOld: column.cards[cardIndex].title })
         column.cards[cardIndex].title = valueTitleCard
       }
       storeBoard(updatedBoard)
@@ -101,6 +107,11 @@ const CardContent = ({ card }: { card: ICard }) => {
     }
   }
 
+  const handleOpenModalDetailCard = () => {
+    setIsOpenModalDetailCard(true)
+    storeStatusOpenModal(true)
+  }
+
   useEffect(() => {
     onDeletingCard && deleteCard()
   }, [onDeletingCard])
@@ -109,7 +120,7 @@ const CardContent = ({ card }: { card: ICard }) => {
     <div ref={setNodeRef} {...listeners} {...attributes}>
       <CardNextUI className={`group cursor-pointer rounded-lg`} style={dndKitCardStyle}>
         <CardBody className={`p-0 ${card?.FE_PlaceholderCard ? 'hidden' : 'block'}`}>
-          <div className='flex w-full items-center justify-between pr-1'>
+          <div onClick={handleOpenModalDetailCard} className='flex w-full items-center justify-between pr-1'>
             <div className='w-[90%]'>
               {card?.cover && <ImageFallback alt={card?.cover} className='max-h-[200px] w-full object-contain' src={card?.cover} width={270} height={400} />}
               {onFixTitleCard ? (
@@ -154,29 +165,21 @@ const CardContent = ({ card }: { card: ICard }) => {
                 </div>
               )}
             </div>
-            <div onClick={() => onOpen()}>
+            <div
+              onClick={(e) => {
+                onOpen()
+                e.stopPropagation()
+                e.preventDefault()
+              }}
+              className='z-20 cursor-pointer'
+            >
               <Trash className='hidden duration-150 hover:text-red-500 group-hover:block' size={20} />
             </div>
           </div>
         </CardBody>
       </CardNextUI>
-      <Modal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        modalTitle='Delete Card'
-        modalFooter={
-          <div className='flex items-center gap-2'>
-            <Button isLoading={onDeletingCard} variant='light' color='danger' onClick={() => handleDeleteCard()} className='px-6 py-3'>
-              Delete
-            </Button>
-            <Button onClick={onOpenChange} className='bg-colorBoardContent px-6 py-3 text-white'>
-              Cancel
-            </Button>
-          </div>
-        }
-      >
-        Are you sure you want to delete this card?
-      </Modal>
+      <ModalDeleteCard isOpen={isOpen} onOpenChange={onOpenChange} onDeletingCard={onDeletingCard} handleDeleteCard={handleDeleteCard} />
+      <ModalOpenCardDetail isOpenModalDetailCard={isOpenModalDetailCard} setIsOpenModalDetailCard={setIsOpenModalDetailCard} card={card} />
     </div>
   )
 }

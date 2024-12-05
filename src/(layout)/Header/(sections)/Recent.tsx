@@ -6,18 +6,27 @@ import { Button } from '@nextui-org/react'
 import { ArrowDown2 } from 'iconsax-react'
 import { useStoreBoard } from '@/store'
 import { IBoard } from '@/types'
-
+import { useState } from 'react'
 const Recent = () => {
-  const { boardsRecent } = useStoreBoard()
+  const { boardsRecent, storeBoardRecent } = useStoreBoard()
+  const [isOpen, setIsOpen] = useState<boolean>(false)
 
   const noData = boardsRecent?.length === 0
 
+  const handleClickItemRecent = (item: IBoard) => {
+    const newBoardsRecent = boardsRecent?.filter((board) => board?._id !== item?._id) || []
+    storeBoardRecent([item, ...newBoardsRecent])
+    setIsOpen(false)
+  }
+
   return (
     <PopoverCustom
+      isOpen={isOpen}
+      onOpenChange={setIsOpen}
       noData={noData}
       placement='bottom-start'
       popoverTrigger={
-        <Button endContent={<ArrowDown2 size={16} />} variant='light' className='flex !min-h-10 flex-shrink-0 bg-transparent text-white hover:bg-white/10'>
+        <Button onClick={() => setIsOpen(true)} endContent={<ArrowDown2 size={16} />} variant='light' className='flex !min-h-10 flex-shrink-0 bg-transparent text-white hover:bg-white/10'>
           Recent
         </Button>
       }
@@ -27,7 +36,7 @@ const Recent = () => {
           <NoItemOverView title='No recent boards' description='Your recent boards will appear here' />
         ) : (
           boardsRecent?.map((item: IBoard, index: number) => (
-            <OverViewItem href={`/board/${item?._id}`} key={index} isStared={item?.isStared} item={item}>
+            <OverViewItem onClick={() => handleClickItemRecent(item)} href={`/board/${item?._id}`} key={index} isStared={item?.isStared} item={item}>
               {item?.title}
             </OverViewItem>
           ))

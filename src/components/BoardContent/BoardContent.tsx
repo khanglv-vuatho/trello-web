@@ -13,37 +13,29 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import { SortableContext, arrayMove, horizontalListSortingStrategy, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material'
+import { arrayMove } from '@dnd-kit/sortable'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 import { generatePlaceholderCard } from '@/utils'
 
-import CardContent from '@/components/CardContent'
-import CreateCard from '@/components/CreateCard'
-import CreateColumn from '@/components/CreateColumn'
+import { CardContent } from '@/components/BoardContent'
+
+import { Column, ListColumn } from '@/components/BoardContent'
 import { IBoard, ICard, IColumn } from '@/types'
-
-import './BoardContent.css'
-
 import { ITEM_TYPE } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, useDisclosure } from '@nextui-org/react'
-import { Trash } from 'iconsax-react'
-import Modal from '../Modal'
-import Toast from '../Toast'
 
 function BoardContent() {
   const { board, storeBoard } = useStoreBoard()
   const [orderedColumns, setOrderedColumns] = useState<any[]>([])
-
   const [activeDragItemId, setActiveDragItemId] = useState<null | string>(null)
   const [activeItemDragStart, setActiveItemDragStart] = useState<any>({})
   const [activeItemType, setActiveItemType] = useState<(typeof ITEM_TYPE)[keyof typeof ITEM_TYPE] | null>(null)
   const [activeDragItemData, setActiveDragItemData] = useState<any>(null)
   const [oldCloumnWhenDraggingCard, setOldCloumnWhenDraggingCard] = useState<any>(null)
+
+  const lastOverId = useRef<any>(null)
 
   const mouseSensor = useSensor(PointerSensor, {
     // Require the mouse to move by 10 pixels before activating
@@ -71,8 +63,6 @@ function BoardContent() {
       },
     }),
   }
-
-  const lastOverId = useRef<any>(null)
 
   const collisionDetectionStrategy = useCallback(
     (args: any) => {
@@ -172,8 +162,11 @@ function BoardContent() {
 
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
 
-        // delete placeholder card if exits
-        nextColumns.cards = nextOverColumn.cards.filter((card: ICard) => !card?.FE_PlaceholderCard)
+        // delete placeholder card if cards length > 1
+        if (nextOverColumn.cards.length > 1) {
+          nextOverColumn.cards = nextOverColumn.cards.filter((card: ICard) => !card?.FE_PlaceholderCard)
+        }
+
         //update cardOrderIds
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map((card: ICard) => card._id)
       }
@@ -181,6 +174,10 @@ function BoardContent() {
       if (triggerForm === '_handleDragEnd') {
         moveCardToDifferentColumn(activeDraggingCardId, oldCloumnWhenDraggingCard._id, nextOverColumn._id, nextColumns)
       }
+
+      const cloneBoard = { ...board } as IBoard
+      cloneBoard.columns = nextColumns
+      storeBoard(cloneBoard)
 
       return [...nextColumns]
     })
@@ -193,7 +190,7 @@ function BoardContent() {
     cloneBoard.columns = dndOrderedColumns
 
     try {
-      await instance.put(`/v1/boards/${board._id}`, {
+      await instance.put(`/v1/boards/${board?._id}`, {
         columns: dndOrderedColumns,
         columnOrderIds: dndOrderedColumnsIds,
       })
@@ -226,9 +223,7 @@ function BoardContent() {
 
   const moveCardToDifferentColumn = async (currentCardId: string, prevColumnId: string, nextColumnId: string, dndOrderedColumns: IColumn[]) => {
     const dndOrderedColumnsIds = dndOrderedColumns.map((item) => item._id)
-    const cloneBoard = { ...board }
-    cloneBoard.columns = dndOrderedColumns
-    cloneBoard.columnOrderIds = dndOrderedColumnsIds
+    const cloneBoard: any = { ...board }
 
     let prevCardOrderIds: any = dndOrderedColumns.find((c) => c._id === prevColumnId)?.cardOrderIds || []
 
@@ -246,7 +241,6 @@ function BoardContent() {
 
     try {
       const data = await instance.put('/v1/boards/supports/moving_card', payload)
-      console.log(data)
     } catch (error) {
       console.log(error)
     }
@@ -312,8 +306,6 @@ function BoardContent() {
       } else {
         const oldCardIndex = oldCloumnWhenDraggingCard?.cards?.findIndex((card: ICard) => card._id === activeDragItemId)
         const newCardIndex = overColumn?.cards?.findIndex((card: ICard) => card._id === overCardId)
-
-        console.log({ oldCardIndex, newCardIndex })
         const dndOrderedCards: any = arrayMove(oldCloumnWhenDraggingCard?.cards, oldCardIndex, newCardIndex)
         const dndOrderedCardsIds = dndOrderedCards.map((item: any) => item._id)
 
@@ -357,6 +349,7 @@ function BoardContent() {
   useEffect(() => {
     setOrderedColumns(board?.columns || [])
   }, [board])
+
   return (
     <div className='h-boardContent overflow-x-auto bg-colorBoardContent'>
       <DndContext collisionDetection={collisionDetectionStrategy as any} onDragStart={_handleDragStart} onDragEnd={_handleDragEnd} sensors={sensors} onDragOver={_handleDragOver}>
@@ -372,173 +365,6 @@ function BoardContent() {
         </DragOverlay>
       </DndContext>
     </div>
-  )
-}
-
-const ListColumn = ({ columns }: { columns: IColumn[] }) => {
-  const [titleColumn, setTitleColumn] = useState<string>('')
-
-  const columnsDndKit = columns?.map((item) => item._id)
-  return (
-    <SortableContext strategy={horizontalListSortingStrategy} items={columnsDndKit}>
-      <div className='flex gap-4 p-2'>
-        {columns?.map((column) => <Column key={column._id} column={column} />)}
-        <CreateColumn value={titleColumn} setValue={setTitleColumn} />
-      </div>
-    </SortableContext>
-  )
-}
-
-const Column = ({ column }: { column: IColumn }) => {
-  const [orderedCards, setOrderedCards] = useState<any[]>([])
-  const [cardTitle, setCardTitle] = useState<string>('')
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-
-  const [onFixTitleColumn, setOnFixTitleColumn] = useState<boolean>(false)
-  const [valueTitleColumn, setValueTitleColumn] = useState<string>(column.title)
-  const { storeBoard, board } = useStoreBoard()
-
-  const { isOpen, onOpen, onOpenChange } = useDisclosure()
-
-  const listExpandColumnButton = [{ title: 'Delete Column', icon: <Trash color='red' />, handleAction: () => onOpen() }]
-
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: column._id,
-    data: { ...column },
-  })
-
-  const dndKitColumnStyle = {
-    transform: CSS.Translate.toString(transform),
-    transition,
-    height: '100%',
-    opacity: isDragging ? 0.7 : 1,
-  }
-
-  const handleDeleteColumn = async () => {
-    try {
-      const cloneBoard: any = { ...board }
-      cloneBoard.columnOrderIds = cloneBoard.columnOrderIds?.filter((columnId: string) => columnId !== column._id)
-      cloneBoard.columns = cloneBoard.columns?.filter((item: IColumn) => item._id !== column._id)
-      storeBoard(cloneBoard)
-
-      const data: any = await instance.delete(`v1/columns/${column._id}`)
-
-      Toast({ message: data.deleteDefault, type: 'success' })
-
-      onOpenChange()
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  const handleRenameColumn = async () => {
-    if (valueTitleColumn === column.title || !valueTitleColumn) return setOnFixTitleColumn(!onFixTitleColumn)
-
-    if (valueTitleColumn?.length <= 3 || valueTitleColumn?.length > 50) {
-      return setOnFixTitleColumn(!onFixTitleColumn)
-    }
-
-    try {
-      const cloneBoard: any = { ...board }
-
-      cloneBoard.columns = cloneBoard.columns?.map((item: IColumn) => {
-        if (item._id === column._id) {
-          return { ...item, title: valueTitleColumn }
-        }
-        return item
-      })
-
-      storeBoard(cloneBoard)
-
-      await instance.put(`v1/columns/${column._id}`, { title: valueTitleColumn })
-
-      Toast({ message: 'Rename column successfully', type: 'success' })
-      setOnFixTitleColumn(!onFixTitleColumn)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  useEffect(() => {
-    setOrderedCards(column?.cards)
-  }, [column])
-
-  return (
-    <>
-      <div ref={setNodeRef} {...attributes} {...listeners} style={dndKitColumnStyle} className='min-w-[300px] max-w-[300px]'>
-        <div className={`h-[fit-content] w-full rounded-lg bg-[#f1f2f4]`}>
-          <div className='flex items-center justify-between p-2'>
-            {onFixTitleColumn ? (
-              <Input
-                onKeyUp={(e) => {
-                  if (e.key === 'Enter') {
-                    handleRenameColumn()
-                  }
-                }}
-                variant='bordered'
-                autoFocus
-                onBlur={() => handleRenameColumn()}
-                value={valueTitleColumn}
-                onChange={(e) => {
-                  setValueTitleColumn(e.target.value)
-                }}
-                className='w-full'
-              />
-            ) : (
-              <h3 className='w-full select-none py-2 pl-3 font-semibold' onDoubleClick={() => setOnFixTitleColumn(!onFixTitleColumn)}>
-                {column?.title}
-              </h3>
-            )}
-            <Dropdown isOpen={isDropdownOpen} onClose={() => setIsDropdownOpen(false)}>
-              <DropdownTrigger>
-                <div onClick={() => setIsDropdownOpen(!isDropdownOpen)} className='rounded-full p-2 hover:bg-white/60'>
-                  <MoreHorizIcon className='text-black' />
-                </div>
-              </DropdownTrigger>
-              <DropdownMenu aria-label='Static Actions'>
-                {listExpandColumnButton.map((item) => (
-                  <DropdownItem key={item.title} startContent={item?.icon} onClick={() => item.handleAction()}>
-                    {item?.title}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-          <ListCard cards={orderedCards} />
-          <CreateCard value={cardTitle} setValue={setCardTitle} column={column} />
-        </div>
-      </div>
-      <Modal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        modalTitle='Delete Column'
-        modalFooter={
-          <div className='flex items-center gap-2'>
-            <Button variant='light' color='danger' onClick={handleDeleteColumn} className='px-6 py-3'>
-              Delete
-            </Button>
-            <Button onClick={onOpenChange} className='bg-colorBoardContent px-6 py-3 text-white'>
-              Cancel
-            </Button>
-          </div>
-        }
-      >
-        <p>Are you sure you want to delete this column?</p>
-      </Modal>
-    </>
-  )
-}
-
-const ListCard = ({ cards }: { cards: ICard[] }) => {
-  const dndKitCards = cards.map((item) => item._id)
-  return (
-    <SortableContext strategy={verticalListSortingStrategy} items={dndKitCards}>
-      <div className='card'>
-        <div style={{ gap: cards.some((card) => card?.FE_PlaceholderCard) && cards.length < 2 ? '0' : '0.5rem' }} className='flex flex-col px-2'>
-          {cards?.length ? cards.map((card, index) => <CardContent key={index} card={card} />) : <></>}
-        </div>
-      </div>
-    </SortableContext>
   )
 }
 

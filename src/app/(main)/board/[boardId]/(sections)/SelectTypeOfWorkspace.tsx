@@ -1,12 +1,16 @@
 'use client'
 import PopoverCustom from '@/components/PopoverCustom'
 import { BOARD_TYPE } from '@/constants'
+import { useStoreBoard } from '@/store'
 import { VpnLock as VpnLockIcon } from '@mui/icons-material'
 import { Button } from '@nextui-org/react'
 import { useState } from 'react'
+import ItemTypeBoard from './ItemTypeBoard'
 
 const SelectTypeOfWorkspace = () => {
-  const [isPrivateBoard, setIsPrivateBoard] = useState<string>(BOARD_TYPE.PUBLIC)
+  const { board } = useStoreBoard()
+
+  const [typeBoard, setTypeBoard] = useState<string>(board?.type || BOARD_TYPE.PRIVATE)
   const listTypeBoard = [
     {
       type: BOARD_TYPE.PUBLIC,
@@ -20,23 +24,22 @@ const SelectTypeOfWorkspace = () => {
   return (
     <PopoverCustom
       popoverTrigger={
-        <Button startContent={<VpnLockIcon />} isIconOnly variant='light' className='!h-10 flex flex-shrink-0 text-white hover:bg-white/10'>
+        <Button startContent={<VpnLockIcon />} isIconOnly variant='light' className='flex !min-h-10 w-fit flex-shrink-0 gap-4 rounded-lg px-4 text-white hover:bg-white/10'>
           Workspace Visibility
         </Button>
       }
     >
-      <div className='flex flex-col gap-2 bg-gradient-to-br from-blue-600 to-indigo-800'>
+      <div className='flex flex-col gap-2 bg-gradient-to-br from-blue-600 to-indigo-800 py-2 text-white'>
         <span className='text-sm'>Workspace Visibility</span>
-        <span className='text-xs text-gray-500'>Choose who can see your workspace</span>
+        <span className='text-xs text-white/50'>Choose who can see your workspace</span>
         <div className='flex w-full flex-col gap-2'>
           {listTypeBoard.map((item) => (
-            <div key={item.type} className={`w-full rounded-lg border px-4 py-2 ${isPrivateBoard === item.type ? 'border-white/50' : 'border-white/10'}`} onClick={() => setIsPrivateBoard(item.type)}>
-              {/* uppercase the first letter */}
-              <p>{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</p>
-              <p>{item.description}</p>
-            </div>
+            <ItemTypeBoard key={item.type} item={item} typeBoard={typeBoard} setTypeBoard={setTypeBoard} />
           ))}
         </div>
+        <Button className='min-h-10 w-full text-blue-600' color='primary' variant='shadow'>
+          Save
+        </Button>
       </div>
     </PopoverCustom>
   )

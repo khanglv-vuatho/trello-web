@@ -13,10 +13,15 @@ const AcceptInvitation = ({ searchParams }: { searchParams: { boardId: string; s
   const { boardId } = searchParams
   const [onAccept, setOnAccept] = useState(false)
   const { userInfo } = useStoreUser()
+  const currentLink = window.location.href
+
+  localStorage.setItem('accept-invitation-link', currentLink)
+  // get full current link
 
   const handleAcceptInvitation = async () => {
     try {
       await instance.put(`/v1/notifications/${boardId}`, { status: NOTIFICATION_TYPES.ACCEPTED, email: userInfo?.email, boardId })
+      localStorage.removeItem('accept-invitation-link')
     } catch (error) {
       console.log({ error })
     } finally {

@@ -1,10 +1,3 @@
-import { TBoards } from '@/types'
-
-export const capitalizeFirstLetter = (val: string) => {
-  if (!val) return ''
-  return `${val.charAt(0).toUpperCase()}${val.slice(1)}`
-}
-
 export const mapOrder = (originalArray: any[], orderArray: string[], key: string) => {
   if (!originalArray || !orderArray || !key) return []
 
@@ -77,4 +70,10 @@ export function objectToFormData(obj: any) {
   }
 
   return formData
+}
+
+// upercase first letter
+export const uppercaseFirstLetter = (str: string) => {
+  if (!str) return ''
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }

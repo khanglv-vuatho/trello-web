@@ -9,7 +9,11 @@ import { memo, useEffect, useState } from 'react'
 import Modal from '../Modal'
 import Toast from '../Toast'
 
-const BoardItem = ({ board }: { board: TBoards }) => {
+type TBoardItem = {
+  board: TBoards
+  hiddenAction?: boolean
+}
+const BoardItem = ({ board, hiddenAction }: TBoardItem) => {
   const [onSending, setOnSending] = useState<boolean>(false)
   const [isOpenPopover, setIsOpenPopover] = useState<boolean>(false)
   const [isOpenModalDelete, setIsOpenModalDelete] = useState<boolean>(false)
@@ -17,6 +21,7 @@ const BoardItem = ({ board }: { board: TBoards }) => {
   const { deleteBoard, updateRecentBoardAndStar } = useStoreBoard()
 
   const _handleToggleStar = (e: any) => {
+    if (hiddenAction) return
     e.preventDefault()
     setOnSending(true)
   }
@@ -60,7 +65,7 @@ const BoardItem = ({ board }: { board: TBoards }) => {
 
   return (
     <div className='group relative flex h-[100px] min-w-[200px] flex-col justify-between overflow-hidden rounded-md bg-white/10 p-2'>
-      <Modal isOpen={isOpenModalDelete} onOpenChange={setIsOpenModalDelete} modalTitle='Delete board'>
+      <Modal isOpen={isOpenModalDelete} onOpenChange={setIsOpenModalDelete} modalTitle={`Delete board #${board?.title}`}>
         <p>Are you sure you want to delete this board?</p>
         <div className='flex justify-between gap-2'>
           <Button isLoading={onDeleting} onPress={() => setOnDeleting(true)} variant='light' color='danger' className='w-full px-4 py-2'>
@@ -74,39 +79,42 @@ const BoardItem = ({ board }: { board: TBoards }) => {
       <Link href={`/board/${board?._id}`} className='absolute inset-0 z-10' />
       <p className='line-clamp-1 max-w-[140px]'>{board?.title}</p>
       <p className='line-clamp-1 max-w-[140px]'>{board?.description}</p>
-
-      <Popover
-        classNames={{
-          content: 'p-0.5',
-        }}
-        placement='right'
-        className='z-20'
-        isOpen={isOpenPopover}
-        onOpenChange={setIsOpenPopover}
-      >
-        <PopoverTrigger>
-          <Button disableRipple className='absolute right-0 top-2 translate-x-[100%] bg-transparent p-0 duration-200 group-hover:translate-x-[10px]' onClick={(e) => e.preventDefault()}>
-            {/* dots icon */}
-            <MoreCircle className='text-white' />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent>
-          <Listbox aria-label='Actions'>
-            <ListboxItem key='delete' className='text-danger' color='danger' onClick={handleOpenModalDelete}>
-              Delete board
-            </ListboxItem>
-          </Listbox>
-        </PopoverContent>
-      </Popover>
-      <Button
-        as={'button'}
-        disableRipple
-        isDisabled={onSending}
-        onClick={_handleToggleStar}
-        className='absolute bottom-2 right-0 z-[200] translate-x-[100%] bg-transparent p-0 duration-200 group-hover:translate-x-[10px]'
-      >
-        <Star1 variant={board?.isStared ? 'Bold' : 'Outline'} className={board?.isStared ? 'text-yellow-500' : 'text-white'} />
-      </Button>
+      {!hiddenAction && (
+        <Popover
+          classNames={{
+            content: 'p-0.5',
+          }}
+          placement='right'
+          className='z-20'
+          isOpen={isOpenPopover}
+          onOpenChange={setIsOpenPopover}
+        >
+          <PopoverTrigger>
+            <Button disableRipple className='absolute right-0 top-2 translate-x-[100%] bg-transparent p-0 duration-200 group-hover:translate-x-[10px]' onClick={(e) => e.preventDefault()}>
+              {/* dots icon */}
+              <MoreCircle className='text-white' />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent>
+            <Listbox aria-label='Actions'>
+              <ListboxItem key='delete' className='text-danger' color='danger' onClick={handleOpenModalDelete}>
+                Delete board
+              </ListboxItem>
+            </Listbox>
+          </PopoverContent>
+        </Popover>
+      )}
+      {!hiddenAction && (
+        <Button
+          as={'button'}
+          disableRipple
+          isDisabled={onSending}
+          onClick={_handleToggleStar}
+          className='absolute bottom-2 right-0 z-[200] translate-x-[100%] bg-transparent p-0 duration-200 group-hover:translate-x-[10px]'
+        >
+          <Star1 variant={board?.isStared ? 'Bold' : 'Outline'} className={board?.isStared ? 'text-yellow-500' : 'text-white'} />
+        </Button>
+      )}
     </div>
   )
 }

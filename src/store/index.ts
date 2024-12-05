@@ -6,8 +6,11 @@ import { generatePlaceholderCard, mapOrder } from '@/utils'
 
 type TBoardState = {
   board?: IBoard
+  allBoards?: IBoard[]
   boardsRecent?: IBoard[]
   boardsStar?: IBoard[]
+  workspace?: IBoard[]
+  storeWorkspace: (workspace: IBoard[]) => void
   storeBoard: (board: IBoard) => void
   storeBoardRecent: (board: IBoard[]) => void
   storeBoardStar: (board: IBoard[]) => void
@@ -16,14 +19,20 @@ type TBoardState = {
   createNewCard: (column: IColumn, board: IBoard, title: string) => Promise<void>
   moveColumn: (column: IColumn, board: IBoard, title: string) => Promise<void>
   starBoard: (boardId: string, isStared: boolean) => Promise<void>
-  fetchAllBoards: (email: string) => Promise<void>
+  fetchAllBoards: () => Promise<void>
+  storeAllBoards: (boards: IBoard[]) => void
   deleteBoard: (boardId: string) => Promise<void>
+  deleteMemberBoard: (boardId: string, email: string) => Promise<void>
   updateRecentBoardAndStar: (board: IBoard) => Promise<void>
 }
 
 export const useStoreBoard = create<TBoardState>((set, get) => ({
   storeBoard: (board) => {
     set({ board })
+  },
+
+  storeAllBoards: (allBoards: IBoard[]) => {
+    set({ allBoards })
   },
 
   storeBoardRecent: (boardsRecent) => {
@@ -65,10 +74,19 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     board.isStared = !board.isStared
     await get().starBoard(board?._id, board?.isStared)
   },
-  fetchAllBoards: async (email) => {
+
+  storeWorkspace: (workspace) => {
+    set({ workspace })
+  },
+
+  fetchAllBoards: async () => {
     try {
-      const data: any = await instance.get(`/v1/boards/get-all?email=${email}`)
-      set({ board: data })
+      const data: any = await instance.get(`/v1/boards/get-all`)
+      get().storeWorkspace(data?.workspace)
+      get().storeBoardRecent(data?.boards?.filter((item: IBoard) => !item?.isStared))
+      get().storeBoardStar(data?.boards?.filter((item: IBoard) => item?.isStared))
+      get().storeAllBoards(data?.boards)
+
       return data
     } catch (error) {
       console.log(error)
@@ -94,6 +112,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
       set({ board: { ...cloneData } })
       return cloneData
     } catch (error) {
+      window.location.href = '/board-not-found'
       console.log(error)
     }
   },
@@ -125,11 +144,6 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
 
   createNewCard: async (column, board, title) => {
     const clonedColumn = { ...column }
-
-    const newBoard = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
-
-    set({ board: newBoard })
-
     const payload = {
       title,
       boardId: board?._id,
@@ -138,7 +152,13 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     const card: any = await instance.post('/v1/cards', payload)
 
     clonedColumn.cards.push(card)
+
     clonedColumn.cardOrderIds.push(card?._id)
+    const newBoard: any = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
+    newBoard.cards.push(card)
+    set({ board: newBoard })
+
+    console.log({ newBoard })
   },
 
   moveColumn: async (column, board, title) => {
@@ -158,6 +178,13 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     set({ board: newBoard })
   },
 
+  deleteMemberBoard: async (boardId, email) => {
+    await instance.delete(`/v1/boards/${boardId}/members`, { data: { email } })
+    const { board } = get()
+    console.log({ board })
+    if (!board) return
+    set({ board: { ...board, memberGmails: board.memberGmails?.filter((member) => member.email !== email) } })
+  },
   starBoard: async (boardId, isStared) => {
     await instance.put('/v1/boards/' + boardId, { isStared })
   },
@@ -174,13 +201,24 @@ export const useStoreUser = create<TUserState>((set) => ({
   },
 }))
 
-type TWorkspaceState = {
-  workspace?: IBoard[]
-  storeWorkspace: (workspace: IBoard[]) => void
+type TRoleOfBoard = {
+  role?: string
+  storeRoleOfBoard: (role: string) => void
 }
 
-export const useStoreWorkspace = create<TWorkspaceState>((set) => ({
-  storeWorkspace: (workspace) => {
-    set({ workspace })
+export const useStoreRoleOfBoard = create<TRoleOfBoard>((set) => ({
+  storeRoleOfBoard: (role) => {
+    set({ role })
+  },
+}))
+
+type TStatusOpenModal = {
+  status?: boolean
+  storeStatusOpenModal: (status: boolean) => void
+}
+
+export const useStoreStatusOpenModal = create<TStatusOpenModal>((set) => ({
+  storeStatusOpenModal: (status) => {
+    set({ status })
   },
 }))

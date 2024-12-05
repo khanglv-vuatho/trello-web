@@ -12,11 +12,7 @@ const PopoverCustom = ({ noData = false, popoverTrigger, children, ...props }: T
     <Popover
       {...props}
       classNames={{
-        base: '1',
-        arrow: '2',
-        backdrop: '3',
         content: `${noData ? 'bg-white' : 'bg-gradient-to-br from-blue-600 to-indigo-800'}`,
-        trigger: '5',
       }}
     >
       <PopoverTrigger>{popoverTrigger}</PopoverTrigger>

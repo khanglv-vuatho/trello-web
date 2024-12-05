@@ -1,4 +1,5 @@
 'use client'
+
 import ImageFallback from '@/components/ImageFallback'
 import ProfileSkeleton from '@/components/ProfileSkeleton'
 import Toast from '@/components/Toast'
@@ -15,10 +16,15 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
   const { userInfo, storeUser } = useStoreUser()
 
   const [displayName, setDisplayName] = useState(userInfo?.name || '')
+
   const [onSubmit, setOnSubmit] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [imageUI, setImageUI] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [onFetchingDetailUser, setOnFetchingDetailUser] = useState(false)
+  const [storeAnotherUser, setStoreAnotherUser] = useState<any>(null)
+  const isOwner = userInfo?.email === email
 
   const handleChangeAvatar = (event: any) => {
     const file = event.target.files[0]
@@ -33,6 +39,13 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
 
   const handleSubmit = async () => {
     try {
+      if (!isOwner) {
+        Toast({
+          type: 'error',
+          message: 'You do not have permission to edit this profile',
+        })
+        return
+      }
       if (!displayName || (displayName === userInfo?.name && file === null)) return
       const payload = {
         name: displayName,
@@ -49,6 +62,18 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
       console.log(error)
     } finally {
       setOnSubmit(false)
+    }
+  }
+
+  const handleFetchingDetailUser = async () => {
+    if (isOwner) return
+    try {
+      const dataUser: any = await instance.get(`/v1/users/${email}`)
+      setStoreAnotherUser(dataUser?.user)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setOnFetchingDetailUser(false)
     }
   }
 
@@ -70,23 +95,40 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
     }
   }, [imageUI])
 
+  useEffect(() => {
+    if (isOwner) return
+    if (!userInfo?.email) return
+
+    if (onFetchingDetailUser) {
+      handleFetchingDetailUser()
+    }
+  }, [onFetchingDetailUser, userInfo?.email])
+
+  useEffect(() => {
+    if (isOwner) return
+    if (!userInfo?.email) return
+    setOnFetchingDetailUser(true)
+  }, [userInfo?.email])
+
   return (
     <WrapperLayout>
       <div className='flex w-full max-w-md rounded-lg border border-white/20 bg-white/5 p-4 transition-colors hover:bg-white/10'>
         {!!userInfo ? (
           <div className='mx-auto flex w-full flex-col gap-6'>
-            <h1 className='text-2xl font-bold'>Edit Profile</h1>
+            <h1 className='text-2xl font-bold'>{isOwner ? 'Edit Profile' : `${storeAnotherUser?.name}'s Profile`}</h1>
             <div className='relative mx-auto size-[200px] overflow-hidden rounded-full'>
-              <input accept='image/*' onChange={handleChangeAvatar} type='file' className='hidden' ref={fileInputRef} />
-              <ImageFallback src={imageUI || ''} alt='avatar' className='size-full object-cover' width={500} height={500} />
-              <div onClick={() => fileInputRef.current?.click()} className='absolute bottom-0 left-0 right-0 z-40 flex items-center justify-center rounded-full bg-gray-200 py-2'>
-                <Camera size={24} className='text-white' />
-              </div>
+              {isOwner && <input accept='image/*' onChange={handleChangeAvatar} type='file' className='hidden' ref={fileInputRef} />}
+              <ImageFallback src={isOwner ? imageUI : storeAnotherUser?.picture || ''} alt='avatar' className='size-full object-cover' width={500} height={500} />
+              {isOwner && (
+                <div onClick={() => fileInputRef.current?.click()} className='absolute bottom-0 left-0 right-0 z-40 flex items-center justify-center rounded-full bg-gray-200 py-2'>
+                  <Camera size={24} className='text-white' />
+                </div>
+              )}
             </div>
             <div className='flex flex-col gap-2'>
               <Input
                 onKeyUp={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === 'Enter' && isOwner) {
                     setOnSubmit(true)
                   }
                 }}
@@ -94,8 +136,9 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
                 variant='bordered'
                 label='Display Name'
                 labelPlacement='outside'
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
+                value={isOwner ? displayName : storeAnotherUser?.name}
+                onChange={(e) => isOwner && setDisplayName(e.target.value)}
+                readOnly={!isOwner}
                 classNames={{
                   input: 'placeholder:text-white',
                   inputWrapper: 'group-data-[focus=true]:border-white data-[hover=true]:border-white',
@@ -107,7 +150,7 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
                 readOnly
                 label='Email'
                 labelPlacement='outside'
-                value={email}
+                value={isOwner ? email : storeAnotherUser?.email}
                 classNames={{
                   input: 'placeholder:text-white',
                   inputWrapper: 'group-data-[focus=true]:border-white data-[hover=true]:border-white',
@@ -115,9 +158,11 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
                 }}
               />
 
-              <Button isLoading={onSubmit} onClick={() => setOnSubmit(true)} className='ml-auto mt-4 min-h-10 w-full bg-white text-indigo-600 hover:bg-indigo-100'>
-                Save
-              </Button>
+              {isOwner && (
+                <Button isLoading={onSubmit} onClick={() => setOnSubmit(true)} className='ml-auto mt-4 min-h-10 w-full bg-white text-blue-500 hover:bg-indigo-100'>
+                  Save
+                </Button>
+              )}
             </div>
           </div>
         ) : (

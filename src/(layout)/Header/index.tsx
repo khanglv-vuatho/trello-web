@@ -9,19 +9,21 @@ import ExpandButton from '@/components/ExpandButton'
 import Modal from '@/components/Modal'
 import Toast from '@/components/Toast'
 import instance from '@/services/axiosConfig'
-import { useStoreUser } from '@/store'
-import { deleteCookie, getCookie } from 'cookies-next'
+import { useStoreBoard, useStoreUser } from '@/store'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-
+import { deleteCookie, getCookie, setCookie } from 'cookies-next'
 import { InputSearch } from '@/components/InputSearch'
 import { ContentUser, Messages, Notifications, Recent, Starred, Workspaces } from './(sections)'
 import ModalBodyCreateNewBoard from './(sections)/ModalBodyCreateNewBoard'
 
 function Header() {
+  // get token from cookie
   const google_token = getCookie('google_token')
+  // get token from localStorage
   const { storeUser } = useStoreUser()
+  const { storeBoardRecent, boardsRecent, allBoards } = useStoreBoard()
 
   const router = useRouter()
 
@@ -38,13 +40,15 @@ function Header() {
 
   const handleCreateNewBoard = async () => {
     try {
-      const payload = { title: titleBoard, type: 'public', ownerId: userInfo?.email }
+      const payload = { title: titleBoard?.trim(), type: 'private', ownerId: userInfo?.email }
       const data: any = await instance.post('/v1/boards', payload)
 
       Toast({ message: 'Create Board Successful', type: 'success' })
       setTitleBoard('')
+      const newBoard = [data, ...(boardsRecent || [])]
       router.push(`/board/${data?._id}`)
       onClose()
+      storeBoardRecent(newBoard)
     } catch (error) {
       console.log(error)
     } finally {
@@ -55,7 +59,9 @@ function Header() {
   const handleGetDetailUser = async ({ payload }: { payload: any }) => {
     try {
       const dataUser: any = await instance.post(`/v1/users/login`, payload)
-      storeUser(dataUser.boards)
+      setCookie('access_token', dataUser?.boards?.access_token)
+      localStorage.setItem('access_token', dataUser?.boards?.access_token)
+      storeUser(dataUser?.boards)
     } catch (error) {
       console.log(error)
     }
@@ -67,7 +73,11 @@ function Header() {
       await handleGetDetailUser({ payload: dataUser })
     } catch (error) {
       if (error) {
-        deleteCookie('access_token')
+        Toast({ message: 'Login Expired', type: 'error' })
+        // delete token from cookie
+        deleteCookie('google_token')
+        // delete token from localStorage6
+        localStorage.removeItem('access_token')
         router.push('/login')
       }
       console.log(error)
@@ -77,6 +87,12 @@ function Header() {
   }
 
   const handleConfirmCreateNewBoard = () => {
+    // check
+    console.log({ allBoards })
+    if (allBoards?.find((board) => board?.title.trim() === titleBoard?.trim())) {
+      Toast({ message: 'Board already exists', type: 'error' })
+      return
+    }
     setOnSending(true)
   }
 
@@ -129,7 +145,7 @@ function Header() {
             <Button variant='light' color='default' onClick={onOpenChange} className='px-6 py-3'>
               Cancel
             </Button>
-            <Button isLoading={onSending} onClick={handleConfirmCreateNewBoard} className='bg-white/10 px-6 py-3 text-white'>
+            <Button isLoading={onSending} onClick={handleConfirmCreateNewBoard} className='bg-colorBoardBar px-6 py-3 text-white'>
               Create
             </Button>
           </div>
