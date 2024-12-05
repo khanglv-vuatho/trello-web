@@ -34,7 +34,7 @@ const MemberGroup = () => {
             }}
           />
         )}
-        className='*:min-h-10 *:cursor-pointer'
+        className='*:size-10 *:max-h-10 *:min-h-10 *:cursor-pointer'
       >
         {memberGmails?.map((item) => <AvatarMember key={item?.email} item={item} onClick={handleShowAllMember} />)}
       </AvatarGroup>

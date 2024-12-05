@@ -52,6 +52,7 @@ const Notifications = () => {
         _id: notification?.invitation?.boardId,
         title: notification?.invitation?.boardTitle,
       }
+
       storeWorkspace([...(workspace || []), newWorkspace] as any)
       setNotifications(newListNotifications as TNotifications[])
     } catch (error) {
@@ -60,12 +61,12 @@ const Notifications = () => {
   }
 
   useEffect(() => {
-    !!userInfo?.email && setOnFetchingNotification(true)
-  }, [userInfo?.email])
-
-  useEffect(() => {
     onFetchingNotification && handleFetchingNotification()
   }, [onFetchingNotification])
+
+  useEffect(() => {
+    !!userInfo?.email && setOnFetchingNotification(true)
+  }, [userInfo])
 
   return (
     <PopoverCustom
@@ -93,9 +94,10 @@ const Notifications = () => {
           notifications.map((notification) => (
             <div
               key={notification?._id}
-              className='flex w-full flex-col rounded-lg border border-white/20 bg-white/5 transition-colors hover:bg-white/10'
+              className='relative flex w-full flex-col rounded-lg border border-white/20 bg-white/5 transition-colors hover:bg-white/10'
               style={{ opacity: 1, willChange: 'opacity, transform', transform: 'none' }}
             >
+              <div className='!h-2 absolute right-2 top-2 flex !w-2 flex-shrink-0 animate-ping rounded-full bg-blue-500' />
               <div className='flex items-start gap-4 p-4'>
                 <Avatar className='flex !size-10 flex-shrink-0 ring-1 ring-white/20'></Avatar>
                 <div className='min-w-0 flex-1'>

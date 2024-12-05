@@ -35,25 +35,25 @@ dont have permission to view board => show toast => render UI (thinking) => done
 update layout root (header) => done
 get detail user => done
 when drag card to other board, the card is not update (check state of board (card)) => done
+open card detail has bug => done
+click in user member => detail profile in new page => done
+rename card has bug when drag card => done
 
 //bug
-rename card has bug when drag card
 check valid link
 
 //core
+detail of card (show in modal)
+crud detail of card
 update role of member
 public/ private board
 leave board
 
+
 search boards
 
-click in user member => detail profile in new page
 filter board
-detail of card (show in drawer)
-loading for board/id page
-update UI name of board in board/id page
 
-crud detail of card
 
 // chat
 chat with member
@@ -62,7 +62,6 @@ chat with member api
 //optimize 
 split code to component
 check code to solid
-optimize toast to valid form
 dragging card close create card
 reponsive
 

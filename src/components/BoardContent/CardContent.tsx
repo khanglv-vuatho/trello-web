@@ -1,17 +1,15 @@
+import ImageFallback from '@/components/ImageFallback'
+import Toast from '@/components/Toast'
+import instance from '@/services/axiosConfig'
+import { useStoreBoard, useStoreStatusOpenModal } from '@/store'
 import { ICard, IColumn } from '@/types'
+import { generatePlaceholderCard } from '@/utils'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Attachment as AttachmentIcon, Comment as CommentIcon, Group as GroupIcon } from '@mui/icons-material'
 import { Button, CardBody, Card as CardNextUI, Input, useDisclosure } from '@nextui-org/react'
-import ImageFallback from '@/components/ImageFallback'
 import { Trash } from 'iconsax-react'
-import Modal from '@/components/Modal'
-import instance from '@/services/axiosConfig'
-import Toast from '@/components/Toast'
 import { useEffect, useState } from 'react'
-import { useStoreBoard } from '@/store'
-import { generatePlaceholderCard } from '@/utils'
-import { useStoreStatusOpenModal } from '@/store'
 import ModalDeleteCard from './ModalDeleteCard'
 import ModalOpenCardDetail from './ModalOpenCardDetail'
 
@@ -117,8 +115,8 @@ const CardContent = ({ card }: { card: ICard }) => {
   }, [onDeletingCard])
 
   return (
-    <div ref={setNodeRef} {...listeners} {...attributes}>
-      <CardNextUI className={`group cursor-pointer rounded-lg`} style={dndKitCardStyle}>
+    <div ref={status ? undefined : setNodeRef} {...(status ? {} : listeners)} {...(status ? {} : attributes)}>
+      <CardNextUI className={`group cursor-pointer rounded-lg`} style={status ? undefined : dndKitCardStyle}>
         <CardBody className={`p-0 ${card?.FE_PlaceholderCard ? 'hidden' : 'block'}`}>
           <div onClick={handleOpenModalDetailCard} className='flex w-full items-center justify-between pr-1'>
             <div className='w-[90%]'>

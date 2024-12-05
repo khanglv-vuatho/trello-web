@@ -12,12 +12,14 @@ import { SocketProvider } from './SocketProvider'
 function Providers({ children }: { children: React.ReactNode }) {
   const [onFetching, setOnFetching] = useState(false)
   const { userInfo } = useStoreUser()
-  const { fetchAllBoards, boardsRecent, boardsStar } = useStoreBoard()
+  const { fetchAllBoards, boardsRecent, boardsStar, allBoards } = useStoreBoard()
   const accessToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') || '' : ''
 
   const handleFetchAllBoards = async () => {
     try {
-      if (boardsRecent !== undefined && boardsStar !== undefined) return
+      if (!accessToken || !userInfo?.email) return
+
+      if (allBoards !== undefined) return
       await fetchAllBoards()
     } catch (error) {
       console.error(error)
@@ -25,16 +27,13 @@ function Providers({ children }: { children: React.ReactNode }) {
       setOnFetching(false)
     }
   }
-
   useEffect(() => {
     setOnFetching(true)
-  }, [accessToken, userInfo])
+  }, [accessToken, userInfo?.email, boardsRecent, boardsStar, allBoards])
 
   useEffect(() => {
-    if (!accessToken || !userInfo) return
-
     onFetching && handleFetchAllBoards()
-  }, [onFetching, accessToken, userInfo])
+  }, [onFetching, accessToken, userInfo?.email, boardsRecent, boardsStar, allBoards])
 
   return (
     <NextUIProvider>

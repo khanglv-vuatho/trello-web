@@ -9,6 +9,7 @@ import { useStoreUser } from '@/store'
 import { decodeEmail, objectToFormData } from '@/utils'
 import { Button, Input } from '@nextui-org/react'
 import { Camera } from 'iconsax-react'
+import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 const ProfilePage = ({ params }: { params: { id: string } }) => {
@@ -118,7 +119,7 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
             <h1 className='text-2xl font-bold'>{isOwner ? 'Edit Profile' : `${storeAnotherUser?.name}'s Profile`}</h1>
             <div className='relative mx-auto size-[200px] overflow-hidden rounded-full'>
               {isOwner && <input accept='image/*' onChange={handleChangeAvatar} type='file' className='hidden' ref={fileInputRef} />}
-              <ImageFallback src={isOwner ? imageUI : storeAnotherUser?.picture || ''} alt='avatar' className='size-full object-cover' width={500} height={500} />
+              <ImageFallback src={isOwner ? imageUI || '' : storeAnotherUser?.picture || ''} alt='avatar' className='size-full object-cover' width={500} height={500} />
               {isOwner && (
                 <div onClick={() => fileInputRef.current?.click()} className='absolute bottom-0 left-0 right-0 z-40 flex items-center justify-center rounded-full bg-gray-200 py-2'>
                   <Camera size={24} className='text-white' />

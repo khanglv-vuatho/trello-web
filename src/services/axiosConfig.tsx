@@ -76,9 +76,7 @@ instance.interceptors.response.use(
         })
 
         if (error?.response?.data?.message?.includes('token')) {
-          localStorage.removeItem('access_token')
-          setCookie('access_token', '')
-          window.location.href = '/login'
+          // window.location.href = '/login'
         }
       } else if (error?.request) {
         console.log('====== Timeout =====')

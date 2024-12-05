@@ -94,7 +94,7 @@ const Column = ({ column }: { column: IColumn }) => {
 
   return (
     <>
-      <div ref={setNodeRef} {...listeners} {...attributes} style={dndKitColumnStyle} className='min-w-[300px] max-w-[300px]'>
+      <div ref={status ? undefined : setNodeRef} {...(status ? {} : listeners)} {...(status ? {} : attributes)} style={status ? undefined : dndKitColumnStyle} className='min-w-[300px] max-w-[300px]'>
         <div className={`h-[fit-content] w-full rounded-lg bg-[#f1f2f4]`}>
           <div className='flex items-center justify-between p-2'>
             {onFixTitleColumn ? (
