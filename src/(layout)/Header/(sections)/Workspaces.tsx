@@ -11,9 +11,11 @@ const Workspaces = () => {
   const { workspace } = useStoreBoard()
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
+  const noData = workspace?.length === 0
   return (
     <PopoverCustom
       isOpen={isOpen}
+      noData={noData}
       onOpenChange={setIsOpen}
       placement='bottom-start'
       popoverTrigger={

@@ -17,11 +17,15 @@ import { deleteCookie, getCookie, setCookie } from 'cookies-next'
 import { InputSearch } from '@/components/InputSearch'
 import { ContentUser, Messages, Notifications, Recent, Starred, Workspaces } from './(sections)'
 import ModalBodyCreateNewBoard from './(sections)/ModalBodyCreateNewBoard'
+import { useSocket } from '@/components/Providers/SocketProvider'
+import { SOCKET_EVENTS } from '@/constants'
 
 function Header() {
+  const socket: any = useSocket()
   // get token from cookie
   const google_token = getCookie('google_token')
   // get token from localStorage
+
   const { storeUser } = useStoreUser()
   const { storeBoardRecent, boardsRecent, allBoards } = useStoreBoard()
 
@@ -62,6 +66,8 @@ function Header() {
       setCookie('access_token', dataUser?.boards?.access_token)
       localStorage.setItem('access_token', dataUser?.boards?.access_token)
       storeUser(dataUser?.boards)
+      // register user to socket
+      socket.emit(SOCKET_EVENTS.REGISTER, dataUser?.boards?.email)
     } catch (error) {
       console.log(error)
     }
@@ -120,7 +126,11 @@ function Header() {
           <Workspaces />
           <Recent />
           <Starred />
-          <Button onPress={() => onOpen()} className='flex min-h-10 items-center gap-2 bg-colorBoardBar px-4 font-medium text-primary' startContent={<Add size={24} />}>
+          <Button
+            onPress={() => onOpen()}
+            className='flex min-h-10 items-center gap-2 bg-colorBoardBar px-4 font-medium text-primary'
+            startContent={<Add size={24} />}
+          >
             Create
           </Button>
         </div>

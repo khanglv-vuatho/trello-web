@@ -69,7 +69,7 @@ function BoardBar() {
 
       storeBoard({
         ...board!,
-        memberGmails: [...(board?.memberGmails || []), { email: emailInviteMember, status: MEMBER_STATUS.PENDING, role: BOARD_MEMBER_ROLE.MEMBER }],
+        memberGmails: [...(board?.memberGmails || []), { email: emailInviteMember, status: MEMBER_STATUS.PENDING, role: BOARD_MEMBER_ROLE.MEMBER }]
       })
 
       handleToggleModalInviteMember()
@@ -83,14 +83,6 @@ function BoardBar() {
   useEffect(() => {
     isInvitingMember && handleInviteMemberApi()
   }, [isInvitingMember])
-
-  useEffect(() => {
-    if (!socket) return
-    socket.on('test', (data: string) => {
-      console.log({ data })
-    })
-    socket.emit('test', { message: 'Hello from client' })
-  }, [socket])
 
   return (
     <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto overflow-y-hidden bg-colorBoardContent px-4'>
@@ -111,7 +103,7 @@ function BoardBar() {
               setTitleBoard(e.target.value)
             }}
             classNames={{
-              inputWrapper: 'border-white/80 data-[hover=true]:white/80 group-data-[focus=true]:border-white/80',
+              inputWrapper: 'border-white/80 data-[hover=true]:white/80 group-data-[focus=true]:border-white/80'
             }}
             className='w-full max-w-[250px] border-white/80 text-white'
           />

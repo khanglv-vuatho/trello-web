@@ -2,7 +2,8 @@
 
 import { NoItemOverView } from '@/components/OverViewItem'
 import PopoverCustom from '@/components/PopoverCustom'
-import { NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
+import { useSocket } from '@/components/Providers/SocketProvider'
+import { NOTIFICATION_STATUS, NOTIFICATION_TYPES, SOCKET_EVENTS } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard, useStoreUser } from '@/store'
 import { TNotifications } from '@/types'
@@ -15,6 +16,9 @@ const Notifications = () => {
   const { workspace, storeWorkspace } = useStoreBoard()
   const [notifications, setNotifications] = useState<TNotifications[]>([])
   const [onFetchingNotification, setOnFetchingNotification] = useState<boolean>(false)
+
+  const socket: any = useSocket()
+
   const noData = notifications?.length === 0
 
   const handleFetchingNotification = async () => {
@@ -40,7 +44,11 @@ const Notifications = () => {
 
   const handleAcceptNotification = async (notification: TNotifications) => {
     try {
-      await instance.put(`/v1/notifications/${notification?._id}`, { status: NOTIFICATION_TYPES.ACCEPTED, email: userInfo?.email, boardId: notification?.invitation?.boardId })
+      await instance.put(`/v1/notifications/${notification?._id}`, {
+        status: NOTIFICATION_TYPES.ACCEPTED,
+        email: userInfo?.email,
+        boardId: notification?.invitation?.boardId
+      })
       const newListNotifications = notifications.map((n) => {
         if (n?._id === notification?._id) {
           return { ...n, status: NOTIFICATION_STATUS.READ, invitation: { ...n.invitation, status: NOTIFICATION_TYPES.ACCEPTED } }
@@ -50,7 +58,7 @@ const Notifications = () => {
 
       const newWorkspace = {
         _id: notification?.invitation?.boardId,
-        title: notification?.invitation?.boardTitle,
+        title: notification?.invitation?.boardTitle
       }
 
       storeWorkspace([...(workspace || []), newWorkspace] as any)
@@ -67,6 +75,14 @@ const Notifications = () => {
   useEffect(() => {
     !!userInfo?.email && setOnFetchingNotification(true)
   }, [userInfo])
+
+  useEffect(() => {
+    if (!socket) return
+    socket.on(SOCKET_EVENTS.NOTIFICATION, (data: any) => {
+      console.log({ data })
+      setNotifications((prev) => [...prev, data])
+    })
+  }, [socket])
 
   return (
     <PopoverCustom
