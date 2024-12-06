@@ -89,6 +89,14 @@ function BoardBar() {
     socket.emit(SOCKET_EVENTS.JOIN_BOARD, board?._id)
   }, [socket, board])
 
+  useEffect(() => {
+    if (!socket) return
+    socket.on(SOCKET_EVENTS.UPDATE_MEMBER, (data: any) => {
+      console.log({ data })
+    })
+  }, [socket])
+
+  //test
   return (
     <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto overflow-y-hidden bg-colorBoardContent px-4'>
       <div className='flex items-center gap-2'>
