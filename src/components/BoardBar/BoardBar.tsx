@@ -87,14 +87,12 @@ function BoardBar() {
   useEffect(() => {
     if (!socket) return
     socket.emit(SOCKET_EVENTS.JOIN_BOARD, board?._id)
-  }, [socket, board])
 
-  useEffect(() => {
-    if (!socket) return
+    console.log('123')
     socket.on(SOCKET_EVENTS.UPDATE_MEMBER, (data: any) => {
-      console.log({ data })
+      storeBoard({ ...board!, memberGmails: data.memberGmails })
     })
-  }, [socket])
+  }, [socket, board])
 
   //test
   return (
