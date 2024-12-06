@@ -64,7 +64,7 @@ const BoardItem = ({ board, hiddenAction }: TBoardItem) => {
   }, [onDeleting])
 
   return (
-    <div className='group relative flex h-[100px] min-w-[200px] flex-col justify-between overflow-hidden rounded-md bg-white/10 p-2'>
+    <div className='group relative flex h-[100px] min-w-[200px] flex-col justify-between overflow-hidden rounded-md border border-white/10 bg-white/5 p-2 backdrop-blur-sm hover:bg-white/10'>
       <Modal isOpen={isOpenModalDelete} onOpenChange={setIsOpenModalDelete} modalTitle={`Delete board #${board?.title}`}>
         <p>Are you sure you want to delete this board?</p>
         <div className='flex justify-between gap-2'>
@@ -82,7 +82,7 @@ const BoardItem = ({ board, hiddenAction }: TBoardItem) => {
       {!hiddenAction && (
         <Popover
           classNames={{
-            content: 'p-0.5',
+            content: 'p-0.5'
           }}
           placement='right'
           className='z-20'
@@ -90,7 +90,11 @@ const BoardItem = ({ board, hiddenAction }: TBoardItem) => {
           onOpenChange={setIsOpenPopover}
         >
           <PopoverTrigger>
-            <Button disableRipple className='absolute right-0 top-2 translate-x-[100%] bg-transparent p-0 duration-200 group-hover:translate-x-[10px]' onClick={(e) => e.preventDefault()}>
+            <Button
+              disableRipple
+              className='absolute right-0 top-2 translate-x-[100%] bg-transparent p-0 duration-200 group-hover:translate-x-[10px]'
+              onClick={(e) => e.preventDefault()}
+            >
               {/* dots icon */}
               <MoreCircle className='text-white' />
             </Button>

@@ -14,7 +14,6 @@ const CreateCard = ({ column, value, setValue }: TCreateCard) => {
   const { createNewCard, board } = useStoreBoard()
 
   const [isCreateNewCard, setIsCreateNewCard] = useState<boolean>(false)
-
   const handleToggleCreateNewCard = () => setIsCreateNewCard(!isCreateNewCard)
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -22,17 +21,21 @@ const CreateCard = ({ column, value, setValue }: TCreateCard) => {
   }
 
   const handleAddCard: () => void = async () => {
-    if (value?.length <= 3 || value?.length > 50) {
-      Toast({ message: 'card name must be at least 4 and max 50 characters', type: 'error' })
-      return setIsCreateNewCard(false)
-    }
-    if (value === '') {
-      Toast({ message: 'Enter card title', type: 'error' })
-    } else {
-      await createNewCard(column, board as IBoard, value)
-      setValue('')
-      setIsCreateNewCard(false)
-      Toast({ message: 'Add Card Successful', type: 'success' })
+    try {
+      if (value?.length <= 3 || value?.length > 50) {
+        Toast({ message: 'card name must be at least 4 and max 50 characters', type: 'error' })
+        return setIsCreateNewCard(false)
+      }
+      if (value === '') {
+        Toast({ message: 'Enter card title', type: 'error' })
+      } else {
+        await createNewCard(column, board as IBoard, value)
+        setValue('')
+        setIsCreateNewCard(false)
+        Toast({ message: 'Add Card Successful', type: 'success' })
+      }
+    } catch (error) {
+      console.log(error)
     }
   }
 
@@ -50,19 +53,25 @@ const CreateCard = ({ column, value, setValue }: TCreateCard) => {
               }}
               classNames={{
                 inputWrapper: 'group-data-[focus=true]:border-[#00a8ff] data-[hover=true]:border-[#00a8ff] border-[#00a8ff]',
-                input: 'placeholder:text-[#00a8ff] text-[#00a8ff]',
+                input: 'placeholder:text-[#00a8ff] text-[#00a8ff]'
               }}
               variant='bordered'
               placeholder='Enter card title'
               value={value}
               onChange={handleInputChange}
             />
-            <AddButton onPress={handleAddCard}>Add</AddButton>
+            <AddButton className='bg-[#00a8ff]' onPress={handleAddCard}>
+              Add
+            </AddButton>
             <CloseButton onPress={handleToggleCreateNewCard} />
           </div>
         ) : (
           <div className='flex items-center'>
-            <Button onPress={handleToggleCreateNewCard} startContent={<AddIcon className='text-[#091E42]' />} className='w-full justify-start rounded-lg bg-transparent p-2 hover:bg-[#091E4224]'>
+            <Button
+              onPress={handleToggleCreateNewCard}
+              startContent={<AddIcon className='text-[#091E42]' />}
+              className='w-full justify-start rounded-lg bg-transparent p-2 hover:bg-[#091E4224]'
+            >
               Add a card
             </Button>
           </div>

@@ -29,5 +29,5 @@ export function middleware(request: NextRequest) {
 
 // Config: define on which paths the middleware should run
 export const config = {
-  matcher: ['/', '/board/:path*', '/profile/:path*'], // Add other private routes as needed
+  matcher: ['/', '/board/:path*', '/profile/:path*'] // Add other private routes as needed
 }

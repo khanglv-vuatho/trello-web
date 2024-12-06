@@ -4,7 +4,7 @@ import { memo } from 'react'
 type TModal = {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
-  modalTitle: string
+  modalTitle: string | React.ReactNode
   modalFooter?: React.ReactNode | string
   children: React.ReactNode
 } & Omit<ModalProps, 'children'>

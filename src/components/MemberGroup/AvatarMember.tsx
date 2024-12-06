@@ -25,7 +25,7 @@ const AvatarMember = ({ item, onClick }: TAvatarMember) => {
         <Avatar
           {...(item?.picture ? { src: item?.picture } : { name: item?.email?.charAt(0) })}
           classNames={{
-            base: `ring-2 ring-white/30 ${isHover ? 'ring-orange-500' : ''}`,
+            base: `ring-2 ring-white/30 ${isHover ? 'ring-orange-500' : ''}`
           }}
           onMouseEnter={() => setIsHover(true)}
           onMouseLeave={() => setIsHover(false)}
