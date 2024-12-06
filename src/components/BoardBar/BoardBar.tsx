@@ -7,7 +7,7 @@ import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import Modal from '@/components/Modal'
 import { useSocket } from '@/components/Providers/SocketProvider'
 import Toast from '@/components/Toast'
-import { BOARD_MEMBER_ROLE, BOARD_TYPE, MEMBER_STATUS } from '@/constants'
+import { BOARD_MEMBER_ROLE, BOARD_TYPE, MEMBER_STATUS, SOCKET_EVENTS } from '@/constants'
 import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
 import { memo, useEffect, useState } from 'react'
@@ -83,6 +83,11 @@ function BoardBar() {
   useEffect(() => {
     isInvitingMember && handleInviteMemberApi()
   }, [isInvitingMember])
+
+  useEffect(() => {
+    if (!socket) return
+    socket.emit(SOCKET_EVENTS.JOIN_BOARD, board?._id)
+  }, [socket, board])
 
   return (
     <div className='flex h-boardBar items-center justify-between gap-5 overflow-x-auto overflow-y-hidden bg-colorBoardContent px-4'>
