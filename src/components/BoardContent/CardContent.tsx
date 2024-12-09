@@ -1,7 +1,7 @@
 import ImageFallback from '@/components/ImageFallback'
 import Toast from '@/components/Toast'
 import instance from '@/services/axiosConfig'
-import { useStoreBoard, useStoreStatusOpenModal } from '@/store'
+import { useStoreBoard, useStoreCard, useStoreStatusOpenModal } from '@/store'
 import { ICard, IColumn } from '@/types'
 import { generatePlaceholderCard } from '@/utils'
 import { useSortable } from '@dnd-kit/sortable'
@@ -15,6 +15,7 @@ import ModalOpenCardDetail from './ModalOpenCardDetail'
 
 const CardContent = ({ card }: { card: ICard }) => {
   const { storeBoard, board } = useStoreBoard()
+  const { storeCurrentCard } = useStoreCard()
   const { status, storeStatusOpenModal } = useStoreStatusOpenModal()
   const [onDeletingCard, setOnDeletingCard] = useState(false)
 
@@ -24,7 +25,7 @@ const CardContent = ({ card }: { card: ICard }) => {
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card._id,
-    data: { ...card },
+    data: { ...card }
   })
 
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
@@ -33,7 +34,7 @@ const CardContent = ({ card }: { card: ICard }) => {
     transform: CSS.Translate.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    border: isDragging ? '1px solid #54a0ff' : '',
+    border: isDragging ? '1px solid #54a0ff' : ''
   }
 
   const shouldShowCardAction = () => !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
@@ -107,6 +108,9 @@ const CardContent = ({ card }: { card: ICard }) => {
 
   const handleOpenModalDetailCard = () => {
     setIsOpenModalDetailCard(true)
+
+    console.log({ card })
+    storeCurrentCard(card)
     storeStatusOpenModal(true)
   }
 
@@ -156,7 +160,11 @@ const CardContent = ({ card }: { card: ICard }) => {
                     </Button>
                   )}
                   {!!card?.attachments?.length && (
-                    <Button variant='light' startContent={<AttachmentIcon className='size-5' />} className='flex items-center gap-2 rounded-sm text-colorHeader'>
+                    <Button
+                      variant='light'
+                      startContent={<AttachmentIcon className='size-5' />}
+                      className='flex items-center gap-2 rounded-sm text-colorHeader'
+                    >
                       {card?.attachments?.length}
                     </Button>
                   )}
@@ -177,7 +185,7 @@ const CardContent = ({ card }: { card: ICard }) => {
         </CardBody>
       </CardNextUI>
       <ModalDeleteCard isOpen={isOpen} onOpenChange={onOpenChange} onDeletingCard={onDeletingCard} handleDeleteCard={handleDeleteCard} />
-      <ModalOpenCardDetail isOpenModalDetailCard={isOpenModalDetailCard} setIsOpenModalDetailCard={setIsOpenModalDetailCard} card={card} />
+      <ModalOpenCardDetail isOpenModalDetailCard={isOpenModalDetailCard} setIsOpenModalDetailCard={setIsOpenModalDetailCard} />
     </div>
   )
 }

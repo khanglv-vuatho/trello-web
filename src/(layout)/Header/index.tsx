@@ -94,7 +94,6 @@ function Header() {
 
   const handleConfirmCreateNewBoard = () => {
     // check
-    console.log({ allBoards })
     if (allBoards?.find((board) => board?.title.trim() === titleBoard?.trim())) {
       Toast({ message: 'Board already exists', type: 'error' })
       return

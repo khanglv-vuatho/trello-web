@@ -1,6 +1,6 @@
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import Image from 'next/image'
-import React, { memo } from 'react'
+import React from 'react'
 
 const NoItemOverView = ({ title, description }: { title: string; description: string }) => {
   return (
@@ -12,4 +12,4 @@ const NoItemOverView = ({ title, description }: { title: string; description: st
   )
 }
 
-export default memo(NoItemOverView)
+export default NoItemOverView

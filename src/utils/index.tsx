@@ -14,7 +14,7 @@ export const generatePlaceholderCard = (column: any) => {
     _id: `${column?._id}-placeholder-card`,
     boardId: column?.boardId,
     columnId: column?._id,
-    FE_PlaceholderCard: true,
+    FE_PlaceholderCard: true
   }
 }
 
@@ -76,4 +76,187 @@ export function objectToFormData(obj: any) {
 export const uppercaseFirstLetter = (str: string) => {
   if (!str) return ''
   return str.charAt(0).toUpperCase() + str.slice(1)
+}
+export const validateEmail = (email: string) => {
+  // Check if email is a string and not empty
+  if (typeof email !== 'string' || email.trim() === '') {
+    return {
+      isValid: false,
+      message: 'Email cannot be empty'
+    }
+  }
+
+  // Remove leading and trailing whitespace
+  email = email.trim()
+
+  // Check for single @ symbol
+  const atSymbolCount = email.split('@').length - 1
+  if (atSymbolCount !== 1) {
+    return {
+      isValid: false,
+      message: 'Email must contain exactly one @ symbol'
+    }
+  }
+
+  // Split email into local part and domain
+  const [localPart, domain] = email.split('@')
+
+  // Local part validation
+  const localPartValidation = validateLocalPart(localPart)
+  if (!localPartValidation.isValid) {
+    return localPartValidation
+  }
+
+  // Domain validation
+  const domainValidation = validateDomain(domain)
+  if (!domainValidation.isValid) {
+    return domainValidation
+  }
+
+  return {
+    isValid: true,
+    message: 'Valid email address'
+  }
+}
+
+const validateLocalPart = (localPart: string) => {
+  // Check local part length
+  if (localPart.length === 0) {
+    return {
+      isValid: false,
+      message: 'Local part (before @) cannot be empty'
+    }
+  }
+
+  if (localPart.length > 64) {
+    return {
+      isValid: false,
+      message: 'Local part cannot exceed 64 characters'
+    }
+  }
+
+  // Check for valid characters
+  const validChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_'
+  for (let char of localPart) {
+    if (!validChars.includes(char)) {
+      return {
+        isValid: false,
+        message: `Invalid character '${char}' in local part`
+      }
+    }
+  }
+
+  // Ensure no consecutive dots
+  if (localPart.includes('..')) {
+    return {
+      isValid: false,
+      message: 'Local part cannot contain consecutive dots'
+    }
+  }
+
+  // Ensure doesn't start or end with a dot
+  if (localPart.startsWith('.')) {
+    return {
+      isValid: false,
+      message: 'Local part cannot start with a dot'
+    }
+  }
+
+  if (localPart.endsWith('.')) {
+    return {
+      isValid: false,
+      message: 'Local part cannot end with a dot'
+    }
+  }
+
+  return {
+    isValid: true,
+    message: 'Valid local part'
+  }
+}
+
+const validateDomain = (domain: string) => {
+  // Check domain length
+  if (domain.length === 0) {
+    return {
+      isValid: false,
+      message: 'Domain (after @) cannot be empty'
+    }
+  }
+
+  if (domain.length > 255) {
+    return {
+      isValid: false,
+      message: 'Domain cannot exceed 255 characters'
+    }
+  }
+
+  // Split domain into parts
+  const parts = domain.split('.')
+
+  // Check for at least two parts (e.g., example.com)
+  if (parts.length < 2) {
+    return {
+      isValid: false,
+      message: 'Domain must include at least two parts (e.g., example.com)'
+    }
+  }
+
+  // Validate each part of the domain
+  for (let part of parts) {
+    // Check individual part length
+    if (part.length === 0) {
+      return {
+        isValid: false,
+        message: 'Domain parts cannot be empty'
+      }
+    }
+
+    if (part.length > 63) {
+      return {
+        isValid: false,
+        message: 'Domain part cannot exceed 63 characters'
+      }
+    }
+
+    // Check for valid characters
+    const validChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-'
+    for (let char of part) {
+      if (!validChars.includes(char)) {
+        return {
+          isValid: false,
+          message: `Invalid character '${char}' in domain`
+        }
+      }
+    }
+
+    // Ensure doesn't start or end with a hyphen
+    if (part.startsWith('-')) {
+      return {
+        isValid: false,
+        message: 'Domain part cannot start with a hyphen'
+      }
+    }
+
+    if (part.endsWith('-')) {
+      return {
+        isValid: false,
+        message: 'Domain part cannot end with a hyphen'
+      }
+    }
+  }
+
+  // Check top-level domain (last part)
+  const topLevelDomain = parts[parts.length - 1]
+  if (topLevelDomain.length < 2) {
+    return {
+      isValid: false,
+      message: 'Top-level domain must be at least 2 characters'
+    }
+  }
+
+  return {
+    isValid: true,
+    message: 'Valid domain'
+  }
 }

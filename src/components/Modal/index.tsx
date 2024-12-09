@@ -25,4 +25,4 @@ const Modal = ({ isOpen, onOpenChange, modalTitle, modalFooter, children, ...pro
   )
 }
 
-export default memo(Modal)
+export default Modal

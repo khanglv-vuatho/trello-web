@@ -9,6 +9,7 @@ export type ICard = {
   cover: string | null
   memberIds: string[]
   comments: string[]
+  assignMembers?: IMember[]
   attachments: string[]
   FE_PlaceholderCard?: boolean
 }

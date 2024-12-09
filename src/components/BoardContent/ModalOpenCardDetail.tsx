@@ -1,17 +1,20 @@
-import { Avatar, Button, Input, Popover, PopoverContent, PopoverTrigger, Textarea } from '@nextui-org/react'
-import { ICard, IMember } from '@/types'
-import Markdown from 'react-markdown'
-import Modal from '../Modal'
-import { useStoreBoard, useStoreStatusOpenModal } from '@/store'
+import instance from '@/services/axiosConfig'
+import { useStoreBoard, useStoreCard, useStoreStatusOpenModal } from '@/store'
+import { ICard, IColumn, IMember } from '@/types'
+import { Avatar, Button, Popover, PopoverContent, PopoverTrigger, Textarea } from '@nextui-org/react'
+import 'highlight.js/styles/github.css' // Or any other Highlight.js theme
 import { Add, Card as CardIcon, Edit, MessageText, Send2, TextalignLeft, TickCircle } from 'iconsax-react'
-import { RefObject, useRef, useState } from 'react'
-import { Comment } from '@mui/icons-material'
 import Link from 'next/link'
+import { RefObject, useEffect, useRef, useState } from 'react'
+import Markdown from 'react-markdown'
+import rehypeHighlight from 'rehype-highlight'
+import Modal from '@/components/Modal'
+import Toast from '@/components/Toast'
+import { cloneDeep } from 'lodash'
 
 type ModalOpenCardDetailProps = {
   isOpenModalDetailCard: boolean
   setIsOpenModalDetailCard: (value: boolean) => void
-  card: ICard
 }
 
 const fakeData = {
@@ -141,22 +144,23 @@ const fakeAssignMembers = [
   }
 ]
 
-const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard, card }: ModalOpenCardDetailProps) => {
-  const { board } = useStoreBoard()
+const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }: ModalOpenCardDetailProps) => {
+  const { currentCard, storeCurrentCard } = useStoreCard()
+
+  const { board, storeBoard } = useStoreBoard()
   const { storeStatusOpenModal } = useStoreStatusOpenModal()
-  const [cardDescription, setCardDescription] = useState(fakeData?.description || '')
+  const [cardDescription, setCardDescription] = useState(currentCard?.description || '')
   const [comment, setComment] = useState('')
-  const [listComments, setListComments] = useState(fakeData?.comments || [])
+  const [listComments, setListComments] = useState(currentCard?.comments || [])
   const [isOpenEditDescription, setIsOpenEditDescription] = useState(false)
   const [isOpenPopoverAssignMember, setIsOpenPopoverAssignMember] = useState(false)
-  const [assignMembers, setAssignMembers] = useState(fakeData?.assignMembers || [])
+  const [assignMembers, setAssignMembers] = useState(currentCard?.assignMembers || [])
   const textareaCommentRef: any = useRef<RefObject<HTMLAreaElement>>(null)
-
-  if (!card) return null
 
   const handleCloseModal = () => {
     setIsOpenModalDetailCard(false)
     storeStatusOpenModal(false)
+    storeCurrentCard({} as any)
   }
 
   const handleAssignMember = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -165,29 +169,105 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard, 
     setIsOpenPopoverAssignMember(true)
   }
 
-  const handleToggleAssignMember = (member: IMember) => {
-    console.log(member)
-    if (assignMembers.some((m) => m._id === member._id)) {
-      setAssignMembers(assignMembers.filter((m) => m._id !== member._id))
-    } else {
-      setAssignMembers([...assignMembers, member])
+  const handleToggleAssignMember = async (member: IMember) => {
+    try {
+      console.log({ member })
+      const cloneBoard: any = cloneDeep(board)
+
+      const updateCard = (cardItem: ICard) => {
+        if (cardItem._id === currentCard?._id) {
+          const newAssignMembers = cardItem.assignMembers || []
+          if (newAssignMembers.some((m) => m.email === member.email)) {
+            return { ...cardItem, assignMembers: newAssignMembers.filter((m) => m.email !== member.email) }
+          } else {
+            return { ...cardItem, assignMembers: [...newAssignMembers, member] }
+          }
+        }
+        return cardItem
+      }
+
+      cloneBoard.cards = cloneBoard.cards.map(updateCard)
+
+      const currentColumn = cloneBoard.columns.find((columnItem: IColumn) => columnItem._id === currentCard?.columnId)
+      if (currentColumn) {
+        currentColumn.cards = currentColumn.cards.map(updateCard)
+      }
+
+      storeBoard(cloneBoard)
+      await instance.put(`/v1/cards/${currentCard?._id}/detail`, {
+        assignMembers: currentCard?.assignMembers?.some((m) => m.email === member.email)
+          ? currentCard.assignMembers.filter((m) => m.email !== member.email)
+          : [...(currentCard?.assignMembers || []), member]
+      })
+
+      setAssignMembers((prev) => (prev.some((m) => m.email === member.email) ? prev.filter((m) => m.email !== member.email) : [...prev, member]))
+    } catch (error) {
+      console.log(error)
     }
   }
 
   const handleEditDescription = () => {
-    console.log('handle edit description')
     setIsOpenEditDescription(true)
   }
 
-  const handleSaveDescription = () => {
-    setIsOpenEditDescription(false)
-    console.log('handle save description')
+  const handleSaveDescription = async () => {
+    try {
+      // storeBoard(currentCardInColumn)
+
+      setIsOpenEditDescription(false)
+      await handleEditCardDetail({
+        description: cardDescription
+      })
+
+      Toast({
+        type: 'success',
+        message: 'Edit description success'
+      })
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const handleSendComment = () => {
     console.log('handle send comment')
     setComment('')
   }
+  const handleEditCardDetail = async (data: any) => {
+    try {
+      const cloneBoard: any = cloneDeep(board)
+
+      // Update card in both board cards and column cards with a single map function
+      const updateCard = (cardItem: ICard) => {
+        if (cardItem._id === currentCard?._id) {
+          return { ...cardItem, description: data.description }
+        }
+        return cardItem
+      }
+
+      cloneBoard.cards = cloneBoard.cards.map(updateCard)
+
+      const currentColumn = cloneBoard.columns.find((columnItem: IColumn) => columnItem._id === currentCard?.columnId)
+      if (currentColumn) {
+        currentColumn.cards = currentColumn.cards.map(updateCard)
+      }
+
+      storeBoard(cloneBoard)
+      await instance.put(`/v1/cards/${currentCard?._id}/detail`, data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    if (currentCard) {
+      setCardDescription(currentCard?.description || '')
+      setAssignMembers(currentCard?.assignMembers || [])
+      setListComments(currentCard?.comments || [])
+    }
+  }, [currentCard])
+
+  console.log({ assignMembers })
+  if (!currentCard) return null
 
   return (
     <Modal
@@ -197,7 +277,7 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard, 
       modalTitle={
         <div className='flex items-center gap-2'>
           <CardIcon className='size-6' />
-          <p>{card?.title}</p>
+          <p>{currentCard?.title}</p>
         </div>
       }
     >
@@ -211,7 +291,7 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard, 
             {!isOpenEditDescription && (
               <Button
                 onClick={handleEditDescription}
-                startContent={<Edit />}
+                startContent={<Edit className='size-5' />}
                 className='max-h-10 min-h-10 rounded-md bg-blue-500 px-4 text-sm font-medium text-white'
               >
                 Edit
@@ -222,14 +302,20 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard, 
             <div className='flex flex-col gap-2'>
               <div className='grid grid-cols-2 gap-2'>
                 <Textarea minRows={3} value={cardDescription} onChange={(e) => setCardDescription(e.target.value)} />
-                <Markdown className='whitespace-pre-wrap'>{cardDescription}</Markdown>
+                <Markdown className='whitespace-pre-wrap' rehypePlugins={[rehypeHighlight]}>
+                  {cardDescription}
+                </Markdown>
               </div>
               <Button onClick={handleSaveDescription} className='ml-auto max-h-10 min-h-10 w-fit rounded-md bg-blue-500 px-4 text-sm font-medium text-white'>
                 Save
               </Button>
             </div>
           )}
-          {cardDescription.length > 0 && !isOpenEditDescription && <Markdown>{cardDescription}</Markdown>}
+          {cardDescription.length > 0 && !isOpenEditDescription && (
+            <Markdown className='whitespace-pre-wrap' rehypePlugins={[rehypeHighlight]}>
+              {cardDescription}
+            </Markdown>
+          )}
         </div>
         <div className='flex flex-col gap-2'>
           <p className='text-sm font-medium text-blue-500'>Members</p>
@@ -251,14 +337,14 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard, 
               </PopoverTrigger>
               <PopoverContent>
                 <div className='grid grid-cols-5 gap-2'>
-                  {fakeAssignMembers.map((member) => (
+                  {board?.memberGmails?.map((member) => (
                     <div
                       onClick={() => handleToggleAssignMember(member)}
                       key={member.email}
                       className='relative !size-10 max-h-10 min-h-10 min-w-10 max-w-10 rounded-full'
                     >
                       <Avatar src={member?.picture} className='size-full object-cover' />
-                      {assignMembers.some((m) => m._id === member._id) && (
+                      {assignMembers.some((m) => m.email === member.email) && (
                         <div className='absolute bottom-0 right-0 rounded-full bg-white'>
                           <TickCircle size={16} variant='Bold' className='text-green-500' />
                         </div>
@@ -282,12 +368,12 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard, 
               ? listComments.map((item, index) => (
                   <div key={index} className='flex items-start gap-2'>
                     <div className='!size-10'>
-                      <Avatar className='size-full rounded-full' src={item?.user?.picture || ''} />
+                      <Avatar className='size-full rounded-full' src={item?.picture || ''} />
                     </div>
                     <div className='flex flex-col rounded-lg bg-[#f6f3f3] p-2'>
                       <div className='flex items-center gap-2'>
                         <Link href={'#'} className='text-sm font-bold'>
-                          {item?.user?.name}
+                          {item?.name}
                         </Link>
                         <time className='text-xs text-[#9c9c9c]'>{item?.createdAt}</time>
                       </div>

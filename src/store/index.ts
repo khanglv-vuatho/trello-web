@@ -1,5 +1,5 @@
 import instance from '@/services/axiosConfig'
-import { IBoard, IColumn, TUserInfo } from '@/types'
+import { IBoard, ICard, IColumn, TUserInfo } from '@/types'
 import { create } from 'zustand'
 import { isEmpty } from 'lodash'
 import { generatePlaceholderCard, mapOrder } from '@/utils'
@@ -56,8 +56,8 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
       set({
         boardsStar: updatedBoardsStar,
         boardsRecent: updatedBoardsRecent.filter(
-          (item, index, self) => self.findIndex((b) => b._id === item._id) === index, // Ensure no duplicates
-        ),
+          (item, index, self) => self.findIndex((b) => b._id === item._id) === index // Ensure no duplicates
+        )
       })
     } else {
       // Add to starred and remove from recent
@@ -66,7 +66,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
 
       set({
         boardsStar: updatedBoardsStar,
-        boardsRecent: updatedBoardsRecent,
+        boardsRecent: updatedBoardsRecent
       })
     }
 
@@ -125,7 +125,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     try {
       const payload = {
         boardId: board?._id,
-        title,
+        title
       }
       const column: any = await instance.post('/v1/columns', payload)
       const cloneColumn = { ...column }
@@ -147,7 +147,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     const payload = {
       title,
       boardId: board?._id,
-      columnId: column?._id,
+      columnId: column?._id
     }
     const card: any = await instance.post('/v1/cards', payload)
 
@@ -165,7 +165,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     const payload = {
       title,
       boardId: board?._id,
-      columnId: column?._id,
+      columnId: column?._id
     }
     const card: any = await instance.post('/v1/cards', payload)
 
@@ -187,7 +187,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
   },
   starBoard: async (boardId, isStared) => {
     await instance.put('/v1/boards/' + boardId, { isStared })
-  },
+  }
 }))
 
 type TUserState = {
@@ -198,7 +198,7 @@ type TUserState = {
 export const useStoreUser = create<TUserState>((set) => ({
   storeUser: (userInfo) => {
     set({ userInfo })
-  },
+  }
 }))
 
 type TRoleOfBoard = {
@@ -209,7 +209,7 @@ type TRoleOfBoard = {
 export const useStoreRoleOfBoard = create<TRoleOfBoard>((set) => ({
   storeRoleOfBoard: (role) => {
     set({ role })
-  },
+  }
 }))
 
 type TStatusOpenModal = {
@@ -220,5 +220,16 @@ type TStatusOpenModal = {
 export const useStoreStatusOpenModal = create<TStatusOpenModal>((set) => ({
   storeStatusOpenModal: (status) => {
     set({ status })
-  },
+  }
+}))
+
+type TCardState = {
+  currentCard?: ICard
+  storeCurrentCard: (card: ICard) => void
+}
+
+export const useStoreCard = create<TCardState>((set) => ({
+  storeCurrentCard: (currentCard) => {
+    set({ currentCard })
+  }
 }))

@@ -1,14 +1,16 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
 
-import { IColumn } from '@/types'
+import { ICard, IColumn } from '@/types'
 import { Column } from '@/components/BoardContent'
 import CreateColumn from '@/components/CreateColumn'
 
 const ListColumn = ({ columns }: { columns: IColumn[] }) => {
   const [titleColumn, setTitleColumn] = useState<string>('')
   const columnsDndKit = columns?.map((item) => item._id)
+
+  console.log({ columnsDndKit })
 
   return (
     <SortableContext strategy={horizontalListSortingStrategy} items={columnsDndKit}>

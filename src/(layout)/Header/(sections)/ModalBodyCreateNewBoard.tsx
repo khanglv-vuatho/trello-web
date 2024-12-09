@@ -34,4 +34,4 @@ const ModalBodyCreateNewBoard = ({ handleChange, titleBoard, handleConfirmCreate
   )
 }
 
-export default memo(ModalBodyCreateNewBoard)
+export default ModalBodyCreateNewBoard

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { memo } from 'react'
+import React from 'react'
 import { Drawer as VaulDrawer } from 'vaul'
 
 type VaulDrawerProps = {
@@ -15,9 +15,9 @@ const Drawer = ({ isOpen, onClose, className, children, ...props }: VaulDrawerPr
     <VaulDrawer.Root open={isOpen} onOpenChange={onClose} {...props}>
       <VaulDrawer.Portal>
         <VaulDrawer.Overlay className='fixed inset-0 bg-black/40' />
-        <VaulDrawer.Content className={`bg-gray-100 flex flex-col rounded-t-[10px] mt-24 h-fit fixed bottom-0 left-0 right-0 outline-none ${className}`}>
-          <div className='flex flex-col gap-2 items-center justify-center'>
-            <div className='h-10 w-12 bg-red-300 rounded-full' />
+        <VaulDrawer.Content className={`h-fit fixed bottom-0 left-0 right-0 mt-24 flex flex-col rounded-t-[10px] bg-gray-100 outline-none ${className}`}>
+          <div className='flex flex-col items-center justify-center gap-2'>
+            <div className='h-10 w-12 rounded-full bg-red-300' />
             {children}
           </div>
         </VaulDrawer.Content>
@@ -26,4 +26,4 @@ const Drawer = ({ isOpen, onClose, className, children, ...props }: VaulDrawerPr
   )
 }
 
-export default memo(Drawer)
+export default Drawer

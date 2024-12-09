@@ -12,6 +12,7 @@ import instance from '@/services/axiosConfig'
 import { useStoreBoard } from '@/store'
 import { memo, useEffect, useState } from 'react'
 import MemberGroup from '../MemberGroup'
+import { validateEmail } from '@/utils'
 
 function BoardBar() {
   const socket: any = useSocket()
@@ -61,6 +62,10 @@ function BoardBar() {
       }
       if (emailInviteMember === board?.ownerId) {
         return Toast({ message: `You cannot invite yourself`, type: 'error' })
+      }
+      const emailValidation = validateEmail(emailInviteMember)
+      if (!emailValidation.isValid) {
+        return Toast({ message: emailValidation.message, type: 'error' })
       }
 
       await instance.post(`/v1/boards/${board?._id}/members`, { memberGmails: [emailInviteMember] })
@@ -167,4 +172,4 @@ function BoardBar() {
   )
 }
 
-export default memo(BoardBar)
+export default BoardBar

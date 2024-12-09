@@ -123,4 +123,4 @@ const BoardItem = ({ board, hiddenAction }: TBoardItem) => {
   )
 }
 
-export default memo(BoardItem)
+export default BoardItem

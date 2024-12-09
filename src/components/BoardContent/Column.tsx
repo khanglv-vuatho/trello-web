@@ -30,14 +30,14 @@ const Column = ({ column }: { column: IColumn }) => {
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
-    data: { ...column },
+    data: { ...column }
   })
 
   const dndKitColumnStyle = {
     transform: CSS.Translate.toString(transform),
     transition,
     height: '100%',
-    opacity: isDragging ? 0.7 : 1,
+    opacity: isDragging ? 0.7 : 1
   }
 
   const handleDeleteColumn = async () => {
@@ -90,11 +90,17 @@ const Column = ({ column }: { column: IColumn }) => {
 
   useEffect(() => {
     setOrderedCards(column?.cards)
-  }, [column, board])
+  }, [column, board, status])
 
   return (
     <>
-      <div ref={status ? undefined : setNodeRef} {...(status ? {} : listeners)} {...(status ? {} : attributes)} style={status ? undefined : dndKitColumnStyle} className='min-w-[300px] max-w-[300px]'>
+      <div
+        ref={status ? undefined : setNodeRef}
+        {...(status ? {} : listeners)}
+        {...(status ? {} : attributes)}
+        style={status ? undefined : dndKitColumnStyle}
+        className='min-w-[300px] max-w-[300px]'
+      >
         <div className={`h-[fit-content] w-full rounded-lg bg-[#f1f2f4]`}>
           <div className='flex items-center justify-between p-2'>
             {onFixTitleColumn ? (
@@ -158,4 +164,4 @@ const Column = ({ column }: { column: IColumn }) => {
   )
 }
 
-export default memo(Column)
+export default Column

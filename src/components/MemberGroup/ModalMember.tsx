@@ -24,7 +24,9 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
   const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
 
-  const filteredData = memberGmails?.filter((item) => item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) || item?.email?.toLowerCase()?.includes(searchQuery?.toLowerCase()))
+  const filteredData = memberGmails?.filter(
+    (item) => item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) || item?.email?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+  )
 
   const handleDeleteMember = async (member: IMember) => {
     try {
@@ -32,7 +34,7 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
       await deleteMemberBoard(board?._id, member?.email)
       Toast({
         message: `Delete member ${member?.name ? member?.name : member?.email} success`,
-        type: 'success',
+        type: 'success'
       })
     } catch (error) {
       console.log(error)
@@ -45,7 +47,10 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
         <Input type='text' placeholder='Search by name, email' value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className='mb-4 w-full' />
         <div className='flex max-h-[400px] min-h-[200px] flex-col gap-4 overflow-y-auto p-2'>
           {filteredData?.map((item) => (
-            <div key={item?.name} className='flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md'>
+            <div
+              key={item?.email}
+              className='flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md'
+            >
               <div className='flex items-center gap-4'>
                 <div className='relative'>
                   <div className='size-10' onClick={() => router.push(`/profile/${item?.email}`)}>
@@ -55,7 +60,9 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
                       <ImageFallback src={item?.picture || ''} alt={item?.name || ''} height={50} width={50} className='size-full rounded-full object-cover' />
                     )}
                   </div>
-                  <span className={`absolute bottom-0 right-0 size-3 rounded-full border-2 border-white ${item?.status === MEMBER_STATUS.ACCEPTED ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                  <span
+                    className={`absolute bottom-0 right-0 size-3 rounded-full border-2 border-white ${item?.status === MEMBER_STATUS.ACCEPTED ? 'bg-green-500' : 'bg-yellow-500'}`}
+                  />
                 </div>
                 <div className='flex flex-col'>
                   <p className='font-semibold text-gray-900'>{item?.name}</p>
@@ -64,7 +71,9 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
                 </div>
               </div>
               <div className='flex items-center gap-3'>
-                <span className={`rounded-full px-3 py-1 text-xs font-medium ${item?.status === MEMBER_STATUS.ACCEPTED ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${item?.status === MEMBER_STATUS.ACCEPTED ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}
+                >
                   {uppercaseFirstLetter(item?.status === MEMBER_STATUS.PENDING ? MEMBER_STATUS.PENDING : MEMBER_STATUS.ACCEPTED)}
                 </span>
                 {board?.ownerId === userInfo?.email && (

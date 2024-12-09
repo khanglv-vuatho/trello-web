@@ -11,7 +11,7 @@ import {
   pointerWithin,
   rectIntersection,
   useSensor,
-  useSensors,
+  useSensors
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
@@ -40,15 +40,15 @@ function BoardContent() {
   const mouseSensor = useSensor(PointerSensor, {
     // Require the mouse to move by 10 pixels before activating
     activationConstraint: {
-      distance: 10,
-    },
+      distance: 10
+    }
   })
 
   const touchSensor = useSensor(PointerSensor, {
     activationConstraint: {
       delay: 250,
-      tolerance: 500,
-    },
+      tolerance: 500
+    }
   })
 
   //conver sensors before passing to DndContext
@@ -58,10 +58,10 @@ function BoardContent() {
     sideEffects: defaultDropAnimationSideEffects({
       styles: {
         active: {
-          opacity: '0.5',
-        },
-      },
-    }),
+          opacity: '0.5'
+        }
+      }
+    })
   }
 
   const collisionDetectionStrategy = useCallback(
@@ -92,7 +92,7 @@ function BoardContent() {
             ...args,
             droppableContainers: args?.droppableContainers.filter((container: any) => {
               return container.id !== overId && checkColumn?.cardOrderIds?.includes(container.id)
-            }),
+            })
           })?.[0]?.id
         }
 
@@ -102,7 +102,7 @@ function BoardContent() {
 
       return lastOverId.current ? [{ id: lastOverId.current }] : []
     },
-    [activeItemType, orderedColumns],
+    [activeItemType, orderedColumns]
   )
 
   const _handleFindColumnByCardId = (id: string | number) => {
@@ -117,7 +117,7 @@ function BoardContent() {
     activeColumn: IColumn,
     activeDraggingCardId: string,
     activeDraggingCardData: ICard,
-    triggerForm: '_handleDragEnd' | '_handleDragOver',
+    triggerForm: '_handleDragEnd' | '_handleDragOver'
   ) => {
     setOrderedColumns((prevColumns) => {
       let newCardIndex: number
@@ -157,7 +157,7 @@ function BoardContent() {
 
         const rebuild_activeDraggingCardData = {
           ...activeDraggingCardData,
-          columnId: nextOverColumn?._id,
+          columnId: nextOverColumn?._id
         }
 
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
@@ -178,7 +178,6 @@ function BoardContent() {
       const cloneBoard = { ...board } as IBoard
       cloneBoard.columns = nextColumns
       storeBoard(cloneBoard)
-
       return [...nextColumns]
     })
   }
@@ -192,7 +191,7 @@ function BoardContent() {
     try {
       await instance.put(`/v1/boards/${board?._id}`, {
         columns: dndOrderedColumns,
-        columnOrderIds: dndOrderedColumnsIds,
+        columnOrderIds: dndOrderedColumnsIds
       })
     } catch (error) {
       console.log(error)
@@ -213,7 +212,7 @@ function BoardContent() {
 
     try {
       await instance.put(`/v1/columns/${columnId}`, {
-        cardOrderIds: dndOrderedCardsIds,
+        cardOrderIds: dndOrderedCardsIds
       })
       storeBoard(cloneBoard)
     } catch (error) {
@@ -236,7 +235,7 @@ function BoardContent() {
       prevColumnId,
       prevCardOrderIds,
       nextColumnId,
-      nextCardOrderIds: dndOrderedColumns.find((c) => c._id === nextColumnId)?.cardOrderIds.filter((cardId) => !cardId.includes('placeholder-card')),
+      nextCardOrderIds: dndOrderedColumns.find((c) => c._id === nextColumnId)?.cardOrderIds.filter((cardId) => !cardId.includes('placeholder-card'))
     }
 
     try {
@@ -267,7 +266,7 @@ function BoardContent() {
     //activeDraggingCardId is card dragging
     const {
       id: activeDraggingCardId,
-      data: { current: activeDraggingCardData },
+      data: { current: activeDraggingCardData }
     } = active
     const { id: overCardId } = over
 
@@ -291,7 +290,7 @@ function BoardContent() {
       //activeDraggingCardId is card dragging
       const {
         id: activeDraggingCardId,
-        data: { current: activeDraggingCardData },
+        data: { current: activeDraggingCardData }
       } = active
       const { id: overCardId } = over
 
@@ -352,7 +351,13 @@ function BoardContent() {
 
   return (
     <div className='h-boardContent overflow-x-auto bg-colorBoardContent'>
-      <DndContext collisionDetection={collisionDetectionStrategy as any} onDragStart={_handleDragStart} onDragEnd={_handleDragEnd} sensors={sensors} onDragOver={_handleDragOver}>
+      <DndContext
+        collisionDetection={collisionDetectionStrategy as any}
+        onDragStart={_handleDragStart}
+        onDragEnd={_handleDragEnd}
+        sensors={sensors}
+        onDragOver={_handleDragOver}
+      >
         <ListColumn columns={orderedColumns} />
         <DragOverlay dropAnimation={dropAnimation}>
           {activeItemDragStart?.id && activeItemType === ITEM_TYPE.COLUMN ? (
@@ -368,4 +373,4 @@ function BoardContent() {
   )
 }
 
-export default memo(BoardContent)
+export default BoardContent
