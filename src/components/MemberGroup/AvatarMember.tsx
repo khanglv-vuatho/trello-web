@@ -1,12 +1,11 @@
 'use client'
 
-import { Avatar } from '@nextui-org/react'
-import React, { useState } from 'react'
 import { IMember } from '@/types'
-import PopoverCustom from '../PopoverCustom'
-import { useStoreBoard } from '@/store'
 import { uppercaseFirstLetter } from '@/utils'
+import { Avatar } from '@nextui-org/react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import PopoverCustom from '../PopoverCustom'
 
 type TAvatarMember = {
   item: IMember

@@ -1,9 +1,10 @@
 import instance from '@/services/axiosConfig'
-import { useStoreBoard, useStoreCard, useStoreStatusOpenModal } from '@/store'
+import { MoreHoriz } from '@mui/icons-material'
+import { useStoreBoard, useStoreCard, useStoreStatusOpenModal, useStoreUser } from '@/store'
 import { ICard, IColumn, IMember } from '@/types'
 import { Avatar, Button, Popover, PopoverContent, PopoverTrigger, Textarea } from '@nextui-org/react'
 import 'highlight.js/styles/github.css' // Or any other Highlight.js theme
-import { Add, Card as CardIcon, Edit, MessageText, Send2, TextalignLeft, TickCircle } from 'iconsax-react'
+import { Add, Card as CardIcon, Edit, Edit2, MessageText, Send2, TextalignLeft, TickCircle, Trash } from 'iconsax-react'
 import Link from 'next/link'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import Markdown from 'react-markdown'
@@ -15,6 +16,13 @@ import { cloneDeep } from 'lodash'
 type ModalOpenCardDetailProps = {
   isOpenModalDetailCard: boolean
   setIsOpenModalDetailCard: (value: boolean) => void
+}
+
+type TComment = {
+  content: string
+  createdAt: string
+  userName: string
+  userAvatar: string
 }
 
 const fakeData = {
@@ -146,16 +154,16 @@ const fakeAssignMembers = [
 
 const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }: ModalOpenCardDetailProps) => {
   const { currentCard, storeCurrentCard } = useStoreCard()
-
+  const { userInfo } = useStoreUser()
   const { board, storeBoard } = useStoreBoard()
   const { storeStatusOpenModal } = useStoreStatusOpenModal()
   const [cardDescription, setCardDescription] = useState(currentCard?.description || '')
   const [comment, setComment] = useState('')
-  const [listComments, setListComments] = useState(currentCard?.comments || [])
+  const [listComments, setListComments] = useState<TComment[]>((currentCard?.comments as any) || [])
   const [isOpenEditDescription, setIsOpenEditDescription] = useState(false)
   const [isOpenPopoverAssignMember, setIsOpenPopoverAssignMember] = useState(false)
-  const [assignMembers, setAssignMembers] = useState(currentCard?.assignMembers || [])
-  const textareaCommentRef: any = useRef<RefObject<HTMLAreaElement>>(null)
+  const [assignMembers, setAssignMembers] = useState<IMember[]>(currentCard?.assignMembers || [])
+  const textareaCommentRef = useRef<HTMLTextAreaElement>(null)
 
   const handleCloseModal = () => {
     setIsOpenModalDetailCard(false)
@@ -228,10 +236,51 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
     }
   }
 
-  const handleSendComment = () => {
-    console.log('handle send comment')
-    setComment('')
+  const handleSendComment = async () => {
+    try {
+      console.log('handle send comment')
+      const cloneBoard: any = cloneDeep(board)
+
+      const newComment: any = {
+        content: comment,
+        createdAt: new Date().toISOString(),
+        userName: userInfo?.name,
+        userAvatar: userInfo?.picture
+      }
+
+      cloneBoard.cards = cloneBoard.cards.map((cardItem: ICard) => {
+        if (cardItem._id === currentCard?._id) {
+          cardItem.comments = [...(cardItem.comments || []), newComment]
+          return cardItem
+        }
+        return cardItem
+      })
+
+      cloneBoard.columns.map((columnItem: IColumn) => {
+        if (columnItem._id === currentCard?.columnId) {
+          columnItem.cards = columnItem.cards.map((cardItem: ICard) => {
+            if (cardItem._id === currentCard?._id) {
+              cardItem.comments = [...(cardItem.comments || []), newComment]
+              return cardItem
+            }
+            return cardItem
+          })
+        }
+      })
+      console.log({ cloneBoard })
+
+      setListComments((prev) => [...prev, newComment])
+      storeBoard(cloneBoard)
+
+      await instance.put(`/v1/cards/${currentCard?._id}/detail`, {
+        comments: [...(currentCard?.comments || []), newComment]
+      })
+      setComment('')
+    } catch (error) {
+      console.log(error)
+    }
   }
+
   const handleEditCardDetail = async (data: any) => {
     try {
       const cloneBoard: any = cloneDeep(board)
@@ -258,15 +307,18 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
     }
   }
 
+  const handleOpenModalDeleteComment = (comment: TComment) => {
+    console.log({ comment })
+  }
+
   useEffect(() => {
     if (currentCard) {
       setCardDescription(currentCard?.description || '')
       setAssignMembers(currentCard?.assignMembers || [])
-      setListComments(currentCard?.comments || [])
+      setListComments((currentCard?.comments as any) || [])
     }
   }, [currentCard])
 
-  console.log({ assignMembers })
   if (!currentCard) return null
 
   return (
@@ -368,17 +420,28 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
               ? listComments.map((item, index) => (
                   <div key={index} className='flex items-start gap-2'>
                     <div className='!size-10'>
-                      <Avatar className='size-full rounded-full' src={item?.picture || ''} />
+                      <Avatar className='size-full rounded-full' src={item?.userAvatar || ''} />
                     </div>
-                    <div className='flex flex-col rounded-lg bg-[#f6f3f3] p-2'>
-                      <div className='flex items-center gap-2'>
-                        <Link href={'#'} className='text-sm font-bold'>
-                          {item?.name}
-                        </Link>
-                        <time className='text-xs text-[#9c9c9c]'>{item?.createdAt}</time>
-                      </div>
+                    <div className='flex w-full flex-1 flex-col gap-0.5 rounded-lg bg-[#f6f3f3] p-2'>
+                      <Link href={'#'} className='text-sm font-bold'>
+                        {item?.userName}
+                      </Link>
+                      <time className='text-xs text-[#9c9c9c]'>{new Date(item?.createdAt).toLocaleString()}</time>
                       <p className='text-sm'>{item?.content}</p>
                     </div>
+
+                    <Button
+                      onClick={() => handleOpenModalDeleteComment(item)}
+                      style={{
+                        display: item.userName == userInfo?.name ? 'flex' : 'none'
+                      }}
+                      isIconOnly
+                      className='!size-10 max-h-10 min-h-10 items-center justify-center rounded-full bg-transparent text-black hover:bg-red-500 hover:text-white'
+                      aria-label='Delete'
+                      color='danger'
+                    >
+                      <Trash />
+                    </Button>
                   </div>
                 ))
               : null}
@@ -397,7 +460,7 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
-            <Button className='!size-10 max-h-10 min-h-10 rounded-full bg-[#eee] bg-transparent' isIconOnly>
+            <Button onClick={handleSendComment} className='!size-10 max-h-10 min-h-10 rounded-full bg-[#eee] bg-transparent' isIconOnly>
               <Send2 className={`${comment.length > 0 ? 'text-blue-500' : 'text-[#9c9c9c]'} transition`} />
             </Button>
           </div>
