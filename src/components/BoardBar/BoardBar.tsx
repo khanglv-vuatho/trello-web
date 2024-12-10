@@ -3,7 +3,7 @@
 import { Dashboard as DashboardIcon, PersonAdd as PersonAddIcon } from '@mui/icons-material'
 import { Button, Input } from '@nextui-org/react'
 
-import { SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
+import { FilterBoard, SelectTypeOfWorkspace } from '@/app/(main)/board/[boardId]/(sections)'
 import Modal from '@/components/Modal'
 import { useSocket } from '@/components/Providers/SocketProvider'
 import Toast from '@/components/Toast'
@@ -138,6 +138,7 @@ function BoardBar() {
           <ExpandButton key={index} title={item.title} content={item.content} startContent={item.startContent} style='font-normal'></ExpandButton>
         ))} */}
         <SelectTypeOfWorkspace />
+        {/* <FilterBoard /> */}
       </div>
       <div className='flex items-center gap-10'>
         <Button className='w-full px-4 py-2 text-white' onClick={handleToggleModalInviteMember} startContent={<PersonAddIcon />} variant='bordered'>

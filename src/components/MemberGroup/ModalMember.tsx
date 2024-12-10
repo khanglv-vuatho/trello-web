@@ -11,6 +11,7 @@ import { useState } from 'react'
 import Toast from '@/components/Toast'
 import { uppercaseFirstLetter } from '@/utils'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 type TModalMember = {
   isOpen: boolean
@@ -53,13 +54,13 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
             >
               <div className='flex items-center gap-4'>
                 <div className='relative'>
-                  <div className='size-10' onClick={() => router.push(`/profile/${item?.email}`)}>
+                  <Link href={`/profile/${item?.email}`} className='block size-10'>
                     {item?.status === MEMBER_STATUS.PENDING ? (
                       <Avatar className='size-full rounded-full' name={item?.name?.charAt(0) || ''} />
                     ) : (
                       <ImageFallback src={item?.picture || ''} alt={item?.name || ''} height={50} width={50} className='size-full rounded-full object-cover' />
                     )}
-                  </div>
+                  </Link>
                   <span
                     className={`absolute bottom-0 right-0 size-3 rounded-full border-2 border-white ${item?.status === MEMBER_STATUS.ACCEPTED ? 'bg-green-500' : 'bg-yellow-500'}`}
                   />

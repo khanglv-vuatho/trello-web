@@ -14,17 +14,22 @@ const SelectTypeOfWorkspace = () => {
   const listTypeBoard = [
     {
       type: BOARD_TYPE.PUBLIC,
-      description: 'Anyone with the link can access',
+      description: 'Anyone with the link can access'
     },
     {
       type: BOARD_TYPE.PRIVATE,
-      description: 'All team members can access',
-    },
+      description: 'All team members can access'
+    }
   ]
   return (
     <PopoverCustom
       popoverTrigger={
-        <Button startContent={<VpnLockIcon />} isIconOnly variant='light' className='flex !min-h-10 w-fit flex-shrink-0 gap-4 rounded-lg px-4 text-white hover:bg-white/10'>
+        <Button
+          startContent={<VpnLockIcon />}
+          isIconOnly
+          variant='light'
+          className='flex !min-h-10 w-fit flex-shrink-0 gap-4 rounded-lg px-4 text-white hover:bg-white/10'
+        >
           Workspace Visibility
         </Button>
       }

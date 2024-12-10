@@ -24,6 +24,7 @@ type TBoardState = {
   deleteBoard: (boardId: string) => Promise<void>
   deleteMemberBoard: (boardId: string, email: string) => Promise<void>
   updateRecentBoardAndStar: (board: IBoard) => Promise<void>
+  filterBoard: (board: IBoard, columns: string[]) => void
 }
 
 export const useStoreBoard = create<TBoardState>((set, get) => ({
@@ -33,6 +34,22 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
 
   storeAllBoards: (allBoards: IBoard[]) => {
     set({ allBoards })
+  },
+
+  filterBoard: (board, columns) => {
+    const cloneBoard = { ...board }
+
+    const columnsOfBoard = cloneBoard?.columns?.map((column) => column)
+
+    const titles = ['fmndskfmnkasfd', 'xzcxzcxz']
+    const memberHasAssignGmails = ['z@gmail.com', 'xzcxzcxz']
+    const filteredColumns = columnsOfBoard?.filter((column) => titles.includes(column.title))
+    console.log({ filteredColumns })
+    console.log({ columnsOfBoard })
+    console.log({ newBoard: columnsOfBoard })
+    // const filteredColumns = filterData(board?.columns || [], columns, !board?.memberGmails ? [] : board?.memberGmails?.map((member) => member.email))
+    // console.log({ filteredColumns })
+    // set({ board: { ...board, columns: filteredColumns || [] } })
   },
 
   storeBoardRecent: (boardsRecent) => {

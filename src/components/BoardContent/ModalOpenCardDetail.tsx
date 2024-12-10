@@ -2,7 +2,7 @@ import instance from '@/services/axiosConfig'
 import { MoreHoriz } from '@mui/icons-material'
 import { useStoreBoard, useStoreCard, useStoreStatusOpenModal, useStoreUser } from '@/store'
 import { ICard, IColumn, IMember } from '@/types'
-import { Avatar, Button, Popover, PopoverContent, PopoverTrigger, Textarea } from '@nextui-org/react'
+import { Avatar, Button, Input, Popover, PopoverContent, PopoverTrigger, Textarea, Tooltip } from '@nextui-org/react'
 import 'highlight.js/styles/github.css' // Or any other Highlight.js theme
 import { Add, Card as CardIcon, Edit, Edit2, MessageText, Send2, TextalignLeft, TickCircle, Trash } from 'iconsax-react'
 import Link from 'next/link'
@@ -329,6 +329,7 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
       modalTitle={
         <div className='flex items-center gap-2'>
           <CardIcon className='size-6' />
+          <Input value={currentCard?.title} />
           <p>{currentCard?.title}</p>
         </div>
       }
@@ -373,12 +374,14 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
           <p className='text-sm font-medium text-blue-500'>Members</p>
           <div className='flex flex-wrap gap-1'>
             {assignMembers?.map((member) => (
-              <div key={member.email} className='relative !size-10 max-h-10 min-h-10 min-w-10 max-w-10 rounded-full'>
-                <Avatar src={member?.picture} className='size-full object-cover' />
-                <div className='absolute bottom-0 right-0 rounded-full bg-white'>
-                  <TickCircle size={16} variant='Bold' className='text-green-500' />
+              <Tooltip key={member.email} content={member?.email}>
+                <div className='relative !size-10 max-h-10 min-h-10 min-w-10 max-w-10 rounded-full'>
+                  <Avatar name={member?.email?.charAt(0)} src={member?.picture} className='size-full cursor-pointer object-cover' />
+                  <div className='absolute bottom-0 right-0 rounded-full bg-white'>
+                    <TickCircle size={16} variant='Bold' className='z-50 text-green-500' />
+                  </div>
                 </div>
-              </div>
+              </Tooltip>
             ))}
 
             <Popover placement='right' isOpen={isOpenPopoverAssignMember} onOpenChange={setIsOpenPopoverAssignMember}>
@@ -390,18 +393,16 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
               <PopoverContent>
                 <div className='grid grid-cols-5 gap-2'>
                   {board?.memberGmails?.map((member) => (
-                    <div
-                      onClick={() => handleToggleAssignMember(member)}
-                      key={member.email}
-                      className='relative !size-10 max-h-10 min-h-10 min-w-10 max-w-10 rounded-full'
-                    >
-                      <Avatar src={member?.picture} className='size-full object-cover' />
-                      {assignMembers.some((m) => m.email === member.email) && (
-                        <div className='absolute bottom-0 right-0 rounded-full bg-white'>
-                          <TickCircle size={16} variant='Bold' className='text-green-500' />
-                        </div>
-                      )}
-                    </div>
+                    <Tooltip key={member.email} content={member?.email}>
+                      <div onClick={() => handleToggleAssignMember(member)} className='relative !size-10 max-h-10 min-h-10 min-w-10 max-w-10 rounded-full'>
+                        <Avatar src={member?.picture} className='size-full cursor-pointer object-cover' />
+                        {assignMembers.some((m) => m.email === member.email) && (
+                          <div className='absolute bottom-0 right-0 rounded-full bg-white'>
+                            <TickCircle size={16} variant='Bold' className='text-green-500' />
+                          </div>
+                        )}
+                      </div>
+                    </Tooltip>
                   ))}
                 </div>
               </PopoverContent>
