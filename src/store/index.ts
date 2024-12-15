@@ -142,7 +142,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     try {
       const payload = {
         boardId: board?._id,
-        title
+        title: title.trim()
       }
       const column: any = await instance.post('/v1/columns', payload)
       const cloneColumn = { ...column }
@@ -162,7 +162,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
   createNewCard: async (column, board, title) => {
     const clonedColumn = { ...column }
     const payload = {
-      title,
+      title: title.trim(),
       boardId: board?._id,
       columnId: column?._id
     }

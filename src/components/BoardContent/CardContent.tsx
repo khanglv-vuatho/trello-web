@@ -95,6 +95,7 @@ const CardContent = ({ card }: { card: ICard }) => {
         const cardIndex = column.cards.findIndex((item: ICard) => item._id === card._id)
         column.cards[cardIndex].title = valueTitleCard
       }
+
       storeBoard(updatedBoard)
 
       await instance.put(`/v1/cards/rename/${card._id}`, payload)
@@ -147,7 +148,7 @@ const CardContent = ({ card }: { card: ICard }) => {
                   {card?.title}
                 </p>
               )}
-              {shouldShowCardAction() && (
+              {/* {shouldShowCardAction() && (
                 <div className='flex items-center gap-2 p-2'>
                   {!!card?.memberIds?.length && (
                     <Button variant='light' startContent={<GroupIcon className='size-5' />} className='flex items-center gap-2 rounded-sm text-colorHeader'>
@@ -169,7 +170,7 @@ const CardContent = ({ card }: { card: ICard }) => {
                     </Button>
                   )}
                 </div>
-              )}
+              )} */}
             </div>
             <div
               onClick={(e) => {

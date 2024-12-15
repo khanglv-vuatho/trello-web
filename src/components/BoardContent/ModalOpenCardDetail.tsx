@@ -164,6 +164,8 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
   const [isOpenPopoverAssignMember, setIsOpenPopoverAssignMember] = useState(false)
   const [assignMembers, setAssignMembers] = useState<IMember[]>(currentCard?.assignMembers || [])
   const textareaCommentRef = useRef<HTMLTextAreaElement>(null)
+  const [onFixTitleCard, setOnFixTitleCard] = useState(false)
+  const [titleCard, setTitleCard] = useState(currentCard?.title || '')
 
   const handleCloseModal = () => {
     setIsOpenModalDetailCard(false)
@@ -311,6 +313,20 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
     console.log({ comment })
   }
 
+  const handleSaveTitleCard = async () => {
+    try {
+      await handleEditCardDetail({ title: titleCard })
+      Toast({
+        type: 'success',
+        message: 'Edit title success'
+      })
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setOnFixTitleCard(false)
+    }
+  }
+
   useEffect(() => {
     if (currentCard) {
       setCardDescription(currentCard?.description || '')
@@ -327,10 +343,20 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
       isOpen={isOpenModalDetailCard}
       onOpenChange={isOpenPopoverAssignMember ? () => {} : handleCloseModal}
       modalTitle={
-        <div className='flex items-center gap-2'>
+        <div className='mt-4 flex items-center gap-2'>
           <CardIcon className='size-6' />
-          <Input value={currentCard?.title} />
-          <p>{currentCard?.title}</p>
+          {onFixTitleCard ? (
+            <div className='flex w-full items-center gap-2'>
+              <Input defaultValue={currentCard?.title} value={titleCard} onChange={(e) => setTitleCard(e.target.value)} className='w-full' />
+              <Button onClick={handleSaveTitleCard} className='max-w-auto min-w-auto !size-10 max-h-10 min-h-10 rounded-lg bg-green-500 text-white'>
+                Save
+              </Button>
+            </div>
+          ) : (
+            <p className='select-none p-2' onDoubleClick={() => setOnFixTitleCard(!onFixTitleCard)}>
+              {currentCard?.title}
+            </p>
+          )}
         </div>
       }
     >
