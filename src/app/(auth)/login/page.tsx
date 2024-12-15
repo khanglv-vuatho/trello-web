@@ -24,7 +24,7 @@ const Login = () => {
         setCookie('google_token', tokenResponse.access_token)
         Toast({
           message: 'Login Successful',
-          type: 'success',
+          type: 'success'
         })
         if (localStorage.getItem('accept-invitation-link')) {
           router.push(localStorage.getItem('accept-invitation-link') || '/')
@@ -37,9 +37,9 @@ const Login = () => {
       setIsLoading(false)
       Toast({
         message: 'Login Failed',
-        type: 'error',
+        type: 'error'
       })
-    },
+    }
   })
 
   const handleLogin = () => {
