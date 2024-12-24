@@ -3,10 +3,10 @@
 import ImageFallback from '@/components/ImageFallback'
 import Modal from '@/components/Modal'
 import { MEMBER_STATUS } from '@/constants'
-import { useStoreBoard, useStoreUser } from '@/store'
-import { IMember } from '@/types'
+import { useStoreBoard, useStoreListMessagesPins, useStoreUser } from '@/store'
+import { IMember, TListMessages } from '@/types'
 import { Avatar, Button, Input } from '@nextui-org/react'
-import { Trash } from 'iconsax-react'
+import { Message, Trash } from 'iconsax-react'
 import { useState } from 'react'
 import Toast from '@/components/Toast'
 import { uppercaseFirstLetter } from '@/utils'
@@ -23,6 +23,8 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
   const { board, deleteMemberBoard } = useStoreBoard()
   const { userInfo } = useStoreUser()
   const [searchQuery, setSearchQuery] = useState('')
+
+  const { listMessagesPins, storeListMessagesPins } = useStoreListMessagesPins()
   const router = useRouter()
 
   const filteredData = memberGmails?.filter(
@@ -40,6 +42,17 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  const handleSendMessage = (member: IMember) => {
+    const newMessage: TListMessages = {
+      avatar: member?.picture || '',
+      name: member?.name || '',
+      conversationId: member?.email || '',
+      email: member?.email || ''
+    }
+    storeListMessagesPins([...listMessagesPins, newMessage])
+    onOpenChange(false)
   }
 
   return (
@@ -77,6 +90,11 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
                 >
                   {uppercaseFirstLetter(item?.status === MEMBER_STATUS.PENDING ? MEMBER_STATUS.PENDING : MEMBER_STATUS.ACCEPTED)}
                 </span>
+                {board?.ownerId !== userInfo?.email && (
+                  <Button isIconOnly variant='light' radius='full' size='sm' className='!size-10' onClick={() => handleSendMessage(item)}>
+                    <Message />
+                  </Button>
+                )}
                 {board?.ownerId === userInfo?.email && (
                   <Button isIconOnly color='danger' variant='light' radius='full' size='sm' className='!size-10' onClick={() => handleDeleteMember(item)}>
                     <Trash className='hover:text-red-500' />

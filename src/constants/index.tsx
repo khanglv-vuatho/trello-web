@@ -38,5 +38,8 @@ export const SOCKET_EVENTS = createEnum({
   UPDATE_MEMBER: 'updateMember',
   REGISTER: 'register',
   JOIN_BOARD: 'join-board',
-  NOTIFICATION: 'notification'
+  NOTIFICATION: 'notification',
+  MESSAGE_TYPING: 'message-typing'
 })
+
+export const MESSAGE_TYPES = { TEXT: 'TEXT', IMAGE: 'IMAGE' } as const

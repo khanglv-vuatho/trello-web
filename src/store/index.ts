@@ -1,8 +1,8 @@
 import instance from '@/services/axiosConfig'
-import { IBoard, ICard, IColumn, TUserInfo } from '@/types'
-import { create } from 'zustand'
-import { isEmpty } from 'lodash'
+import { IBoard, ICard, IColumn, TListMessagesPins, TMessage, TUserInfo } from '@/types'
 import { generatePlaceholderCard, mapOrder } from '@/utils'
+import { isEmpty } from 'lodash'
+import { create } from 'zustand'
 
 type TBoardState = {
   board?: IBoard
@@ -248,5 +248,72 @@ type TCardState = {
 export const useStoreCard = create<TCardState>((set) => ({
   storeCurrentCard: (currentCard) => {
     set({ currentCard })
+  }
+}))
+
+export const useStoreListMessagesPins = create<TListMessagesPins>((set) => ({
+  listMessagesPins: [],
+  storeListMessagesPins: (listMessagesPins) => {
+    set({ listMessagesPins })
+  }
+}))
+
+type TConversation = {
+  conversation: TMessage[]
+  storeConversation: (conversation: TMessage[]) => void
+  getMessagesByConversationId: (conversationId: string) => Promise<any[]>
+}
+
+export const useStoreConversation = create<TConversation>((set) => ({
+  conversation: [
+    {
+      message: 'Hello, how are you?',
+      senderId: 'khangluong2002@gmail.com',
+      type: 'TEXT',
+      createdAt: 1672531200000
+    },
+    {
+      message: "I'm good, thanks for asking!",
+      senderId: 'khang@gmail.com',
+      type: 'TEXT',
+      createdAt: 1672531800000
+    },
+    {
+      message: 'Check out this file.',
+      senderId: 'khangluong2002@gmail.com',
+      type: 'TEXT',
+      createdAt: 1672532400000
+    },
+    {
+      message: 'Check out this file.',
+      senderId: 'khangluong2002@gmail.com',
+      type: 'TEXT',
+      createdAt: 1672532400000
+    },
+    {
+      message: 'Check out this file.',
+      senderId: 'khangluong2002@gmail.com',
+      type: 'TEXT',
+      createdAt: 1672532400000
+    },
+    {
+      message: 'Got it, thanks!',
+      senderId: 'khang@gmail.com',
+      type: 'TEXT',
+      createdAt: 1672533000000
+    }
+  ],
+  getMessagesByConversationId: async (conversationId: string) => {
+    if (!conversationId) return []
+    try {
+      const messages: any = await instance.get(`/v1/conversations/${conversationId}`)
+      return messages
+    } catch (error) {
+      console.log(error)
+    }
+  },
+
+  storeConversation: (conversation) => {
+    set({ conversation })
   }
 }))

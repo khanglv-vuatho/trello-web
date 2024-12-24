@@ -118,7 +118,7 @@ const Notifications = () => {
               )}
               <div className='!h-2 absolute right-2 top-2 flex !w-2 flex-shrink-0 animate-ping rounded-full bg-blue-500' />
               <div className='flex items-start gap-4 p-4'>
-                <Avatar className='flex !size-10 flex-shrink-0 ring-1 ring-white/20'></Avatar>
+                <Avatar className='flex !size-10 flex-shrink-0 ring-1 ring-white/20' />
                 <div className='min-w-0 flex-1'>
                   <div className='mb-1 flex items-start justify-between'>
                     <p className='font-medium text-white'>{notification?.title}</p>
