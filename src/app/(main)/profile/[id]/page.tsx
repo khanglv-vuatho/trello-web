@@ -43,21 +43,21 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
       if (!isOwner) {
         Toast({
           type: 'error',
-          message: 'You do not have permission to edit this profile',
+          message: 'You do not have permission to edit this profile'
         })
         return
       }
       if (!displayName || (displayName === userInfo?.name && file === null)) return
       const payload = {
         name: displayName,
-        avatar: file,
+        avatar: file
       }
       await instance.put(`/v1/users/${email}`, objectToFormData(payload))
       storeUser({ ...userInfo, name: displayName || '', picture: imageUI || null } as any)
       setFile(null)
       Toast({
         type: 'success',
-        message: 'Update profile successfully',
+        message: 'Update profile successfully'
       })
     } catch (error) {
       console.log(error)
@@ -119,9 +119,18 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
             <h1 className='text-2xl font-bold'>{isOwner ? 'Edit Profile' : `${storeAnotherUser?.name}'s Profile`}</h1>
             <div className='relative mx-auto size-[200px] overflow-hidden rounded-full'>
               {isOwner && <input accept='image/*' onChange={handleChangeAvatar} type='file' className='hidden' ref={fileInputRef} />}
-              <ImageFallback src={isOwner ? imageUI || '' : storeAnotherUser?.picture || ''} alt='avatar' className='size-full object-cover' width={500} height={500} />
+              <ImageFallback
+                src={isOwner ? imageUI || '' : storeAnotherUser?.picture || ''}
+                alt='avatar'
+                className='size-full object-cover'
+                width={500}
+                height={500}
+              />
               {isOwner && (
-                <div onClick={() => fileInputRef.current?.click()} className='absolute bottom-0 left-0 right-0 z-40 flex items-center justify-center rounded-full bg-gray-200 py-2'>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className='absolute bottom-0 left-0 right-0 z-40 flex items-center justify-center rounded-full bg-gray-200 py-2'
+                >
                   <Camera size={24} className='text-white' />
                 </div>
               )}
@@ -143,9 +152,10 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
                 classNames={{
                   input: 'placeholder:text-white',
                   inputWrapper: 'group-data-[focus=true]:border-white data-[hover=true]:border-white',
-                  label: 'group-data-[filled-within=true]:text-white',
+                  label: 'group-data-[filled-within=true]:text-white'
                 }}
               />
+
               <Input
                 variant='bordered'
                 readOnly
@@ -155,12 +165,16 @@ const ProfilePage = ({ params }: { params: { id: string } }) => {
                 classNames={{
                   input: 'placeholder:text-white',
                   inputWrapper: 'group-data-[focus=true]:border-white data-[hover=true]:border-white',
-                  label: 'group-data-[filled-within=true]:text-white',
+                  label: 'group-data-[filled-within=true]:text-white'
                 }}
               />
 
               {isOwner && (
-                <Button isLoading={onSubmit} onClick={() => setOnSubmit(true)} className='ml-auto mt-4 min-h-10 w-full bg-white text-blue-500 hover:bg-indigo-100'>
+                <Button
+                  isLoading={onSubmit}
+                  onClick={() => setOnSubmit(true)}
+                  className='ml-auto mt-4 min-h-10 w-full bg-white text-blue-500 hover:bg-indigo-100'
+                >
                   Save
                 </Button>
               )}

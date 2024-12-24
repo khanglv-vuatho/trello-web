@@ -1,4 +1,4 @@
-import { BOARD_MEMBER_ROLE, BOARD_TYPE, MEMBER_STATUS, NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
+import { BOARD_MEMBER_ROLE, BOARD_TYPE, MEMBER_STATUS, MESSAGE_TYPES, NOTIFICATION_STATUS, NOTIFICATION_TYPES } from '@/constants'
 
 export type ICard = {
   _id: string
@@ -82,4 +82,28 @@ export type TBoards = {
   title: string
   description: string
   isStared: boolean
+}
+export type TGroupMessage = {
+  userId: string
+  messages: (TMessage & { first?: boolean; last?: boolean })[]
+}
+
+export type TListMessages = {
+  avatar: string
+  name: string
+  conversationId: string
+  email: string
+}
+
+export type TMessage = {
+  message: string
+  senderId: string
+  type: keyof typeof MESSAGE_TYPES
+  attachment?: File
+  createdAt: number
+}
+
+export type TListMessagesPins = {
+  listMessagesPins: TListMessages[]
+  storeListMessagesPins: (listMessagesPins: TListMessages[]) => void
 }

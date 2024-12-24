@@ -1,12 +1,13 @@
-import type { Metadata } from 'next'
-import './globals.css'
+import Header from '@/(layout)/Header'
+import PinMessage from '@/components/PinMessage'
 import Providers from '@/components/Providers'
 import { GoogleTagManager } from '@next/third-parties/google'
-import Header from '@/(layout)/Header'
+import type { Metadata } from 'next'
+import './globals.css'
 
 export const metadata: Metadata = {
   title: 'NTTU Workspace',
-  description: 'NTTU Workspace',
+  description: 'NTTU Workspace'
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +17,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>
           <Header />
-          <>{children}</>
+          <div className='relative'>
+            {children}
+            <PinMessage />
+          </div>
         </Providers>
       </body>
     </html>

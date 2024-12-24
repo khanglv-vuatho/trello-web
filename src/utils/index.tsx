@@ -1,3 +1,5 @@
+import { TGroupMessage, TMessage } from '@/types'
+
 export const mapOrder = (originalArray: any[], orderArray: string[], key: string) => {
   if (!originalArray || !orderArray || !key) return []
 
@@ -259,4 +261,49 @@ const validateDomain = (domain: string) => {
     isValid: true,
     message: 'Valid domain'
   }
+}
+
+export const groupMessagesBySender = (messages: TMessage[]): TGroupMessage[] => {
+  if (!messages) return []
+  const groupedMessages: TGroupMessage[] = []
+  let currentGroup: (TMessage & { first?: boolean; last?: boolean })[] = [messages?.[0]]
+  let currentUserId = messages?.[0]?.senderId
+
+  for (let i = 1; i < messages.length; i++) {
+    if (messages[i]?.senderId === currentUserId) {
+      currentGroup?.push(messages?.[i])
+    } else {
+      if (currentGroup?.length > 0) {
+        currentGroup[0].first = true
+        currentGroup[currentGroup.length - 1].last = true
+        groupedMessages.push({ userId: currentUserId, messages: currentGroup })
+      }
+
+      currentGroup = [messages?.[i]]
+      currentUserId = messages?.[i]?.senderId
+    }
+  }
+
+  // Xử lý nhóm cuối cùng
+  if (currentGroup?.length > 0) {
+    currentGroup[0].first = true
+    currentGroup[currentGroup.length - 1].last = true
+    groupedMessages.push({ userId: currentUserId, messages: currentGroup })
+  }
+
+  // Gỡ bỏ `last` của mọi tin nhắn ngoại trừ tin cuối cùng
+  groupedMessages?.forEach((group) => {
+    const lastMessageIndex = group?.messages?.length - 1
+    group?.messages?.forEach((msg, index) => {
+      if (index !== lastMessageIndex) {
+        delete msg.last
+      }
+    })
+  })
+
+  return groupedMessages
+}
+
+export const isMobileWithUserAgent = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 }
