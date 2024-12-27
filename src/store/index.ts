@@ -1,5 +1,6 @@
+import { MESSAGE_TYPES } from '@/constants'
 import instance from '@/services/axiosConfig'
-import { IBoard, ICard, IColumn, TListMessagesPins, TMessage, TUserInfo } from '@/types'
+import { IBoard, ICard, IColumn, TListMessages, TMessage, TUserInfo } from '@/types'
 import { generatePlaceholderCard, mapOrder } from '@/utils'
 import { isEmpty } from 'lodash'
 import { create } from 'zustand'
@@ -44,9 +45,7 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     const titles = ['fmndskfmnkasfd', 'xzcxzcxz']
     const memberHasAssignGmails = ['z@gmail.com', 'xzcxzcxz']
     const filteredColumns = columnsOfBoard?.filter((column) => titles.includes(column.title))
-    console.log({ filteredColumns })
-    console.log({ columnsOfBoard })
-    console.log({ newBoard: columnsOfBoard })
+
     // const filteredColumns = filterData(board?.columns || [], columns, !board?.memberGmails ? [] : board?.memberGmails?.map((member) => member.email))
     // console.log({ filteredColumns })
     // set({ board: { ...board, columns: filteredColumns || [] } })
@@ -174,8 +173,6 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
     const newBoard: any = { ...board, columns: board?.columns.map((col) => (col?._id === column?._id ? clonedColumn : col)) }
     newBoard.cards.push(card)
     set({ board: newBoard })
-
-    console.log({ newBoard })
   },
 
   moveColumn: async (column, board, title) => {
@@ -198,7 +195,6 @@ export const useStoreBoard = create<TBoardState>((set, get) => ({
   deleteMemberBoard: async (boardId, email) => {
     await instance.delete(`/v1/boards/${boardId}/members`, { data: { email } })
     const { board } = get()
-    console.log({ board })
     if (!board) return
     set({ board: { ...board, memberGmails: board.memberGmails?.filter((member) => member.email !== email) } })
   },
@@ -251,69 +247,95 @@ export const useStoreCard = create<TCardState>((set) => ({
   }
 }))
 
+type TListMessagesPins = {
+  listMessagesPins: TListMessages[]
+  storeListMessagesPins: (listMessagesPins: TListMessages[]) => void
+  currentChat: TListMessages | null
+  storeCurrentChat: (currentChat: TListMessages | null) => void
+}
+
 export const useStoreListMessagesPins = create<TListMessagesPins>((set) => ({
   listMessagesPins: [],
+  currentChat: null,
   storeListMessagesPins: (listMessagesPins) => {
     set({ listMessagesPins })
+  },
+  storeCurrentChat: (currentChat) => {
+    set({ currentChat })
   }
 }))
 
 type TConversation = {
   conversation: TMessage[]
+  allConversation: TMessage[]
   storeConversation: (conversation: TMessage[]) => void
-  getMessagesByConversationId: (conversationId: string) => Promise<any[]>
+  storeAllConversationFromApi: (allConversation: TMessage[]) => void
 }
 
 export const useStoreConversation = create<TConversation>((set) => ({
-  conversation: [
-    {
-      message: 'Hello, how are you?',
-      senderId: 'khangluong2002@gmail.com',
-      type: 'TEXT',
-      createdAt: 1672531200000
-    },
-    {
-      message: "I'm good, thanks for asking!",
-      senderId: 'khang@gmail.com',
-      type: 'TEXT',
-      createdAt: 1672531800000
-    },
-    {
-      message: 'Check out this file.',
-      senderId: 'khangluong2002@gmail.com',
-      type: 'TEXT',
-      createdAt: 1672532400000
-    },
-    {
-      message: 'Check out this file.',
-      senderId: 'khangluong2002@gmail.com',
-      type: 'TEXT',
-      createdAt: 1672532400000
-    },
-    {
-      message: 'Check out this file.',
-      senderId: 'khangluong2002@gmail.com',
-      type: 'TEXT',
-      createdAt: 1672532400000
-    },
-    {
-      message: 'Got it, thanks!',
-      senderId: 'khang@gmail.com',
-      type: 'TEXT',
-      createdAt: 1672533000000
-    }
-  ],
-  getMessagesByConversationId: async (conversationId: string) => {
-    if (!conversationId) return []
-    try {
-      const messages: any = await instance.get(`/v1/conversations/${conversationId}`)
-      return messages
-    } catch (error) {
-      console.log(error)
-    }
-  },
+  conversation: [],
+  allConversation: [],
 
   storeConversation: (conversation) => {
     set({ conversation })
+  },
+
+  storeAllConversationFromApi: (allConversation) => {
+    set({ allConversation })
   }
 }))
+
+type TListConversation = {
+  listConversations: TMessage[]
+  storeListConversations: (listConversation: TMessage[]) => void
+}
+
+export const useStoreListConversation = create<TListConversation>((set) => ({
+  listConversations: [],
+  storeListConversations: (listConversations) => {
+    set({ listConversations })
+  }
+}))
+
+type TCurrentConversation = {
+  currentConversation: TMessage[] | null
+  storeCurrentConversation: (currentConversation: TMessage[] | null) => void
+}
+
+export const useStoreCurrentConversation = create<TCurrentConversation>((set) => ({
+  currentConversation: null,
+  storeCurrentConversation: (currentConversation) => {
+    set({ currentConversation })
+  }
+}))
+
+type TListPinConversation = {
+  listPinConversation: TMessage[]
+  storeListPinConversation: (listPinConversation: TMessage[]) => void
+}
+
+export const useStoreListPinConversation = create<TListPinConversation>((set) => ({
+  listPinConversation: [],
+  storeListPinConversation: (listPinConversation) => {
+    set({ listPinConversation })
+  }
+}))
+
+type TTyping = {
+  typing: boolean
+  storeTyping: (typing: boolean) => void
+}
+
+export const useStoreTyping = create<TTyping>((set) => ({
+  typing: false,
+  storeTyping: (typing) => {
+    set({ typing })
+  }
+}))
+
+// 1) api => 1. storeListConversations   => done
+// 2) click to 1 conversation =>  1. storeCurrentConversation, 2. storeListPinConversation => done
+// 3) send message => 1. storeCurrentConversation 2. storeListConversations => done
+// 4) click 1 Avatar pin => 1. storeCurrentConversation
+// 5) delete 1 Avatar pin => 1. storeListPinConversation (if when opening the pin message => storeListPinConversation  => done
+// 6) click to 1 icon chat with user => 1. storeCurrentConversation 2. storeListPinConversation

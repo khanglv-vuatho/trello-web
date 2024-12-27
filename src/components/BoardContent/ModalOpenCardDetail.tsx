@@ -54,7 +54,6 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
 
   const handleToggleAssignMember = async (member: IMember) => {
     try {
-      console.log({ member })
       const cloneBoard: any = cloneDeep(board)
 
       const updateCard = (cardItem: ICard) => {
@@ -142,7 +141,6 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
           })
         }
       })
-      console.log({ cloneBoard })
 
       setListComments((prev) => [...prev, newComment])
       storeBoard(cloneBoard)
@@ -182,9 +180,7 @@ const ModalOpenCardDetail = ({ isOpenModalDetailCard, setIsOpenModalDetailCard }
     }
   }
 
-  const handleOpenModalDeleteComment = (comment: TComment) => {
-    console.log({ comment })
-  }
+  const handleOpenModalDeleteComment = (comment: TComment) => {}
 
   const handleSaveTitleCard = async () => {
     try {

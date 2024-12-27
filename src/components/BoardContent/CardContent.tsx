@@ -109,7 +109,6 @@ const CardContent = ({ card }: { card: ICard }) => {
   const handleOpenModalDetailCard = () => {
     setIsOpenModalDetailCard(true)
 
-    console.log({ card })
     storeCurrentCard(card)
     storeStatusOpenModal(true)
   }

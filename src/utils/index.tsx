@@ -266,28 +266,33 @@ const validateDomain = (domain: string) => {
 export const groupMessagesBySender = (messages: TMessage[]): TGroupMessage[] => {
   if (!messages) return []
   const groupedMessages: TGroupMessage[] = []
+
   let currentGroup: (TMessage & { first?: boolean; last?: boolean })[] = [messages?.[0]]
-  let currentUserId = messages?.[0]?.senderId
+  let currentUserId = messages?.[0]?.email
 
   for (let i = 1; i < messages.length; i++) {
-    if (messages[i]?.senderId === currentUserId) {
+    if (messages[i]?.email === currentUserId) {
       currentGroup?.push(messages?.[i])
     } else {
       if (currentGroup?.length > 0) {
-        currentGroup[0].first = true
-        currentGroup[currentGroup.length - 1].last = true
+        if (currentGroup.length >= 2) {
+          currentGroup[0].first = true
+          currentGroup[currentGroup.length - 1].last = true
+        }
         groupedMessages.push({ userId: currentUserId, messages: currentGroup })
       }
 
       currentGroup = [messages?.[i]]
-      currentUserId = messages?.[i]?.senderId
+      currentUserId = messages?.[i]?.email
     }
   }
 
   // Xử lý nhóm cuối cùng
   if (currentGroup?.length > 0) {
-    currentGroup[0].first = true
-    currentGroup[currentGroup.length - 1].last = true
+    if (currentGroup.length >= 2) {
+      currentGroup[0].first = true
+      currentGroup[currentGroup.length - 1].last = true
+    }
     groupedMessages.push({ userId: currentUserId, messages: currentGroup })
   }
 

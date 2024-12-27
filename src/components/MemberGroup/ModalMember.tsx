@@ -2,16 +2,16 @@
 
 import ImageFallback from '@/components/ImageFallback'
 import Modal from '@/components/Modal'
-import { MEMBER_STATUS } from '@/constants'
-import { useStoreBoard, useStoreListMessagesPins, useStoreUser } from '@/store'
+import Toast from '@/components/Toast'
+import { MEMBER_STATUS, SOCKET_EVENTS } from '@/constants'
+import { useStoreBoard, useStoreConversation, useStoreCurrentConversation, useStoreListConversation, useStoreListMessagesPins, useStoreUser } from '@/store'
 import { IMember, TListMessages } from '@/types'
+import { uppercaseFirstLetter } from '@/utils'
 import { Avatar, Button, Input } from '@nextui-org/react'
 import { Message, Trash } from 'iconsax-react'
-import { useState } from 'react'
-import Toast from '@/components/Toast'
-import { uppercaseFirstLetter } from '@/utils'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useState } from 'react'
+import { useSocket } from '../Providers/SocketProvider'
 
 type TModalMember = {
   isOpen: boolean
@@ -24,8 +24,12 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
   const { userInfo } = useStoreUser()
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { listMessagesPins, storeListMessagesPins } = useStoreListMessagesPins()
-  const router = useRouter()
+  const { listMessagesPins, storeListMessagesPins, storeCurrentChat } = useStoreListMessagesPins()
+  const { storeCurrentConversation, currentConversation } = useStoreCurrentConversation()
+  const { listConversations } = useStoreListConversation()
+  const { storeConversation } = useStoreConversation()
+
+  const socket: any = useSocket()
 
   const filteredData = memberGmails?.filter(
     (item) => item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase()) || item?.email?.toLowerCase()?.includes(searchQuery?.toLowerCase())
@@ -45,13 +49,87 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
   }
 
   const handleSendMessage = (member: IMember) => {
-    const newMessage: TListMessages = {
-      avatar: member?.picture || '',
-      name: member?.name || '',
+    const newMessage: TListMessages & { chatWithUserId: string } = {
+      avatar: member?.picture || member?.email || '',
+      name: member?.name || member?.email || '',
       conversationId: member?.email || '',
-      email: member?.email || ''
+      chatWithUserId: member?.email || '',
+      id: member?.email || '',
+      email: userInfo?.email || ''
     }
-    storeListMessagesPins([...listMessagesPins, newMessage])
+
+    const newPinMessage = {
+      ...newMessage,
+      messageDetails: [],
+      message: '',
+      _id: Date.now(),
+      time: Date.now()
+    }
+
+    const exitConversation: any = listConversations.find((item: any) => item?.chatWithUserId === (newMessage as any)?.chatWithUserId)
+    if (exitConversation) {
+      storeListMessagesPins([...listMessagesPins, newMessage])
+      storeCurrentChat(newMessage)
+      const messageDetails = exitConversation?.messageDetails.map((itemConversation: any) => ({
+        ...itemConversation,
+        message: itemConversation?.content
+      }))
+      console.log('2')
+      storeConversation(messageDetails)
+      storeCurrentConversation(messageDetails as any)
+    } else {
+      console.log('3')
+
+      storeListMessagesPins([...listMessagesPins, newPinMessage])
+      storeCurrentConversation(newPinMessage as any)
+      storeCurrentChat(newPinMessage as any)
+      storeConversation(newPinMessage?.messageDetails)
+    }
+    // storeListMessagesPins([...listMessagesPins, newMessage])
+    // storeCurrentConversation(newMessage as any)
+
+    // -----------------0---=--=---
+
+    // console.log({ messagePin })
+    // storeCurrentConversation(messagePin as any)
+    // storeCurrentChat(messagePin)
+
+    // const isItemExist = listMessagesPins.some((ping: any) => ping?.chatWithUserId === (messagePin as any)?.chatWithUserId) // Kiểm tra item dựa trên id hoặc một thuộc tính định danh
+
+    // // storeCurrentConversation(item)
+    // const isItemPinMessageExit = listPinConversation.find((item: any) => item?.chatWithUserId === (messagePin as any)?.chatWithUserId)
+    // console.log({ isItemPinMessageExit })
+
+    // if (isItemPinMessageExit) {
+    //   // storeListPinConversation(listPinConversation.filter((item: any) => item?.chatWithUserId !== (item as any)?.chatWithUserId))
+    // } else {
+    //   storeListPinConversation([...listPinConversation, messagePin] as any)
+    // }
+    // console.log({ listPinConversation })
+
+    // if (isItemExist) {
+    //   //
+    // } else {
+    //   storeListMessagesPins([...listMessagesPins, messagePin] as any)
+    // }
+
+    // // {
+    // //   message: "I'm good, thanks for asking!",
+    // //   email: 'khang@gmail.com',
+    // //   type: 'TEXT',
+    // //   createdAt: 1672531800000
+    // // }
+
+    // const conversation: any = allConversation.find((conversation: any) => conversation.chatWithUserId === (messagePin as any).chatWithUserId)
+    // const messageDetails = conversation?.messageDetails.map((itemConversation: any) => ({
+    //   message: itemConversation?.content,
+    //   email: itemConversation?.email,
+    //   type: itemConversation?.type,
+    //   createdAt: itemConversation?.createdAt
+    // }))
+
+    // storeConversation(messageDetails)
+
     onOpenChange(false)
   }
 
@@ -90,8 +168,8 @@ const ModalMember = ({ isOpen, onOpenChange, memberGmails }: TModalMember) => {
                 >
                   {uppercaseFirstLetter(item?.status === MEMBER_STATUS.PENDING ? MEMBER_STATUS.PENDING : MEMBER_STATUS.ACCEPTED)}
                 </span>
-                {board?.ownerId !== userInfo?.email && (
-                  <Button isIconOnly variant='light' radius='full' size='sm' className='!size-10' onClick={() => handleSendMessage(item)}>
+                {item?.email !== userInfo?.email && (
+                  <Button isIconOnly variant='light' radius='full' size='sm' className='!size-10' onPress={() => handleSendMessage(item)}>
                     <Message />
                   </Button>
                 )}

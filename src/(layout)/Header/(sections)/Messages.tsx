@@ -2,38 +2,29 @@
 
 import NoItemOverView from '@/components/OverViewItem/NoItemOverView'
 import PopoverCustom from '@/components/PopoverCustom'
-import { useStoreListMessagesPins } from '@/store'
+import { useStoreConversation, useStoreCurrentConversation, useStoreListConversation, useStoreListMessagesPins, useStoreListPinConversation } from '@/store'
 import { Avatar, Badge, Button } from '@nextui-org/react'
 import { Message } from 'iconsax-react'
 
-type TListMessages = { id: number; name: string; by: string; message: string; avatar: string; time: string }[]
-const Messages = () => {
-  const listMessages: TListMessages = [
-    {
-      id: 1,
-      name: 'John Doe',
-      by: '12312321@gmail.com',
-      message: 'Hello, how are you?',
-      avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d',
-      time: '12:00'
-    },
-    {
-      id: 2,
-      name: 'Hihi',
-      by: 'khangluong2002@gmail.com',
-      message: 'Hello, h123?',
-      avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d',
-      time: '12:11'
-    }
-  ]
+type TMessagePin = { id: number; name: string; email: string; message: string; avatar: string; time: string }
 
-  const noData = listMessages.length === 0
+const Messages = () => {
+  const { listConversations } = useStoreListConversation()
+  console.log({ listConversations })
+  const noData = listConversations?.length === 0
   return (
     <PopoverCustom
       noData={noData}
       popoverTrigger={
         <Button isIconOnly variant='light' className='flex !size-10 flex-shrink-0 text-white hover:bg-white/10'>
-          <Badge content={1} shape='circle' color='danger' placement='top-right' size='sm' classNames={{ badge: '!size-5' }}>
+          <Badge
+            content={listConversations?.length}
+            shape='circle'
+            color='danger'
+            placement='top-right'
+            size='sm'
+            classNames={{ badge: `!size-5 ${noData ? 'hidden' : ''}` }}
+          >
             <Message />
           </Badge>
         </Button>
@@ -43,36 +34,71 @@ const Messages = () => {
         {noData ? (
           <NoItemOverView title='No messages yet' description='Your messages will appear here' />
         ) : (
-          listMessages.map((item) => <MessagesContent key={item.id} item={item} />)
+          listConversations?.map((item: any, index: number) => <MessagesContent key={index} item={item} />)
         )}
       </div>
     </PopoverCustom>
   )
 }
 
-const MessagesContent = ({ item }: { item: TListMessages[number] }) => {
-  const { storeListMessagesPins, listMessagesPins } = useStoreListMessagesPins()
-  console.log({ listMessagesPins })
+const MessagesContent = ({ item }: { item: TMessagePin }) => {
+  const { storeListMessagesPins, listMessagesPins, storeCurrentChat } = useStoreListMessagesPins()
+  const { allConversation, storeConversation } = useStoreConversation()
+  const { storeListPinConversation, listPinConversation } = useStoreListPinConversation()
+  const { currentConversation, storeCurrentConversation } = useStoreCurrentConversation()
+  const { listConversations } = useStoreListConversation()
+
   const handleClickToChat = () => {
-    const isItemExist = listMessagesPins.some((ping: any) => ping?.id === item?.id) // Kiểm tra item dựa trên id hoặc một thuộc tính định danh
-    if (isItemExist) {
-      console.log(123)
+    const isItemExist = listMessagesPins.find((ping: any) => ping?.chatWithUserId === (item as any)?.chatWithUserId) // Kiểm tra item dựa trên id hoặc một thuộc tính định danh
+    storeCurrentChat(item as any)
+    storeCurrentConversation(item as any)
+    // storeCurrentConversation(item)
+    const isItemPinMessageExit = listPinConversation.find((item: any) => item?.chatWithUserId === (item as any)?.chatWithUserId)
+
+    if (isItemPinMessageExit) {
+      // storeListPinConversation(listPinConversation.filter((item: any) => item?.chatWithUserId !== (item as any)?.chatWithUserId))
     } else {
-      storeListMessagesPins([...listMessagesPins, item])
+      storeListPinConversation([...listPinConversation, item] as any)
     }
+
+    if (isItemExist) {
+      //
+    } else {
+      storeListMessagesPins([...listMessagesPins, item] as any)
+    }
+
+    // {
+    //   message: "I'm good, thanks for asking!",
+    //   email: 'khang@gmail.com',
+    //   type: 'TEXT',
+    //   createdAt: 1672531800000
+    // }
+
+    const conversation: any = allConversation.find((conversation: any) => conversation.chatWithUserId === (item as any).chatWithUserId)
+    const messageDetails = conversation?.messageDetails.map((itemConversation: any) => ({
+      message: itemConversation?.content,
+      email: itemConversation?.email,
+      type: itemConversation?.type,
+      createdAt: itemConversation?.createdAt
+    }))
+    console.log({ allConversation, conversation })
+    console.log('1')
+    console.log({ messageDetails })
+    storeConversation(messageDetails)
   }
+
   return (
     <div
       className='relative flex w-full items-center gap-2 rounded-lg border border-white/20 bg-white/5 p-2 transition-colors hover:bg-white/10'
       style={{ opacity: 1, willChange: 'opacity, transform', transform: 'none' }}
       onClick={handleClickToChat}
     >
-      <div className='size-9'>
-        <Avatar src={item.avatar} className='size-full' />
+      <div className='!size-9 max-h-9 min-h-9 min-w-9 max-w-9'>
+        <Avatar name={item?.name} className='flex size-full max-h-9 min-h-9 min-w-9 max-w-9 flex-shrink-0' />
       </div>
       <div className='flex flex-col gap-1 text-white'>
-        <p className='text-sm'>{item.name}</p>
-        <p className='text-xs text-white/50'>{item.message}</p>
+        <p className='text-sm'>{(item as any)?.chatWithUserId}</p>
+        <p className='text-xs text-white/50'>{item?.message}</p>
       </div>
     </div>
   )

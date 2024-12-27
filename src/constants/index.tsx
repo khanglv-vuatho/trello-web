@@ -32,13 +32,15 @@ export const BOARD_MEMBER_ROLE = createEnum({
 })
 
 export const SOCKET_EVENTS = createEnum({
+  REGISTER: 'register',
+  JOIN_BOARD: 'join-board',
+  NOTIFICATION: 'notification',
+  DISCONNECT: 'disconnect',
   UPDATE_BOARD: 'updateBoard',
   UPDATE_COLUMN: 'updateColumn',
   UPDATE_CARD: 'updateCard',
   UPDATE_MEMBER: 'updateMember',
-  REGISTER: 'register',
-  JOIN_BOARD: 'join-board',
-  NOTIFICATION: 'notification',
+  MESSAGE_ARRIVED: 'message-arrived',
   MESSAGE_TYPING: 'message-typing'
 })
 

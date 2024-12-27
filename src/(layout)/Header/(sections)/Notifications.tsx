@@ -10,7 +10,7 @@ import { TNotifications } from '@/types'
 import { NotificationsNoneOutlined } from '@mui/icons-material'
 import { Avatar, Badge, Button } from '@nextui-org/react'
 import Link from 'next/link'
-import { memo, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const Notifications = () => {
   const { userInfo } = useStoreUser()
@@ -82,6 +82,10 @@ const Notifications = () => {
     socket.on(SOCKET_EVENTS.NOTIFICATION, (data: any) => {
       setNotifications((prev) => [...prev, data])
     })
+
+    return () => {
+      socket.off(SOCKET_EVENTS.NOTIFICATION)
+    }
   }, [socket])
 
   return (
@@ -96,7 +100,7 @@ const Notifications = () => {
             color='danger'
             placement='top-right'
             size='sm'
-            classNames={{ badge: '!size-5' }}
+            classNames={{ badge: `!size-5 ${noData ? 'hidden' : ''}` }}
           >
             <NotificationsNoneOutlined />
           </Badge>

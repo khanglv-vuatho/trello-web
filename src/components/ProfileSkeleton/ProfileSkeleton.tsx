@@ -6,7 +6,7 @@ const ProfileSkeleton = () => {
     <div className='mx-auto flex w-full flex-col gap-6'>
       <Skeleton className='!min-h-8 w-40 rounded-lg bg-white/10' />
       <div className='relative mx-auto'>
-        <Skeleton className='!size-[200px] rounded-full bg-white/10' />
+        <Skeleton className='!size-[120px] rounded-full bg-white/10' />
       </div>
       <div className='flex flex-col gap-2'>
         <Skeleton className='mb-1 !min-h-4 w-24 rounded-lg bg-white/10' />
