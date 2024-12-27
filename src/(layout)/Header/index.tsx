@@ -6,19 +6,19 @@ import { Avatar, Button, useDisclosure } from '@nextui-org/react'
 import { Add } from 'iconsax-react'
 
 import ExpandButton from '@/components/ExpandButton'
+import { InputSearch } from '@/components/InputSearch'
 import Modal from '@/components/Modal'
+import { useSocket } from '@/components/Providers/SocketProvider'
 import Toast from '@/components/Toast'
+import { SOCKET_EVENTS } from '@/constants'
 import instance from '@/services/axiosConfig'
-import { useStoreBoard, useStoreUser } from '@/store'
+import { useStoreBoard, useStoreConversation, useStoreListConversation, useStoreListMessagesPins, useStoreUser } from '@/store'
+import { deleteCookie, getCookie, setCookie } from 'cookies-next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { deleteCookie, getCookie, setCookie } from 'cookies-next'
-import { InputSearch } from '@/components/InputSearch'
 import { ContentUser, Messages, Notifications, Recent, Starred, Workspaces } from './(sections)'
 import ModalBodyCreateNewBoard from './(sections)/ModalBodyCreateNewBoard'
-import { useSocket } from '@/components/Providers/SocketProvider'
-import { SOCKET_EVENTS } from '@/constants'
 
 function Header() {
   const socket: any = useSocket()
@@ -29,10 +29,15 @@ function Header() {
   const { storeUser } = useStoreUser()
   const { storeBoardRecent, boardsRecent, allBoards } = useStoreBoard()
 
+  const { storeListConversations } = useStoreListConversation()
+  const { storeAllConversationFromApi, conversation, storeConversation, allConversation } = useStoreConversation()
+  const { storeCurrentChat, currentChat } = useStoreListMessagesPins()
   const router = useRouter()
 
   const [onSending, setOnSending] = useState<boolean>(false)
   const [onFetching, setOnFetching] = useState<boolean>(false)
+
+  const [onFetchingMessages, setOnFetchingMessages] = useState<boolean>(false)
 
   const userInfo = useStoreUser((state) => state.userInfo)
   const [titleBoard, setTitleBoard] = useState<string>('')
@@ -92,6 +97,19 @@ function Header() {
     }
   }
 
+  const handleFetchingMessages = async () => {
+    try {
+      const dataMessages: any = await instance.get(`/v1/conversations`)
+      storeAllConversationFromApi(dataMessages)
+
+      storeListConversations(dataMessages)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setOnFetchingMessages(false)
+    }
+  }
+
   const handleConfirmCreateNewBoard = () => {
     // check
     if (allBoards?.find((board) => board?.title.trim() === titleBoard?.trim())) {
@@ -106,12 +124,46 @@ function Header() {
   }, [])
 
   useEffect(() => {
+    setOnFetchingMessages(true)
+  }, [])
+
+  useEffect(() => {
     onFetching && handleFetchingUser()
   }, [onFetching])
 
   useEffect(() => {
     onSending && handleCreateNewBoard()
   }, [onSending])
+
+  useEffect(() => {
+    onFetchingMessages && handleFetchingMessages()
+  }, [onFetchingMessages])
+
+  useEffect(() => {
+    if (!socket) return
+    socket.emit(SOCKET_EVENTS.REGISTER, userInfo?.email)
+
+    socket.on(SOCKET_EVENTS.MESSAGE_ARRIVED, (data: any) => {
+      if (data?.chatWithUserId !== userInfo?.email) return
+
+      const currentConversationSocket: any = allConversation.find((item: any) => item?.chatWithUserId === data?.email)
+      const newData = {
+        ...data,
+        message: data.content
+      }
+
+      const convertData = (currentConversationSocket as any)?.messageDetails.map((item: any) => ({
+        ...item,
+        message: item.content
+      }))
+
+      convertData.push(newData)
+      currentConversationSocket.messageDetails = convertData
+      storeAllConversationFromApi([...allConversation.filter((item: any) => item?.chatWithUserId !== data?.email), currentConversationSocket])
+      storeConversation(convertData)
+      storeCurrentChat(currentConversationSocket)
+    })
+  }, [socket, userInfo?.email])
 
   return (
     <header className='flex h-header items-center justify-between gap-5 overflow-x-auto bg-colorHeader px-4 text-primary'>

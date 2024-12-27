@@ -88,22 +88,18 @@ export type TGroupMessage = {
   messages: (TMessage & { first?: boolean; last?: boolean })[]
 }
 
-export type TListMessages = {
-  avatar: string
-  name: string
-  conversationId: string
-  email: string
-}
-
 export type TMessage = {
   message: string
-  senderId: string
+  email: string
   type: keyof typeof MESSAGE_TYPES
   attachment?: File
   createdAt: number
 }
 
-export type TListMessagesPins = {
-  listMessagesPins: TListMessages[]
-  storeListMessagesPins: (listMessagesPins: TListMessages[]) => void
+export type TListMessages = {
+  avatar: string
+  name: string
+  conversationId: string
+  email: string
+  id: string
 }

@@ -1,30 +1,27 @@
 'use client'
-import { motion } from 'framer-motion'
-import { Button } from '@nextui-org/react'
-import { Textarea } from '@nextui-org/react'
-import React, { useEffect, useRef, useState } from 'react'
-import { TListMessages } from '@/types'
 import { useSocket } from '@/components/Providers/SocketProvider'
 import { MESSAGE_TYPES, SOCKET_EVENTS } from '@/constants'
+import { TListMessages } from '@/types'
 import { isMobileWithUserAgent } from '@/utils'
-import { DocumentUpload, Send2 } from 'iconsax-react'
-import Toast from '@/components/Toast'
+import { Button, Textarea } from '@nextui-org/react'
+import { motion } from 'framer-motion'
+import { CloudLightning, Send2 } from 'iconsax-react'
+import { useRef } from 'react'
 
 const InputSendMessage = ({
   message,
-  setMessage,
+  onChangeMessage,
   currentChat,
   handleSendMessage,
   isSending
 }: {
   message: string
-  setMessage: (value: string) => void
+  onChangeMessage: (value: string) => void
   currentChat: TListMessages | null
   handleSendMessage: ({ message, attachment, type }: { message: string; attachment?: File; type: keyof typeof MESSAGE_TYPES }) => Promise<void>
   isSending: boolean
 }) => {
   const socket: any = useSocket()
-
   const inputRef: any = useRef(null)
   const uploadRef: any = useRef(null)
   const sendRef: any = useRef(null)
@@ -40,22 +37,25 @@ const InputSendMessage = ({
     <div className='w-full'>
       <Textarea
         value={message}
-        onBlur={() =>
+        onBlur={() => {
+          console.log('xxx')
+
           socket.emit(SOCKET_EVENTS.MESSAGE_TYPING, {
-            message: '',
-            conversationId: currentChat?.conversationId,
-            chatWithUserId: currentChat?.email
+            typing: false,
+            email: currentChat?.email,
+            chatWithUserId: (currentChat as any)?.chatWithUserId
           })
-        }
+        }}
         onChange={(e) => {
           const value = e.target.value
-          setMessage(value)
+          onChangeMessage(value)
           if (value.length > 1) return
           if (value.length === 1) {
+            console.log('zzz')
             socket.emit(SOCKET_EVENTS.MESSAGE_TYPING, {
-              message: '',
-              conversationId: currentChat?.conversationId,
-              chatWithUserId: currentChat?.email
+              typing: true,
+              email: currentChat?.email,
+              chatWithUserId: (currentChat as any)?.chatWithUserId
             })
           }
         }}
@@ -149,10 +149,10 @@ const InputSendMessage = ({
               // isDisabled={onFetchingMessage || onReloadMessage}
               isIconOnly
               radius='full'
-              className={`text-primary-green flex !size-10 items-center justify-center bg-transparent transition`}
-              onClick={() => handleSendMessage({ message, type: MESSAGE_TYPES.TEXT })}
+              className={`flex !size-10 items-center justify-center bg-transparent transition`}
+              onPress={() => handleSendMessage({ message, type: MESSAGE_TYPES.TEXT })}
             >
-              <Send2 variant='Bold' className='rotate-45 text-colorBoardBar transition' />
+              <Send2 variant='Bold' className={`rotate-45 ${message.trim() === '' ? 'text-gray-200' : 'text-colorBoardBar'} transition`} />
             </Button>
           </motion.div>
         }

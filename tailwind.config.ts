@@ -13,7 +13,7 @@ const config: Config = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
     './src/**/*.{js,ts,jsx,tsx,mdx}',
-    './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'
   ],
   theme: {
     height: {
@@ -21,8 +21,8 @@ const config: Config = {
       boardBar: BOARDBAR_HEIGHT,
       boardContent: BOARDCONTENT_HEIGHT,
       column: CLOUMN_HEIGHT,
-      boardContainer: BOARDCONTAINER_HEIGHT,
-    },
+      boardContainer: BOARDCONTAINER_HEIGHT
+    }
   },
   darkMode: 'class',
   plugins: [
@@ -34,8 +34,8 @@ const config: Config = {
             colorBoardBar: '#305cda',
             colorBoardContent: '#305bda',
             primary: '#fff',
-            primary2: '#292D32',
-          },
+            primary2: '#292D32'
+          }
         },
         dark: {
           colors: {
@@ -43,12 +43,12 @@ const config: Config = {
             colorBoardBar: '#305cda',
             colorBoardContent: '#305bda',
             primary: '#292D32',
-            primary2: '#fff',
-          },
-        },
-      },
-    }),
-  ],
+            primary2: '#fff'
+          }
+        }
+      }
+    })
+  ]
 }
 
 export default config
